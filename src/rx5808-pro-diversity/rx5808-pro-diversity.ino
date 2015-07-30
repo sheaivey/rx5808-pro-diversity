@@ -34,14 +34,28 @@ SOFTWARE.
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 
-#include <PinChangeInt.h>
-//#include <PinChangeIntConfig.h>
-
+// Feature Togglels
+//define USE_DIP
+#define USE_DIVERSITY
+//#define DEBUG
 
 #define spiDataPin 10
 #define slaveSelectPin 11
 #define spiClockPin 12
-#define rssiPin A6
+
+// Receiver PINS
+#define receiverA_led A1
+#define rssiPinA A7
+
+#ifdef USE_DIVERSITY
+// Diversity
+#define receiverB_led A0
+#define rssiPinB A6
+#define useReceiverAuto 0
+#define useReceiverA 1
+#define useReceiverB 2
+#endif
+
 // this two are minimum required
 #define buttonSeek 2
 #define buttonMode 3
@@ -50,17 +64,18 @@ SOFTWARE.
 #define buttonSave 5
 // Buzzer
 #define buzzer 6
-// pins for DIP switch
-#define dip_ch0 A0
-#define dip_ch1 A1
-#define dip_ch2 A2
-#define dip_band0 A3
-#define dip_band1 A4
-#define dip_enable A5
 
-// genlock vsync input
-#define vsync_in 13
-#define hsync_in 8
+// pins for DIP switch
+//#define USE_DIP
+#ifdef USE_DIP
+    #define dip_ch0 A0
+    #define dip_ch1 A1
+    #define dip_ch2 A2
+    #define dip_band0 A3
+    #define dip_band1 A4
+    #define dip_enable 0
+#endif
+
 // key debounce delay in ms
 // NOTE: good values are in the range of 100-200ms
 // shorter values will make it more reactive, but may lead to double trigger
@@ -88,6 +103,9 @@ SOFTWARE.
 #define STATE_SWITCH 4
 #define STATE_SAVE 5
 #define STATE_RSSI_SETUP 6
+#ifdef USE_DIVERSITY
+#define STATE_DIVERSITY 7
+#endif
 
 #define START_STATE STATE_SEEK
 #define MAX_STATE STATE_MANUAL
@@ -115,6 +133,9 @@ SOFTWARE.
 #define EEPROM_ADR_RSSI_MIN_H 3
 #define EEPROM_ADR_RSSI_MAX_L 4
 #define EEPROM_ADR_RSSI_MAX_H 5
+#ifdef USE_DIVERSITY
+#define EEPROM_ADR_DIVERSITY 6
+#endif
 //#define DEBUG
 
 // Channels to sent to the SPI registers
@@ -152,6 +173,9 @@ uint8_t channel = 0;
 uint8_t channelIndex = 0;
 uint8_t rssi = 0;
 uint8_t rssi_scaled = 0;
+#ifdef USE_DIVERSITY
+uint8_t diversity_mode = useReceiverAuto;
+#endif
 uint8_t hight = 0;
 uint8_t state = START_STATE;
 uint8_t state_last_used=START_STATE;
@@ -179,18 +203,11 @@ uint16_t rssi_setup_max=0;
 uint16_t rssi_seek_found=0;
 uint16_t rssi_setup_run=0;
 
-// genlock hander
-#define GENLOCK_DLY 0
-
-uint8_t genlock_dly = GENLOCK_DLY;
-
 TVout TV;
-
 
 // SETUP ----------------------------------------------------------------------------
 void setup()
 {
-
     // IO INIT
     // initialize digital pin 13 LED as an output.
     pinMode(led, OUTPUT); // status pin for TV mode errors
@@ -207,7 +224,15 @@ void setup()
     digitalWrite(buttonDown, INPUT_PULLUP);
     pinMode(buttonSave, INPUT);
     digitalWrite(buttonSave, INPUT_PULLUP);
+    //Receiver Setup
+    pinMode(receiverA_led,OUTPUT);
+    digitalWrite(buzzer, HIGH);
+#ifdef USE_DIVERSITY
+    pinMode(receiverB_led,OUTPUT);
+    digitalWrite(buzzer, LOW);
+#endif
     // dip switches
+#ifdef USE_DIP
     pinMode(dip_ch0, INPUT);
     digitalWrite(dip_ch0, INPUT_PULLUP);
     pinMode(dip_ch1, INPUT);
@@ -220,6 +245,7 @@ void setup()
     digitalWrite(dip_band1, INPUT_PULLUP);
     pinMode(dip_enable, INPUT);
     digitalWrite(dip_enable, INPUT_PULLUP);
+#endif
 #ifdef DEBUG
     Serial.begin(115200);
     Serial.println(F("START:"));
@@ -228,10 +254,6 @@ void setup()
     pinMode (slaveSelectPin, OUTPUT);
     pinMode (spiDataPin, OUTPUT);
 	pinMode (spiClockPin, OUTPUT);
-    // genlock input
-    pinMode(vsync_in, INPUT);
-    pinMode(hsync_in, INPUT);
-
     // tune to first channel
 
 
@@ -248,26 +270,9 @@ void setup()
             delay(100);
         }
     }
-    // init overlay
-
-    //initOverlay();
-
     TV.select_font(font4x6);
-    // setup Genlock
-    //PCintPort::attachInterrupt(vsync_in,genlock ,RISING); // attach a PinChange Interrupt to our pin on the rising edge
-
-    //PCintPort::attachInterrupt(vsync_in,genlock ,FALLING); // attach a PinChange Interrupt to our pin on the rising edge
-
-    //PCintPort::attachInterrupt(vsync_in,genlock ,FALLING); // attach a PinChange Interrupt to our pin on the rising edge
-
-    // hsync
-    PCintPort::attachInterrupt(vsync_in,display.vsync_handle ,FALLING); // attach a PinChange Interrupt to our pin on the rising edge
-
-
-    genlock_dly=GENLOCK_DLY;
-
     // Setup Done - LED ON
-    digitalWrite(13, HIGH);
+    digitalWrite(led, HIGH);
 
     // use values only of EEprom is not 255 = unsaved
     uint8_t eeprom_check = EEPROM.read(EEPROM_ADR_STATE);
@@ -281,6 +286,10 @@ void setup()
         // save 16 bit
         EEPROM.write(EEPROM_ADR_RSSI_MAX_L,lowByte(RSSI_MAX_VAL));
         EEPROM.write(EEPROM_ADR_RSSI_MAX_H,highByte(RSSI_MAX_VAL));
+#ifdef USE_DIVERSITY
+        // diversity
+        EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
+#endif
     }
     // debug reset EEPROM
     //EEPROM.write(EEPROM_ADR_STATE,255);
@@ -290,65 +299,11 @@ void setup()
     channelIndex=EEPROM.read(EEPROM_ADR_TUNE);
     rssi_min=((EEPROM.read(EEPROM_ADR_RSSI_MIN_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_L)));
     rssi_max=((EEPROM.read(EEPROM_ADR_RSSI_MAX_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_L)));
+#ifdef USE_DIVERSITY
+    diversity_mode = EEPROM.read(EEPROM_ADR_DIVERSITY);
+#endif
     force_menu_redraw=1;
 }
-
-// genlock ISR
-void genlock()
-{
-display.scanLine = 0;
-    //uint8_t sreg = SREG;
-#if 0
-    if(genlock_dly)
-    {
-        genlock_dly--;
-    }
-    else
-    {
-    genlock_dly=GENLOCK_DLY;
-    }
-    //SREG=sreg;
-#endif
-}
-
-#if 0
-    ISR (PCINT0_vect) // handle pin change interrupt for D8 to D13 here
- {
-    //digitalWrite(13,digitalRead(8) and digitalRead(9));
-    digitalWrite(led, !digitalRead(led));
-    display.scanLine = 0;
- }
- #endif
-// interup setup for input pin
-void pciSetup(byte pin)
-{
-    *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
-    PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
-    PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group
-}
-
- // Initialize ATMega registers for video overlay capability.
-// Must be called after tv.begin().
-void initOverlay() {
-  // disable timer for free running video
-  TCCR1A = 0;
-  // Enable timer1.  ICES0 is set to 0 for falling edge detection on input capture pin.
-  // get hsync to state machine
-  TCCR1B = _BV(CS10);
-
-  //pciSetup(8);
-
-
-  // Enable input capture interrupt
-  TIMSK1 |= _BV(ICIE1);
-
-  // Enable external interrupt INT0 on pin 2 with falling edge.
-  //EIMSK = _BV(INT0); // enable interrupt
-  //EICRA = _BV(ISC11); // Falling edge int0
-}
-
-
-
 
 // LOOP ----------------------------------------------------------------------------
 void loop()
@@ -363,9 +318,13 @@ void loop()
         delay(KEY_DEBOUNCE/2); // debounce
         beep(50); // beep & debounce
         delay(KEY_DEBOUNCE/2); // debounce
+
+        uint8_t press_time=0;
         // on entry wait for release
         while(digitalRead(buttonMode) == LOW)
         {
+            delay(10);
+            press_time++;
                 // wait for MODE release
         }
         #define MAX_MENU 4
@@ -388,6 +347,13 @@ void loop()
         */
         do
         {
+            if(press_time >= 10) // if menu held for 1 second invoke quick save.
+            {
+                // user held the mode button and wants to quick save.
+                in_menu=0; // EXIT
+                state = STATE_SAVE;
+                break;
+            }
             TV.clear_screen();
             // simple menu
             TV.select_font(font8x8);
@@ -397,7 +363,11 @@ void loop()
             TV.printPGM(10, 5+1*MENU_Y_SIZE, PSTR("Auto Search"));
             TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Band Scanner"));
             TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("Manual Mode"));
+#ifdef USE_DIVERSITY
+            TV.printPGM(10, 5+4*MENU_Y_SIZE, PSTR("Diversity"));
+#else
             TV.printPGM(10, 5+4*MENU_Y_SIZE, PSTR("Switch Mode"));
+#endif
             TV.printPGM(10, 5+5*MENU_Y_SIZE, PSTR("Save Setup"));
             // selection by inverted box
             switch (menu_id)
@@ -417,18 +387,20 @@ void loop()
                     TV.draw_rect(8,3+3*MENU_Y_SIZE,100,12,  WHITE, INVERT);
                     state=STATE_MANUAL;
                 break;
-                case 3: // DIP mode
+                case 3: // DIP mode or diversity
                     TV.draw_rect(8,3+4*MENU_Y_SIZE,100,12,  WHITE, INVERT);
+#ifdef USE_DIVERSITY
+                    state=STATE_DIVERSITY;
+#else
                     state=STATE_SWITCH;
                     last_dip_channel=255; // force update
+#endif
                 break;
                 case 4: // Save settings
                     TV.draw_rect(8,3+5*MENU_Y_SIZE,100,12,  WHITE, INVERT);
                     state=STATE_SAVE;
                 break;
             } // end switch
-
-
 
             while(digitalRead(buttonMode) == LOW)
             {
@@ -474,6 +446,7 @@ void loop()
     { // reset debounce
         switch_count = 0;
     }
+#ifdef USE_DIP
     /***********************/
     /*   Static SWITCH MODE   */
     /***********************/
@@ -482,19 +455,14 @@ void loop()
     {
         state=STATE_SWITCH;
     }
+#endif
     /***********************/
     /*     Save buttom     */
     /***********************/
     // hardware save buttom support (if no display is used)
     if(digitalRead(buttonSave) == LOW)
     {
-        //state=STATE_SAVE;
-        // DEBUG DEBUG
-        TV.video_clock(CLOCK_EXTERN);
-    }
-    else
-    {
-        TV.video_clock(CLOCK_INTERN);
+        state=STATE_SAVE;
     }
     /***************************************/
     /*   Draw screen if mode has changed   */
@@ -581,9 +549,17 @@ void loop()
                 update_frequency_view=1;
                 force_seek=1;
             break;
+#ifdef USE_DIVERSITY
+            case STATE_DIVERSITY:
+                // diversity menu is below this is just a place holder.
+            break;
+#endif
             case STATE_SAVE:
-                EEPROM.write(EEPROM_ADR_STATE,state_last_used);
                 EEPROM.write(EEPROM_ADR_TUNE,channelIndex);
+                EEPROM.write(EEPROM_ADR_STATE,state_last_used);
+#ifdef USE_DIVERSITY
+                EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
+#endif
                 TV.select_font(font8x8);
                 TV.draw_rect(0,0,127,95,  WHITE);
                 TV.draw_line(0,14,127,14,WHITE);
@@ -672,7 +648,64 @@ void loop()
     /*************************************/
     /*   Processing depending of state   */
     /*************************************/
+#ifdef USE_DIVERSITY
+    if(state == STATE_DIVERSITY) {
+        // simple menu
+        uint8_t menu_id=diversity_mode;
+        uint8_t in_menu=1;
+        uint8_t in_menu_time_out=10; // 10x 200ms = 2 seconds
+        do{
+            if(digitalRead(buttonMode) == LOW)        // channel UP
+            {
+                in_menu_time_out=10;
+                beep(50); // beep & debounce
+                delay(KEY_DEBOUNCE); // debounce
+                menu_id++;
+                if(menu_id > 2) {
+                    menu_id = 0;
+                }
+            }
+            TV.clear_screen();
+            TV.select_font(font8x8);
+            TV.draw_rect(0,0,127,95,  WHITE);
+            TV.draw_line(0,14,127,14,WHITE);
+            TV.printPGM(10, 3,  PSTR("DIVERSITY"));
+            TV.printPGM(10, 5+1*MENU_Y_SIZE, PSTR("Auto"));
+            TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Receiver A"));
+            TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("Receiver B"));
+            switch (menu_id)
+            {
+                case useReceiverAuto:
+                    TV.draw_rect(8,3+1*MENU_Y_SIZE,100,12,  WHITE, INVERT); // auto
+                    digitalWrite(receiverA_led, HIGH);
+                    digitalWrite(receiverB_led, HIGH);
+                    break;
+                case useReceiverA:
+                    TV.draw_rect(8,3+2*MENU_Y_SIZE,100,12,  WHITE, INVERT); // receiver a
+                    digitalWrite(receiverA_led, HIGH);
+                    digitalWrite(receiverB_led, LOW);
+                    break;
+                case useReceiverB:
+                    TV.draw_rect(8,3+3*MENU_Y_SIZE,100,12,  WHITE, INVERT); // receiver b
+                    digitalWrite(receiverA_led, LOW);
+                    digitalWrite(receiverB_led, HIGH);
+                    break;
+            }
 
+            while(--in_menu_time_out && (digitalRead(buttonMode) == HIGH)) // wait for next mode or time out
+            {
+                delay(200); // timeout delay
+            }
+            if(in_menu_time_out <= 0) {
+                diversity_mode = menu_id;
+                in_menu = 0; // exit menu
+            }
+        }
+        while(in_menu);
+
+        state=state_last_used;
+    }
+#endif
     /*****************************************/
     /*   Processing MANUAL MODE / SEEK MODE  */
     /*****************************************/
@@ -704,6 +737,7 @@ void loop()
                 update_frequency_view=1;
             }
         }
+#ifdef USE_DIP
         if(state == STATE_SWITCH) // SWITCH MODE
         {
             // read band DIP switch (invert since switch pulls to gnd)
@@ -720,6 +754,7 @@ void loop()
             }
 
         }
+#endif
         // display refresh handler
         if(update_frequency_view) // only updated on changes
         {
@@ -947,8 +982,10 @@ void loop()
 
 void beep(uint16_t time)
 {
+    digitalWrite(led, LOW);
     digitalWrite(buzzer, LOW);
     delay(time);
+    digitalWrite(led, HIGH);
     digitalWrite(buzzer, HIGH);
 }
 
@@ -986,10 +1023,51 @@ void wait_rssi_ready()
 uint16_t readRSSI()
 {
     uint16_t rssi = 0;
+    uint16_t rssiA = 0;
+    uint16_t rssiB = 0;
+
     for (uint8_t i = 0; i < 10; i++)
     {
-        rssi += analogRead(rssiPin);
+        rssiA += analogRead(rssiPinA);
+#ifdef USE_DIVERSITY
+        rssiB += analogRead(rssiPinB);
+#endif
     }
+#ifdef USE_DIVERSITY
+    switch(diversity_mode)
+    {
+        case useReceiverAuto:
+            // select receiver
+            if(rssiA/10 > rssiB/10)
+            {
+                rssi=rssiA;
+                digitalWrite(receiverA_led, HIGH);
+                digitalWrite(receiverB_led, LOW);
+            }
+            else
+            {
+                rssi=rssiB;
+                digitalWrite(receiverB_led, HIGH);
+                digitalWrite(receiverA_led, LOW);
+            }
+            break;
+        case useReceiverA:
+            rssi=rssiA;
+            digitalWrite(receiverA_led, HIGH);
+            digitalWrite(receiverB_led, LOW);
+            break;
+        case useReceiverB:
+            rssi=rssiB;
+            digitalWrite(receiverB_led, HIGH);
+            digitalWrite(receiverA_led, LOW);
+            break;
+    }
+#else
+    rssi=rssiA;
+    digitalWrite(receiverA_led, HIGH);
+#endif
+
+
     rssi=rssi/10; // average
     // special case for RSSI setup
     if(state==STATE_RSSI_SETUP)
