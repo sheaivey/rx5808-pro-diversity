@@ -1,0 +1,5 @@
+font4x6	LITERAL1
+font6x8	LITERAL1
+font8x8	LITERAL1
+font8x8ext	LITERAL1
+

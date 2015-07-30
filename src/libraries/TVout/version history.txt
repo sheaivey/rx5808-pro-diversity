@@ -1,0 +1,94 @@
+Beta1.0 (Dec 2nd 2010)
+	-Revamped font engine to use less flash memory. select_font() must be called see wiki for details.
+	-Full print system for all data types, no more print_str instead use print().
+	-rewrote draw_circle faster uses different arguments.
+	-removed draw_box replaced with draw_rect faster easier.
+	-added draw_row very fast horizontal line drawing.
+	-added draw_column very fast column drawing.
+	-added force functions for startline outputdelay and vertical scale.
+	-remove fs_bitmap and replaced with general bitmap function.
+	-added shift function to move screen in any direction.
+	-delay now takes ms delays, delay_frames still takes frames.
+	-millis replacement returns ms since begin was called.
+	-added 4 and 3 cycle render routines for horizontal resolutions of up to 256.
+	-added vertical and horizontal blanking hook functions for automatic polling.
+	-added end function to clean up system.
+	-started lowering memory footprint
+
+R6 (June 2010) (Currently Beta at 5.9):
+	-transitioned API to a more be more "arduino like", macros were included
+	 maintain compatibility, with the exception of the start_render(mode,x,y) which
+	 has no such compatibility layer.
+	-created a fill method that will either fill the screen with white or black or
+	 invert the screen. clear_screen() and invert() are now macro calls of fill()
+	-switched to an 8x8 font because of the simplicity and speed of rendering by the
+	 byte, all character printing is now restricted x's that are multiples of 8
+	 to reflect this x is now taken as a multiple of 8pixels.
+	-encapsolated all global variables into structs. one for the video portion and
+	 one for the audio portion.
+	-the interrupt now uses the timer1 overflow vector.  Leaving compare match b for
+	 intitiating the rendering(does not do this yet)
+	-the line handler portion of line interrupt is now handled by a function pointer
+	 and functions that corrispond to each of the 3 possible line types.
+	-Switched the actual rendering to an assembly loop that will work for resolutions
+	 all the way up to 192pixels(at 16mhz). This cuts off down the required flash
+	 by 1.5kbytes.
+	-Moved Hardware specific deffinitions to there on hardware_setup.h file.
+	-fixed the number of lines in the PAL mode, Thanks Lover on arduino.cc forums.
+	-Added circle function thank you Andy Crook
+	-Added box function thank you Andy Crook
+
+R5 (May 27th 2010):
+	-Fixed a render bug preventing a full white screen
+	-Fixed the get_pixel function actually works now
+	-reverted to original version of the draw_line function works correctly now
+	-added gijs(arduino.cc forums) invert function inverts the whole screen
+	-added nootropic(arduino.cc forums) tone generation system
+	-added a full screen bitmap function, very limited will be expanded upon.
+
+R4.x (May 19th 2010):
+	-fixed sanguino support, works properly in R4.6
+
+R4 (May 18th 2010):
+	-Added support for runtime resolution setup.
+		-start_render(mode,hres,vres)
+	-cleaned up the rendering code.
+	-If speed/low memory usage is required it is recommended that R3 is used and the
+	 resolution is changed in the video_properties.h file.
+	-Added sanguino support, untested.
+
+R3 (May 9th 2010):
+	-Added horz_res(), vert_res(), char_line(), get_pixel(x,y)
+		-horz_res/vert_res gets resolution of screen
+		-char_line gets the number of characters that will fit on a line
+		-get_pixel gets the status of x,y returns 1 for white 0 for black.
+	-rewrote the line render functions
+	-fixed bugs preventing changes in resolution and pixel scaling
+	-automatically centers the screen vertically
+	-added arduino mega support, untested
+		-Sync pin:  pin11
+		-Video pin: pin12
+	-changing the redering resolution is now supported.
+	 to do so change the virtical and horizontal resolution in video_properties.h
+		-Note:
+		 (_RESOLUTION_HORIZONTAL/8)*_RESOLUTION_VERTICAL
+		 must be less than the amount of memory the arduino has.
+	
+R2 (May 2nd 2010):
+	-Added PAL support:
+		-to render in pal call  start_render(_PAL);
+		-to render in NTSC call start_render(_NTSC);
+	-centered video better.
+	-reduced system to useing one interupt, this will allow for adding sound, and or
+	 support for polling the UART/SPI/ect. once per scanline.
+	-now renders full half frames(262 lines) instead of 255 lines for NTSC
+	-modified fonts to be less horrid looking.
+	-slightly faster line rendering.
+	-Fixed issue with line rendering not working on last horizonal pixel
+	-added support for pausing video; output still issues h sync
+		-pause:  pause_render();
+		-resume: resume_render();
+		-This does cause a Vsync glitch for the first frame, recovers after
+		 soon.
+R1 (April 30th 2010):
+	Initial release.

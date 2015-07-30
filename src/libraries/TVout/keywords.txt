@@ -1,0 +1,50 @@
+NTSC	LITERAL1
+PAL	LITERAL1
+_NTSC	LITERAL1
+_PAL	LITERAL1
+WHITE	LITERAL1
+BLACK	LITERAL1
+INVERT	LITERAL1
+UP	LITERAL1
+DOWN	LITERAL1
+LEFT	LITERAL1
+RIGHT	LITERAL1
+
+TVout	KEYWORD1
+
+clear_screen	KEYWORD2
+invert	KEYWORD2
+
+begin	KEYWORD2
+end	KEYWORD2
+force_vscale KEYWORD2
+force_outstart	KEYWORD2
+force_linestart	KEYWORD2
+hres	KEYWORD2
+vres	KEYWORD2
+char_line	KEYWORD2
+fill	KEYWORD2
+delay	KEYWORD2
+delay_frame	KEYWORD2
+millis	KEYWORD2
+set_pixel	KEYWORD2
+get_pixel	KEYWORD2
+fill	KEYWORD2
+shift	KEYWORD2
+draw_line	KEYWORD2
+draw_row	KEYWORD2
+draw_column	KEYWORD2
+draw_rect	KEYWORD2
+draw_circle	KEYWORD2
+bitmap	KEYWORD2
+set_vbi_hook	KEYWORD2
+set_hbi_hook	KEYWORD2
+tone	KEYWORD2
+noTone	KEYWORD2
+print_char	KEYWORD2
+set_cursor	KEYWORD2
+select_font	KEYWORD2
+print	KEYWORD2
+println	KEYWORD2
+printPGM	KEYWORD2
+
