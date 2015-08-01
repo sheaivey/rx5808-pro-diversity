@@ -325,25 +325,24 @@ void loop()
         {
             delay(10);
             press_time++;
-                // wait for MODE release
         }
         #define MAX_MENU 4
         #define MENU_Y_SIZE 15
 
-        uint8_t menu_id=0;
+        char menu_id=state_last_used-1;
         // Show Mode Screen
         if(state==STATE_SEEK_FOUND)
         {
             state=STATE_SEEK;
         }
         uint8_t in_menu=1;
-        uint8_t in_menu_time_out=10; // 10x 200ms = 2 seconds
+        uint8_t in_menu_time_out=50; // 20x 100ms = 5 seconds
         /*
         Enter Mode menu
         Show current mode
         Change mode by MODE key
         Any Mode will refresh screen
-        If not MODE changes in 2 seconds, it uses last selected mode
+        If not MODE changes in 2 seconds, it uses last used mode
         */
         do
         {
@@ -402,17 +401,20 @@ void loop()
                 break;
             } // end switch
 
-            while(digitalRead(buttonMode) == LOW)
+            while(digitalRead(buttonMode) == LOW || digitalRead(buttonSeek) == LOW || digitalRead(buttonDown) == LOW)
             {
                 // wait for MODE release
-                in_menu_time_out=10;
+                in_menu_time_out=50;
             }
-            while(--in_menu_time_out && (digitalRead(buttonMode) == HIGH)) // wait for next mode or time out
+            while(--in_menu_time_out && ((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonSeek) == HIGH) && (digitalRead(buttonDown) == HIGH))) // wait for next key press or time out
             {
-                delay(200); // timeout delay
+                delay(100); // timeout delay
             }
-            if(in_menu_time_out==0)
+            if(in_menu_time_out==0 || digitalRead(buttonMode) == LOW)
             {
+                if(digitalRead(buttonMode) != LOW) {
+                    state=state_last_used; // exit to last state on timeout.
+                }
                 in_menu=0; // EXIT
                 beep(KEY_DEBOUNCE/2); // beep & debounce
                 delay(50); // debounce
@@ -421,20 +423,27 @@ void loop()
             }
             else // no timeout, must be keypressed
             {
-                in_menu_time_out=10;
-                beep(50); // beep & debounce
-                delay(KEY_DEBOUNCE); // debounce
                 /*********************/
                 /*   Menu handler   */
                 /*********************/
-                if (menu_id < MAX_MENU)
-                {
-                    menu_id++; // next state
+                if(digitalRead(buttonSeek) == LOW) {
+                    menu_id++;
                 }
-                else
-                {
-                    menu_id = 0;
+                else if(digitalRead(buttonDown) == LOW) {
+                    menu_id--;
                 }
+
+                if (menu_id > MAX_MENU)
+                {
+                    menu_id = 0; // next state
+                }
+                if(menu_id < 0)
+                {
+                    menu_id = MAX_MENU;
+                }
+                in_menu_time_out=50;
+                beep(50); // beep & debounce
+                delay(KEY_DEBOUNCE); // debounce
             }
         } while(in_menu);
         last_state=255; // force redraw of current screen
@@ -651,20 +660,9 @@ void loop()
 #ifdef USE_DIVERSITY
     if(state == STATE_DIVERSITY) {
         // simple menu
-        uint8_t menu_id=diversity_mode;
+        char menu_id=diversity_mode;
         uint8_t in_menu=1;
-        uint8_t in_menu_time_out=10; // 10x 200ms = 2 seconds
         do{
-            if(digitalRead(buttonMode) == LOW)        // channel UP
-            {
-                in_menu_time_out=10;
-                beep(50); // beep & debounce
-                delay(KEY_DEBOUNCE); // debounce
-                menu_id++;
-                if(menu_id > 2) {
-                    menu_id = 0;
-                }
-            }
             TV.clear_screen();
             TV.select_font(font8x8);
             TV.draw_rect(0,0,127,95,  WHITE);
@@ -673,6 +671,11 @@ void loop()
             TV.printPGM(10, 5+1*MENU_Y_SIZE, PSTR("Auto"));
             TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Receiver A"));
             TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("Receiver B"));
+            // RSSI Strength
+            TV.draw_line(0,3+4*MENU_Y_SIZE, TV_X_MAX, 3+4*MENU_Y_SIZE, WHITE);
+            TV.printPGM(10, 6+4*MENU_Y_SIZE, PSTR("A:"));
+            TV.draw_line(0,3+5*MENU_Y_SIZE, TV_X_MAX, 3+5*MENU_Y_SIZE, WHITE);
+            TV.printPGM(10, 6+5*MENU_Y_SIZE, PSTR("B:"));
             switch (menu_id)
             {
                 case useReceiverAuto:
@@ -691,15 +694,48 @@ void loop()
                     digitalWrite(receiverB_led, HIGH);
                     break;
             }
-
-            while(--in_menu_time_out && (digitalRead(buttonMode) == HIGH)) // wait for next mode or time out
+            do
             {
-                delay(200); // timeout delay
+                delay(10); // timeout delay
+                // show signal strength
+                wait_rssi_ready();
+                rssi = readRSSI(useReceiverA);
+                #define RSSI_BAR_SIZE 100
+                rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
+                // clear last bar
+                TV.draw_rect(25+rssi_scaled, 6+4*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
+                //  draw new bar
+                TV.draw_rect(25, 6+4*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, WHITE);
+
+                rssi = readRSSI(useReceiverB);
+                rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
+                // clear last bar
+                TV.draw_rect(25+rssi_scaled, 6+5*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
+                //  draw new bar
+                TV.draw_rect(25, 6+5*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, WHITE);
             }
-            if(in_menu_time_out <= 0) {
+            while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonSeek) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next mode or time out
+
+            if(digitalRead(buttonMode) == LOW)        // channel UP
+            {
                 diversity_mode = menu_id;
                 in_menu = 0; // exit menu
             }
+            else if(digitalRead(buttonSeek) == LOW) {
+                menu_id++;
+            }
+            else if(digitalRead(buttonDown) == LOW) {
+                menu_id--;
+            }
+
+            if(menu_id > useReceiverB) {
+                menu_id = 0;
+            }
+            if(menu_id < 0) {
+                menu_id = useReceiverB;
+            }
+            beep(50); // beep & debounce
+            delay(KEY_DEBOUNCE); // debounce
         }
         while(in_menu);
 
@@ -790,6 +826,8 @@ void loop()
             TV.print(50,TV_Y_OFFSET+3*TV_Y_GRID, pgm_read_word_near(channelFreqTable + channelIndex));
         }
         // show signal strength
+        wait_rssi_ready();
+        rssi = readRSSI();
         #define RSSI_BAR_SIZE 100
         rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
         // clear last bar
@@ -798,9 +836,7 @@ void loop()
         TV.draw_rect(25, TV_Y_OFFSET+4*TV_Y_GRID, rssi_scaled, 4 , WHITE, WHITE);
         // print bar for spectrum
         channel=channel_from_index(channelIndex); // get 0...31 index depending of current channel
-        wait_rssi_ready();
         #define SCANNER_BAR_MINI_SIZE 14
-        rssi = readRSSI();
         rssi_scaled=map(rssi, 1, 100, 1, SCANNER_BAR_MINI_SIZE);
         hight = (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled);
         // clear last bar
@@ -1019,9 +1055,17 @@ void wait_rssi_ready()
     }
 }
 
-
+#ifdef USE_DIVERSITY
 uint16_t readRSSI()
 {
+    return readRSSI(-1);
+}
+uint16_t readRSSI(uint8_t receiver)
+{
+#else
+uint16_t readRSSI()
+{
+#endif
     uint16_t rssi = 0;
     uint16_t rssiA = 0;
     uint16_t rssiB = 0;
@@ -1034,33 +1078,43 @@ uint16_t readRSSI()
 #endif
     }
 #ifdef USE_DIVERSITY
-    switch(diversity_mode)
-    {
-        case useReceiverAuto:
-            // select receiver
-            if(rssiA/10 > rssiB/10)
-            {
+
+    // choosing which receiver RSSI to use.. do not change LED
+    if(receiver == useReceiverA) {
+        rssi=rssiA;
+    }
+    else if(receiver == useReceiverB) {
+        rssi=rssiB;
+    }
+    else{
+        switch(diversity_mode)
+        {
+            case useReceiverAuto:
+                // select receiver
+                if(rssiA/10 > rssiB/10)
+                {
+                    rssi=rssiA;
+                    digitalWrite(receiverA_led, HIGH);
+                    digitalWrite(receiverB_led, LOW);
+                }
+                else
+                {
+                    rssi=rssiB;
+                    digitalWrite(receiverB_led, HIGH);
+                    digitalWrite(receiverA_led, LOW);
+                }
+                break;
+            case useReceiverA:
                 rssi=rssiA;
                 digitalWrite(receiverA_led, HIGH);
                 digitalWrite(receiverB_led, LOW);
-            }
-            else
-            {
+                break;
+            case useReceiverB:
                 rssi=rssiB;
                 digitalWrite(receiverB_led, HIGH);
                 digitalWrite(receiverA_led, LOW);
-            }
-            break;
-        case useReceiverA:
-            rssi=rssiA;
-            digitalWrite(receiverA_led, HIGH);
-            digitalWrite(receiverB_led, LOW);
-            break;
-        case useReceiverB:
-            rssi=rssiB;
-            digitalWrite(receiverB_led, HIGH);
-            digitalWrite(receiverA_led, LOW);
-            break;
+                break;
+        }
     }
 #else
     rssi=rssiA;
