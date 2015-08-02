@@ -38,6 +38,7 @@ SOFTWARE.
 //define USE_DIP
 #define USE_DIVERSITY
 //#define DEBUG
+//#define RSSI_DEBUG
 
 #define spiDataPin 10
 #define slaveSelectPin 11
@@ -54,6 +55,8 @@ SOFTWARE.
 #define useReceiverAuto 0
 #define useReceiverA 1
 #define useReceiverB 2
+// rssi strenth should be 2% greater than other receiver before switch.
+#define DIVERSITY_CUTOVER 2
 #endif
 
 // this two are minimum required
@@ -229,7 +232,7 @@ void setup()
     digitalWrite(buzzer, HIGH);
 #ifdef USE_DIVERSITY
     pinMode(receiverB_led,OUTPUT);
-    digitalWrite(buzzer, LOW);
+    digitalWrite(receiverA_led, LOW);
 #endif
     // dip switches
 #ifdef USE_DIP
@@ -680,8 +683,8 @@ void loop()
             {
                 case useReceiverAuto:
                     TV.draw_rect(8,3+1*MENU_Y_SIZE,100,12,  WHITE, INVERT); // auto
-                    digitalWrite(receiverA_led, HIGH);
-                    digitalWrite(receiverB_led, HIGH);
+                    //digitalWrite(receiverA_led, HIGH);
+                    //digitalWrite(receiverB_led, HIGH);
                     break;
                 case useReceiverA:
                     TV.draw_rect(8,3+2*MENU_Y_SIZE,100,12,  WHITE, INVERT); // receiver a
@@ -699,6 +702,10 @@ void loop()
                 delay(10); // timeout delay
                 // show signal strength
                 wait_rssi_ready();
+                if(menu_id == useReceiverAuto) {
+                    readRSSI(); // update LED 
+                }
+                // read rssi A
                 rssi = readRSSI(useReceiverA);
                 #define RSSI_BAR_SIZE 100
                 rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
@@ -707,6 +714,7 @@ void loop()
                 //  draw new bar
                 TV.draw_rect(25, 6+4*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, WHITE);
 
+                // read rssi B
                 rssi = readRSSI(useReceiverB);
                 rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
                 // clear last bar
@@ -1077,13 +1085,16 @@ uint16_t readRSSI()
         rssiB += analogRead(rssiPinB);
 #endif
     }
+    rssiA = rssiA/10;
 #ifdef USE_DIVERSITY
-
+    rssiB = rssiB/10;
     // choosing which receiver RSSI to use.. do not change LED
-    if(receiver == useReceiverA) {
+    if(receiver == useReceiverA)
+    {
         rssi=rssiA;
     }
-    else if(receiver == useReceiverB) {
+    else if(receiver == useReceiverB)
+    {
         rssi=rssiB;
     }
     else{
@@ -1091,17 +1102,32 @@ uint16_t readRSSI()
         {
             case useReceiverAuto:
                 // select receiver
-                if(rssiA/10 > rssiB/10)
+                if((int)abs((float)(((float)rssiA - (float)rssiB) / (float)rssiB) * 100.0) >= DIVERSITY_CUTOVER)
                 {
-                    rssi=rssiA;
-                    digitalWrite(receiverA_led, HIGH);
-                    digitalWrite(receiverB_led, LOW);
+                    if(rssiA > rssiB)
+                    {
+                        rssi=rssiA;
+                        digitalWrite(receiverA_led, HIGH);
+                        digitalWrite(receiverB_led, LOW);
+                    }
+                    else
+                    {
+                        rssi=rssiB;
+                        digitalWrite(receiverA_led, LOW);
+                        digitalWrite(receiverB_led, HIGH);
+                    }
                 }
-                else
-                {
-                    rssi=rssiB;
-                    digitalWrite(receiverB_led, HIGH);
-                    digitalWrite(receiverA_led, LOW);
+                else {
+                    if(digitalRead(receiverA_led) == HIGH) {
+                        rssi=rssiA;
+                        digitalWrite(receiverA_led, HIGH);
+                        digitalWrite(receiverB_led, LOW);
+                    }
+                    else {
+                        rssi=rssiB;
+                        digitalWrite(receiverA_led, LOW);
+                        digitalWrite(receiverB_led, HIGH);
+                    }
                 }
                 break;
             case useReceiverA:
@@ -1122,7 +1148,7 @@ uint16_t readRSSI()
 #endif
 
 
-    rssi=rssi/10; // average
+    //rssi=rssi/10; // average
     // special case for RSSI setup
     if(state==STATE_RSSI_SETUP)
     { // RSSI setup
@@ -1135,8 +1161,8 @@ uint16_t readRSSI()
         if(rssi > rssi_setup_max)
         {
             rssi_setup_max=rssi;
-        TV.print(110, SCANNER_LIST_Y_POS, "   ");
-        TV.print(110, SCANNER_LIST_Y_POS, rssi_setup_max , DEC);
+            TV.print(110, SCANNER_LIST_Y_POS, "   ");
+            TV.print(110, SCANNER_LIST_Y_POS, rssi_setup_max , DEC);
         }
         // dump current values
     }
