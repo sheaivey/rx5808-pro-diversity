@@ -5,6 +5,7 @@
  * Inital 2 Button version by Peter (pete1990)
  * Refactored and GUI reworked by Marko Hoepken
  * Universal version my Marko Hoepken
+ * Diversity Receiver Mode and GUI improvements by Shea Ivey
 
 The MIT License (MIT)
 
@@ -35,10 +36,7 @@ SOFTWARE.
 #include <EEPROM.h>
 
 // Feature Togglels
-//define USE_DIP
-#define USE_DIVERSITY
 //#define DEBUG
-//#define RSSI_DEBUG
 
 #define spiDataPin 10
 #define slaveSelectPin 11
@@ -48,7 +46,6 @@ SOFTWARE.
 #define receiverA_led A1
 #define rssiPinA A7
 
-#ifdef USE_DIVERSITY
 // Diversity
 #define receiverB_led A0
 #define rssiPinB A6
@@ -58,7 +55,6 @@ SOFTWARE.
 // rssi strenth should be 2% greater than other receiver before switch.
 // this pervents flicker when rssi are close.
 #define DIVERSITY_CUTOVER 2
-#endif
 
 // this two are minimum required
 #define buttonSeek 2
@@ -68,17 +64,6 @@ SOFTWARE.
 #define buttonSave 5
 // Buzzer
 #define buzzer 6
-
-// pins for DIP switch
-//#define USE_DIP
-#ifdef USE_DIP
-    #define dip_ch0 A0
-    #define dip_ch1 A1
-    #define dip_ch2 A2
-    #define dip_band0 A3
-    #define dip_band1 A4
-    #define dip_enable 0
-#endif
 
 // key debounce delay in ms
 // NOTE: good values are in the range of 100-200ms
@@ -107,9 +92,7 @@ SOFTWARE.
 #define STATE_SWITCH 4
 #define STATE_SAVE 5
 #define STATE_RSSI_SETUP 6
-#ifdef USE_DIVERSITY
 #define STATE_DIVERSITY 7
-#endif
 
 #define START_STATE STATE_SEEK
 #define MAX_STATE STATE_MANUAL
@@ -137,14 +120,11 @@ SOFTWARE.
 #define EEPROM_ADR_RSSI_MIN_A_H 3
 #define EEPROM_ADR_RSSI_MAX_A_L 4
 #define EEPROM_ADR_RSSI_MAX_A_H 5
-#ifdef USE_DIVERSITY
 #define EEPROM_ADR_DIVERSITY 6
 #define EEPROM_ADR_RSSI_MIN_B_L 7
 #define EEPROM_ADR_RSSI_MIN_B_H 8
 #define EEPROM_ADR_RSSI_MAX_B_L 9
 #define EEPROM_ADR_RSSI_MAX_B_H 10
-#endif
-//#define DEBUG
 
 // Channels to sent to the SPI registers
 const uint16_t channelTable[] PROGMEM = {
@@ -181,9 +161,7 @@ uint8_t channel = 0;
 uint8_t channelIndex = 0;
 uint8_t rssi = 0;
 uint8_t rssi_scaled = 0;
-#ifdef USE_DIVERSITY
 uint8_t diversity_mode = useReceiverAuto;
-#endif
 uint8_t hight = 0;
 uint8_t state = START_STATE;
 uint8_t state_last_used=START_STATE;
@@ -208,12 +186,10 @@ uint16_t rssi_min_a=0;
 uint16_t rssi_max_a=0;
 uint16_t rssi_setup_min_a=0;
 uint16_t rssi_setup_max_a=0;
-#ifdef USE_DIVERSITY
 uint16_t rssi_min_b=0;
 uint16_t rssi_max_b=0;
 uint16_t rssi_setup_min_b=0;
 uint16_t rssi_setup_max_b=0;
-#endif
 uint16_t rssi_seek_found=0;
 uint16_t rssi_setup_run=0;
 
@@ -241,25 +217,8 @@ void setup()
     //Receiver Setup
     pinMode(receiverA_led,OUTPUT);
     digitalWrite(buzzer, HIGH);
-#ifdef USE_DIVERSITY
     pinMode(receiverB_led,OUTPUT);
     digitalWrite(receiverA_led, LOW);
-#endif
-    // dip switches
-#ifdef USE_DIP
-    pinMode(dip_ch0, INPUT);
-    digitalWrite(dip_ch0, INPUT_PULLUP);
-    pinMode(dip_ch1, INPUT);
-    digitalWrite(dip_ch1, INPUT_PULLUP);
-    pinMode(dip_ch2, INPUT);
-    digitalWrite(dip_ch2, INPUT_PULLUP);
-    pinMode(dip_band0, INPUT);
-    digitalWrite(dip_band0, INPUT_PULLUP);
-    pinMode(dip_band1, INPUT);
-    digitalWrite(dip_band1, INPUT_PULLUP);
-    pinMode(dip_enable, INPUT);
-    digitalWrite(dip_enable, INPUT_PULLUP);
-#endif
 #ifdef DEBUG
     Serial.begin(115200);
     Serial.println(F("START:"));
@@ -300,7 +259,6 @@ void setup()
         // save 16 bit
         EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L,lowByte(RSSI_MAX_VAL));
         EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,highByte(RSSI_MAX_VAL));
-#ifdef USE_DIVERSITY
         // diversity
         EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
         // save 16 bit
@@ -309,21 +267,16 @@ void setup()
         // save 16 bit
         EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,lowByte(RSSI_MAX_VAL));
         EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,highByte(RSSI_MAX_VAL));
-#endif
     }
-    // debug reset EEPROM
-    //EEPROM.write(EEPROM_ADR_STATE,255);
 
     // read last setting from eeprom
     state=EEPROM.read(EEPROM_ADR_STATE);
     channelIndex=EEPROM.read(EEPROM_ADR_TUNE);
     rssi_min_a=((EEPROM.read(EEPROM_ADR_RSSI_MIN_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_A_L)));
     rssi_max_a=((EEPROM.read(EEPROM_ADR_RSSI_MAX_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_A_L)));
-#ifdef USE_DIVERSITY
     diversity_mode = EEPROM.read(EEPROM_ADR_DIVERSITY);
     rssi_min_b=((EEPROM.read(EEPROM_ADR_RSSI_MIN_B_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_B_L)));
     rssi_max_b=((EEPROM.read(EEPROM_ADR_RSSI_MAX_B_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_B_L)));
-#endif
     force_menu_redraw=1;
 }
 
@@ -384,11 +337,7 @@ void loop()
             TV.printPGM(10, 5+1*MENU_Y_SIZE, PSTR("Auto Search"));
             TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Band Scanner"));
             TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("Manual Mode"));
-#ifdef USE_DIVERSITY
             TV.printPGM(10, 5+4*MENU_Y_SIZE, PSTR("Diversity"));
-#else
-            TV.printPGM(10, 5+4*MENU_Y_SIZE, PSTR("Switch Mode"));
-#endif
             TV.printPGM(10, 5+5*MENU_Y_SIZE, PSTR("Save Setup"));
             // selection by inverted box
             switch (menu_id)
@@ -410,12 +359,7 @@ void loop()
                 break;
                 case 3: // DIP mode or diversity
                     TV.draw_rect(8,3+4*MENU_Y_SIZE,100,12,  WHITE, INVERT);
-#ifdef USE_DIVERSITY
                     state=STATE_DIVERSITY;
-#else
-                    state=STATE_SWITCH;
-                    last_dip_channel=255; // force update
-#endif
                 break;
                 case 4: // Save settings
                     TV.draw_rect(8,3+5*MENU_Y_SIZE,100,12,  WHITE, INVERT);
@@ -477,16 +421,6 @@ void loop()
     { // reset debounce
         switch_count = 0;
     }
-#ifdef USE_DIP
-    /***********************/
-    /*   Static SWITCH MODE   */
-    /***********************/
-    // set to SWITCH mode if SWITCH_ENABLE is low (no interactive mode)
-    if(digitalRead(dip_enable) == LOW)
-    {
-        state=STATE_SWITCH;
-    }
-#endif
     /***********************/
     /*     Save buttom     */
     /***********************/
@@ -580,17 +514,13 @@ void loop()
                 update_frequency_view=1;
                 force_seek=1;
             break;
-#ifdef USE_DIVERSITY
             case STATE_DIVERSITY:
                 // diversity menu is below this is just a place holder.
             break;
-#endif
             case STATE_SAVE:
                 EEPROM.write(EEPROM_ADR_TUNE,channelIndex);
                 EEPROM.write(EEPROM_ADR_STATE,state_last_used);
-#ifdef USE_DIVERSITY
                 EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
-#endif
                 TV.select_font(font8x8);
                 TV.draw_rect(0,0,127,95,  WHITE);
                 TV.draw_line(0,14,127,14,WHITE);
@@ -679,7 +609,6 @@ void loop()
     /*************************************/
     /*   Processing depending of state   */
     /*************************************/
-#ifdef USE_DIVERSITY
     if(state == STATE_DIVERSITY) {
         // simple menu
         char menu_id=diversity_mode;
@@ -766,7 +695,6 @@ void loop()
 
         state=state_last_used;
     }
-#endif
     /*****************************************/
     /*   Processing MANUAL MODE / SEEK MODE  */
     /*****************************************/
@@ -798,24 +726,6 @@ void loop()
                 update_frequency_view=1;
             }
         }
-#ifdef USE_DIP
-        if(state == STATE_SWITCH) // SWITCH MODE
-        {
-            // read band DIP switch (invert since switch pulls to gnd)
-            uint8_t dip_band= (((digitalRead(dip_band1)<<1) | digitalRead(dip_band0)) ^0x3);
-            // read channel DIP switch (invert since switch pulls to gnd)
-            uint8_t dip_channel = (((digitalRead(dip_ch2)<<2) | ((digitalRead(dip_ch1))<<1) | (digitalRead(dip_ch0))) ^0x7);
-            if((dip_band != last_dip_band) || (dip_channel != last_dip_channel)) // check for changes to avoid unrequred tuning
-            {
-                last_dip_band=dip_band;
-                last_dip_channel=dip_channel;
-                // caclulate index of channel in 4x8 array
-                channelIndex=CHANNEL_BAND_SIZE*last_dip_band + last_dip_channel;
-                update_frequency_view=1;
-            }
-
-        }
-#endif
         // display refresh handler
         if(update_frequency_view) // only updated on changes
         {
@@ -992,7 +902,6 @@ void loop()
                     // save 16 bit
                     EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L,(rssi_max_a & 0xff));
                     EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,(rssi_max_a >> 8));
-#ifdef USE_DIVERSITY
                     rssi_min_b=rssi_setup_min_b;
                     rssi_max_b=rssi_setup_max_b;
                     // save 16 bit
@@ -1001,7 +910,6 @@ void loop()
                     // save 16 bit
                     EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,(rssi_max_b & 0xff));
                     EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,(rssi_max_b >> 8));
-#endif
 
                     state=EEPROM.read(EEPROM_ADR_STATE);
                     beep(1000);
@@ -1091,32 +999,22 @@ void wait_rssi_ready()
     }
 }
 
-#ifdef USE_DIVERSITY
 uint16_t readRSSI()
 {
     return readRSSI(-1);
 }
 uint16_t readRSSI(uint8_t receiver)
 {
-#else
-uint16_t readRSSI()
-{
-#endif
     uint16_t rssi = 0;
     uint16_t rssiA = 0;
-#ifdef USE_DIVERSITY
     uint16_t rssiB = 0;
-#endif
     for (uint8_t i = 0; i < 10; i++)
     {
         rssiA += analogRead(rssiPinA);
-#ifdef USE_DIVERSITY
         rssiB += analogRead(rssiPinB);
-#endif
     }
-    rssiA = rssiA/10;
-#ifdef USE_DIVERSITY
-    rssiB = rssiB/10;
+    rssiA = rssiA/10; // average of 10 readings
+    rssiB = rssiB/10; // average of 10 readings
     // choosing which receiver RSSI to use.. do not change LED
     if(receiver == useReceiverA)
     {
@@ -1165,12 +1063,8 @@ uint16_t readRSSI()
                 break;
         }
     }
-#else
-    digitalWrite(receiverA_led, HIGH);
-#endif
 
 
-    //rssi=rssi/10; // average
     // special case for RSSI setup
     if(state==STATE_RSSI_SETUP)
     { // RSSI setup
@@ -1186,7 +1080,6 @@ uint16_t readRSSI()
             TV.print(110, SCANNER_LIST_Y_POS, "   ");
             TV.print(110, SCANNER_LIST_Y_POS, rssi_setup_max_a , DEC);
         }
-#ifdef USE_DIVERSITY
         if(rssiB < rssi_setup_min_b)
         {
             rssi_setup_min_b=rssiB;
@@ -1195,10 +1088,8 @@ uint16_t readRSSI()
         {
             rssi_setup_max_b=rssiB;
         }
-#endif
     }
 
-#ifdef USE_DIVERSITY
     if(receiver == useReceiverA || state==STATE_RSSI_SETUP)
     {
         rssi = constrain(rssiA, rssi_min_a, rssi_max_a);    //original 90---250
@@ -1210,15 +1101,9 @@ uint16_t readRSSI()
         rssi=rssi-rssi_min_b; // set zero point (value 0...160)
         rssi = map(rssi, 0, rssi_max_a-rssi_min_b , 1, 100);   // scale from 1..100%
     }
-#else
-    rssi = constrain(rssiA, rssi_min_a, rssi_max_a);    //original 90---250
-    rssi=rssi-rssi_min_a; // set zero point (value 0...160)
-    rssi = map(rssi, 0, rssi_max_a-rssi_min_a , 1, 100);   // scale from 1..100%
-#endif
     return (rssi);
 }
 
-#ifdef USE_DIVERSITY
 void setReceiver(uint8_t receiver) {
     if(receiver == useReceiverA)
     {
@@ -1231,7 +1116,6 @@ void setReceiver(uint8_t receiver) {
         digitalWrite(receiverA_led, LOW);
     }
 }
-#endif
 
 // Private function: from http://arduino.cc/playground/Code/AvailableMemory
 int freeRam () {
