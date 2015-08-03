@@ -56,6 +56,7 @@ SOFTWARE.
 #define useReceiverA 1
 #define useReceiverB 2
 // rssi strenth should be 2% greater than other receiver before switch.
+// this pervents flicker when rssi are close.
 #define DIVERSITY_CUTOVER 2
 #endif
 
@@ -132,12 +133,16 @@ SOFTWARE.
 
 #define EEPROM_ADR_STATE 0
 #define EEPROM_ADR_TUNE 1
-#define EEPROM_ADR_RSSI_MIN_L 2
-#define EEPROM_ADR_RSSI_MIN_H 3
-#define EEPROM_ADR_RSSI_MAX_L 4
-#define EEPROM_ADR_RSSI_MAX_H 5
+#define EEPROM_ADR_RSSI_MIN_A_L 2
+#define EEPROM_ADR_RSSI_MIN_A_H 3
+#define EEPROM_ADR_RSSI_MAX_A_L 4
+#define EEPROM_ADR_RSSI_MAX_A_H 5
 #ifdef USE_DIVERSITY
 #define EEPROM_ADR_DIVERSITY 6
+#define EEPROM_ADR_RSSI_MIN_B_L 7
+#define EEPROM_ADR_RSSI_MIN_B_H 8
+#define EEPROM_ADR_RSSI_MAX_B_L 9
+#define EEPROM_ADR_RSSI_MAX_B_H 10
 #endif
 //#define DEBUG
 
@@ -199,10 +204,16 @@ uint8_t last_dip_band=255;
 uint8_t scan_start=0;
 uint8_t first_tune=1;
 uint8_t force_menu_redraw=0;
-uint16_t rssi_min=0;
-uint16_t rssi_max=0;
-uint16_t rssi_setup_min=0;
-uint16_t rssi_setup_max=0;
+uint16_t rssi_min_a=0;
+uint16_t rssi_max_a=0;
+uint16_t rssi_setup_min_a=0;
+uint16_t rssi_setup_max_a=0;
+#ifdef USE_DIVERSITY
+uint16_t rssi_min_b=0;
+uint16_t rssi_max_b=0;
+uint16_t rssi_setup_min_b=0;
+uint16_t rssi_setup_max_b=0;
+#endif
 uint16_t rssi_seek_found=0;
 uint16_t rssi_setup_run=0;
 
@@ -284,14 +295,20 @@ void setup()
         EEPROM.write(EEPROM_ADR_STATE,START_STATE);
         EEPROM.write(EEPROM_ADR_TUNE,CHANNEL_MIN_INDEX);
         // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_L,lowByte(RSSI_MIN_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_H,highByte(RSSI_MIN_VAL));
+        EEPROM.write(EEPROM_ADR_RSSI_MIN_A_L,lowByte(RSSI_MIN_VAL));
+        EEPROM.write(EEPROM_ADR_RSSI_MIN_A_H,highByte(RSSI_MIN_VAL));
         // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_L,lowByte(RSSI_MAX_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_H,highByte(RSSI_MAX_VAL));
+        EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L,lowByte(RSSI_MAX_VAL));
+        EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,highByte(RSSI_MAX_VAL));
 #ifdef USE_DIVERSITY
         // diversity
         EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
+        // save 16 bit
+        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,lowByte(RSSI_MIN_VAL));
+        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,highByte(RSSI_MIN_VAL));
+        // save 16 bit
+        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,lowByte(RSSI_MAX_VAL));
+        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,highByte(RSSI_MAX_VAL));
 #endif
     }
     // debug reset EEPROM
@@ -300,10 +317,12 @@ void setup()
     // read last setting from eeprom
     state=EEPROM.read(EEPROM_ADR_STATE);
     channelIndex=EEPROM.read(EEPROM_ADR_TUNE);
-    rssi_min=((EEPROM.read(EEPROM_ADR_RSSI_MIN_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_L)));
-    rssi_max=((EEPROM.read(EEPROM_ADR_RSSI_MAX_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_L)));
+    rssi_min_a=((EEPROM.read(EEPROM_ADR_RSSI_MIN_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_A_L)));
+    rssi_max_a=((EEPROM.read(EEPROM_ADR_RSSI_MAX_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_A_L)));
 #ifdef USE_DIVERSITY
     diversity_mode = EEPROM.read(EEPROM_ADR_DIVERSITY);
+    rssi_min_b=((EEPROM.read(EEPROM_ADR_RSSI_MIN_B_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_B_L)));
+    rssi_max_b=((EEPROM.read(EEPROM_ADR_RSSI_MAX_B_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_B_L)));
 #endif
     force_menu_redraw=1;
 }
@@ -506,10 +525,10 @@ void loop()
                     TV.select_font(font4x6);
                     TV.print(10, SCANNER_LIST_Y_POS, "RSSI Min:     RSSI Max:   ");
                     // prepare new setup
-                    rssi_min=0;
-                    rssi_max=400; // set to max range
-                    rssi_setup_min=400;
-                    rssi_setup_max=0;
+                    rssi_min_a=0;
+                    rssi_max_a=400; // set to max range
+                    rssi_setup_min_a=400;
+                    rssi_setup_max_a=0;
                     rssi_setup_run=RSSI_SETUP_RUN;
                 }
                 TV.draw_rect(0,1*TV_Y_GRID,TV_X_MAX,9,  WHITE); // list frame
@@ -683,8 +702,6 @@ void loop()
             {
                 case useReceiverAuto:
                     TV.draw_rect(8,3+1*MENU_Y_SIZE,100,12,  WHITE, INVERT); // auto
-                    //digitalWrite(receiverA_led, HIGH);
-                    //digitalWrite(receiverB_led, HIGH);
                     break;
                 case useReceiverA:
                     TV.draw_rect(8,3+2*MENU_Y_SIZE,100,12,  WHITE, INVERT); // receiver a
@@ -703,7 +720,7 @@ void loop()
                 // show signal strength
                 wait_rssi_ready();
                 if(menu_id == useReceiverAuto) {
-                    readRSSI(); // update LED 
+                    readRSSI(); // update LED
                 }
                 // read rssi A
                 rssi = readRSSI(useReceiverA);
@@ -967,14 +984,25 @@ void loop()
                 if(!rssi_setup_run--)
                 {
                     // setup done
-                    rssi_min=rssi_setup_min;
-                    rssi_max=rssi_setup_max;
+                    rssi_min_a=rssi_setup_min_a;
+                    rssi_max_a=rssi_setup_max_a;
                     // save 16 bit
-                    EEPROM.write(EEPROM_ADR_RSSI_MIN_L,(rssi_min & 0xff));
-                    EEPROM.write(EEPROM_ADR_RSSI_MIN_H,(rssi_min >> 8));
+                    EEPROM.write(EEPROM_ADR_RSSI_MIN_A_L,(rssi_min_a & 0xff));
+                    EEPROM.write(EEPROM_ADR_RSSI_MIN_A_H,(rssi_min_a >> 8));
                     // save 16 bit
-                    EEPROM.write(EEPROM_ADR_RSSI_MAX_L,(rssi_max & 0xff));
-                    EEPROM.write(EEPROM_ADR_RSSI_MAX_H,(rssi_max >> 8));
+                    EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L,(rssi_max_a & 0xff));
+                    EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,(rssi_max_a >> 8));
+#ifdef USE_DIVERSITY
+                    rssi_min_b=rssi_setup_min_b;
+                    rssi_max_b=rssi_setup_max_b;
+                    // save 16 bit
+                    EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,(rssi_min_b & 0xff));
+                    EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,(rssi_min_b >> 8));
+                    // save 16 bit
+                    EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,(rssi_max_b & 0xff));
+                    EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,(rssi_max_b >> 8));
+#endif
+
                     state=EEPROM.read(EEPROM_ADR_STATE);
                     beep(1000);
                 }
@@ -1076,8 +1104,9 @@ uint16_t readRSSI()
 #endif
     uint16_t rssi = 0;
     uint16_t rssiA = 0;
+#ifdef USE_DIVERSITY
     uint16_t rssiB = 0;
-
+#endif
     for (uint8_t i = 0; i < 10; i++)
     {
         rssiA += analogRead(rssiPinA);
@@ -1106,44 +1135,37 @@ uint16_t readRSSI()
                 {
                     if(rssiA > rssiB)
                     {
-                        rssi=rssiA;
-                        digitalWrite(receiverA_led, HIGH);
-                        digitalWrite(receiverB_led, LOW);
+                        receiver=useReceiverA;
+                        setReceiver(useReceiverA);
                     }
                     else
                     {
-                        rssi=rssiB;
-                        digitalWrite(receiverA_led, LOW);
-                        digitalWrite(receiverB_led, HIGH);
+                        receiver=useReceiverB;
+                        setReceiver(useReceiverB);
                     }
                 }
                 else {
                     if(digitalRead(receiverA_led) == HIGH) {
-                        rssi=rssiA;
-                        digitalWrite(receiverA_led, HIGH);
-                        digitalWrite(receiverB_led, LOW);
+                        receiver=useReceiverA;
+                        setReceiver(useReceiverA);
                     }
                     else {
-                        rssi=rssiB;
-                        digitalWrite(receiverA_led, LOW);
-                        digitalWrite(receiverB_led, HIGH);
+                        receiver=useReceiverB;
+                        setReceiver(useReceiverB);
                     }
                 }
                 break;
             case useReceiverA:
-                rssi=rssiA;
-                digitalWrite(receiverA_led, HIGH);
-                digitalWrite(receiverB_led, LOW);
+                receiver=useReceiverA;
+                setReceiver(useReceiverA);
                 break;
             case useReceiverB:
-                rssi=rssiB;
-                digitalWrite(receiverB_led, HIGH);
-                digitalWrite(receiverA_led, LOW);
+                receiver=useReceiverB;
+                setReceiver(useReceiverB);
                 break;
         }
     }
 #else
-    rssi=rssiA;
     digitalWrite(receiverA_led, HIGH);
 #endif
 
@@ -1152,40 +1174,64 @@ uint16_t readRSSI()
     // special case for RSSI setup
     if(state==STATE_RSSI_SETUP)
     { // RSSI setup
-        if(rssi < rssi_setup_min)
+        if(rssiA < rssi_setup_min_a)
         {
-            rssi_setup_min=rssi;
+            rssi_setup_min_a=rssiA;
             TV.print(50, SCANNER_LIST_Y_POS, "   ");
-            TV.print(50, SCANNER_LIST_Y_POS, rssi_setup_min , DEC);
+            TV.print(50, SCANNER_LIST_Y_POS, rssi_setup_min_a , DEC);
         }
-        if(rssi > rssi_setup_max)
+        if(rssiA > rssi_setup_max_a)
         {
-            rssi_setup_max=rssi;
+            rssi_setup_max_a=rssiA;
             TV.print(110, SCANNER_LIST_Y_POS, "   ");
-            TV.print(110, SCANNER_LIST_Y_POS, rssi_setup_max , DEC);
+            TV.print(110, SCANNER_LIST_Y_POS, rssi_setup_max_a , DEC);
         }
-        // dump current values
+#ifdef USE_DIVERSITY
+        if(rssiB < rssi_setup_min_b)
+        {
+            rssi_setup_min_b=rssiB;
+        }
+        if(rssiB > rssi_setup_max_b)
+        {
+            rssi_setup_max_b=rssiB;
+        }
+#endif
     }
-    //TV.print(50, SCANNER_LIST_Y_POS-10, rssi_min , DEC);
-    //TV.print(110, SCANNER_LIST_Y_POS-10, rssi_max , DEC);
-    // scale AD RSSI Valaues to 1-100%
-    //#define RSSI_DEBUG
 
-    // Filter glitches
-    #ifdef RSSI_DEBUG
-        TV.print(1,20, "RAW:             ");
-        TV.print(30,20, rssi, DEC);
-    #endif
-    rssi = constrain(rssi, rssi_min, rssi_max);    //original 90---250
-    rssi=rssi-rssi_min; // set zero point (value 0...160)
-    rssi = map(rssi, 0, rssi_max-rssi_min , 1, 100);   // scale from 1..100%
-    #ifdef RSSI_DEBUG
-        TV.print(1,40, "SCALED:           ");
-        TV.print(50,40, rssi, DEC);
-    #endif
-
+#ifdef USE_DIVERSITY
+    if(receiver == useReceiverA || state==STATE_RSSI_SETUP)
+    {
+        rssi = constrain(rssiA, rssi_min_a, rssi_max_a);    //original 90---250
+        rssi=rssi-rssi_min_a; // set zero point (value 0...160)
+        rssi = map(rssi, 0, rssi_max_a-rssi_min_a , 1, 100);   // scale from 1..100%
+    }
+    else {
+        rssi = constrain(rssiB, rssi_min_b, rssi_max_b);    //original 90---250
+        rssi=rssi-rssi_min_b; // set zero point (value 0...160)
+        rssi = map(rssi, 0, rssi_max_a-rssi_min_b , 1, 100);   // scale from 1..100%
+    }
+#else
+    rssi = constrain(rssiA, rssi_min_a, rssi_max_a);    //original 90---250
+    rssi=rssi-rssi_min_a; // set zero point (value 0...160)
+    rssi = map(rssi, 0, rssi_max_a-rssi_min_a , 1, 100);   // scale from 1..100%
+#endif
     return (rssi);
 }
+
+#ifdef USE_DIVERSITY
+void setReceiver(uint8_t receiver) {
+    if(receiver == useReceiverA)
+    {
+        digitalWrite(receiverA_led, HIGH);
+        digitalWrite(receiverB_led, LOW);
+    }
+    else
+    {
+        digitalWrite(receiverB_led, HIGH);
+        digitalWrite(receiverA_led, LOW);
+    }
+}
+#endif
 
 // Private function: from http://arduino.cc/playground/Code/AvailableMemory
 int freeRam () {
