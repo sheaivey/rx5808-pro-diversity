@@ -5,12 +5,12 @@ The main goal of this branch was to add diversity to the feature set. Please see
 
 [![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](http://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE)
 
-1. [Features](#Features)
-2. [Hardware](#Hardware)
-3. [Software](#Software)
-4. [Usage](#Usage)
-5. [Contributing](#Contributing)
-6. [License](#License)
+1. [Features](#features)
+2. [Hardware](#hardware)
+3. [Software](#software)
+4. [Usage](#usage)
+5. [Contributing](#contributing)
+6. [License](#license)
 
 
 ##Features
