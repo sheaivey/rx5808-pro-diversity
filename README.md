@@ -30,7 +30,7 @@ The main goal of this branch was to add diversity to the feature set. Please see
 ##Hardware
 This project is centered around the rx5808 5.8ghz receiver module which can be found at a number of online stores.
 
-I have modified the origional schematics to incorperate the diversity setup.
+I have modified the original schematics to incorporate the diversity setup.
 
 I have also added LEDs to represent which antenna is currently being selected.
 
@@ -40,7 +40,7 @@ I have also added LEDs to represent which antenna is currently being selected.
 4. [Enclosure Documentation]()
 
 ##Software
-The major software changes are centered around the diversity menu. This required removing the Dipswitch mode from the origional project. Within the diversity menu you will find RSSI signal strength for each receiver and the abuility to select which mode the receivers are operating in (Auto, Receiver A, Receiver B).
+The major software changes are centered around the diversity menu. This required removing the dip switch mode from the origional project. Within the diversity menu you will find RSSI signal strength for each receiver and the ability to select which mode the receivers are operating in (Auto, Receiver A, Receiver B).
 
 The diversity switching logic is simple.
 ```
@@ -50,7 +50,7 @@ else
   Select Receiver B.
 ```
 
-The two percent helps pervent rapid video switching when both RSSI are close in value.
+The two percent helps prevent rapid video switching when both RSSI are close in value.
 
 ##Usage
 
