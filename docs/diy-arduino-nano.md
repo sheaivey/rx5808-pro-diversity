@@ -13,4 +13,4 @@
 - 1x Arduino Nano 3.0 328
 
 ####Schematic
-![alt text](img/rx5808-pro-diversity-schematic-simple.png)
+![alt text](img/rx5808-pro-diversity-schematic-simple.jpg)

@@ -38,17 +38,17 @@ The main goal of this fork was to add diversity to an already amazing feature se
 ##Usage
 ####Screens
 
-1. **Mode Select** - Use the up/down buttons to navigate. Hit mode to select. Don't press anything to return to the last mode selected. ![alt text](docs/img/screen-menu.png "Mode Select")
+1. **Mode Select** - Use the up/down buttons to navigate. Hit mode to select. Don't press anything to return to the last mode selected. ![alt text](docs/img/screen-menu.jpg "Mode Select")
 
-2. **Auto Scan** - Scans all bands until a signal with good signal strength is found. ![alt text](docs/img/screen-auto-scan.png "Auto Scan")
+2. **Auto Scan** - Scans all bands until a signal with good signal strength is found. ![alt text](docs/img/screen-auto-scan.jpg "Auto Scan")
 
-4. **Band Scaner** - Scans all bands and presents them with a sitnal strength bar graph. ![alt text](docs/img/screen-band-scan.png "Band Scaner")
+4. **Band Scaner** - Scans all bands and presents them with a sitnal strength bar graph. ![alt text](docs/img/screen-band-scan.jpg "Band Scaner")
 
-3. **Manual Mode** - Will hold on a manualy selected channel. ![alt text](docs/img/screen-manual.png "Manual Mode")
+3. **Manual Mode** - Will hold on a manualy selected channel. ![alt text](docs/img/screen-manual.jpg "Manual Mode")
 
-5. **Diversity** - Select which receiver to use or auto. Also Displays signal strength of each antenna. ![alt text](docs/img/screen-diversity.png "Diversity")
+5. **Diversity** - Select which receiver to use or auto. Also Displays signal strength of each antenna. ![alt text](docs/img/screen-diversity.jpg "Diversity")
 
-6. **Save** - Saves last used channel and mode for next power cycle. This is also where you enter RSSI calibration mode. ![alt text](docs/img/screen-save.png "Save")
+6. **Save** - Saves last used channel and mode for next power cycle. This is also where you enter RSSI calibration mode. ![alt text](docs/img/screen-save.jpg "Save")
 
 ####Initial Setup
 When powering on for the first time it is best to calibrate your RSSI. To do this follow these steps below. (You can repeat this process as many times as needed for best results.)

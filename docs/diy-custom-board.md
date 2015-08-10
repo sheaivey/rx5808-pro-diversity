@@ -21,7 +21,7 @@ You will also need a programmer to get the Arduino bootloader onto the MEGA328 c
 - 1x MEGA 328 TQFP
 
 ####Schematic
-![alt text](img/rx5808-pro-diversity-schematic-eagle.png)
+![alt text](img/rx5808-pro-diversity-schematic-eagle.jpg)
 
 ####Board
-![alt text](img/rx5808-pro-diversity-schematic-board-white.png)
+![alt text](img/rx5808-pro-diversity-schematic-board-white.jpg)
