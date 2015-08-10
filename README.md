@@ -1,11 +1,11 @@
 #Introduction
-This project originated at [here](https://code.google.com/p/rx5808-pro/) and has been modified to include diversity menu.
+This project originated [here](https://code.google.com/p/rx5808-pro/) and has been modified to include diversity receiver menu.
 
-The main goal of this fork was to add diversity to the already amazing feature set. Please see the following video for a quick intro into the project.
+The main goal of this fork was to add diversity to an already amazing feature set. Please see the following video for a quick intro of the project.
 
-video place holder...
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](http://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE)
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/NwnQCUikqvI/0.jpg)](http://www.youtube.com/watch?v=NwnQCUikqvI)
 
+## Table of Contents
 1. [Features](#features)
 2. [Usage](#usage)
 3. [Hardware](#hardware)
