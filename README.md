@@ -3,7 +3,7 @@ This project originated [here](https://code.google.com/p/rx5808-pro/) and has be
 
 The main goal of this fork was to add diversity to an already amazing feature set. Please see the following video for a quick intro of the project.
 
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/NwnQCUikqvI/0.jpg)](http://www.youtube.com/watch?v=NwnQCUikqvI)
+[![Video](http://img.youtube.com/vi/NwnQCUikqvI/0.jpg)](http://www.youtube.com/watch?v=NwnQCUikqvI)
 
 ## Table of Contents
 1. [Features](#features)
@@ -38,17 +38,17 @@ The main goal of this fork was to add diversity to an already amazing feature se
 ##Usage
 ####Screens
 
-1. **Mode Select** - Use the up/down buttons to navigate. Hit mode to select. Don't press anything to return to the last mode selected. ![alt text](docs/img/screen-menu.jpg "Mode Select")
+1. **Mode Select** - Use the up/down buttons to navigate. Hit mode to select. Don't press anything to return to the last mode selected. ![GUI Screen](docs/img/screen-menu.jpg "Mode Select")
 
-2. **Auto Scan** - Scans all bands until a signal with good signal strength is found. ![alt text](docs/img/screen-auto-scan.jpg "Auto Scan")
+2. **Auto Scan** - Scans all bands until a signal with good signal strength is found. ![GUI Screen](docs/img/screen-auto-scan.jpg "Auto Scan")
 
-4. **Band Scaner** - Scans all bands and presents them with a sitnal strength bar graph. ![alt text](docs/img/screen-band-scan.jpg "Band Scaner")
+4. **Band Scaner** - Scans all bands and presents them with a sitnal strength bar graph. ![GUI Screen](docs/img/screen-band-scan.jpg "Band Scaner")
 
-3. **Manual Mode** - Will hold on a manualy selected channel. ![alt text](docs/img/screen-manual.jpg "Manual Mode")
+3. **Manual Mode** - Will hold on a manualy selected channel. ![GUI Screen](docs/img/screen-manual.jpg "Manual Mode")
 
-5. **Diversity** - Select which receiver to use or auto. Also Displays signal strength of each antenna. ![alt text](docs/img/screen-diversity.jpg "Diversity")
+5. **Diversity** - Select which receiver to use or auto. Also Displays signal strength of each antenna. ![GUI Screen](docs/img/screen-diversity.jpg "Diversity")
 
-6. **Save** - Saves last used channel and mode for next power cycle. This is also where you enter RSSI calibration mode. ![alt text](docs/img/screen-save.jpg "Save")
+6. **Save** - Saves last used channel and mode for next power cycle. This is also where you enter RSSI calibration mode. ![GUI Screen](docs/img/screen-save.jpg "Save")
 
 ####Initial Setup
 When powering on for the first time it is best to calibrate your RSSI. To do this follow these steps below. (You can repeat this process as many times as needed for best results.)
@@ -66,10 +66,10 @@ I have modified the original schematics to incorporate the diversity setup.
 
 I have also added LEDs to represent which antenna is currently being selected.
 
-
-![alt text](docs/img/rx5808-pro-diversity-schematic-simple.jpg)
+![diversity simple schematic](docs/img/rx5808-pro-diversity-schematic-simple.jpg)
 
 For more information on specific hardware implementation:
+
 1. [DIY Simple - Arduino Nano](/docs/diy-arduino-nano.md)
 2. [DIY Advanced - Custom Board](/docs/diy-custom-board.md)
 3. [rx5808 SPI modification](/docs/rx5808-spi-mod.md)
@@ -87,7 +87,7 @@ else
 ```
 
 The two percent helps prevent rapid video switching when both RSSI are close in value.
-![alt text](docs/img/diversity-example.jpg)
+![diversity example](docs/img/diversity-example.jpg)
 
 ##Contributing
 Any contributions are welcome!
