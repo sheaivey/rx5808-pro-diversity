@@ -66,6 +66,10 @@ I have modified the original schematics to incorporate the diversity setup.
 
 I have also added LEDs to represent which antenna is currently being selected.
 
+
+![alt text](docs/img/rx5808-pro-diversity-schematic-simple.jpg)
+
+For more information on specific hardware implementation:
 1. [DIY Simple - Arduino Nano](/docs/diy-arduino-nano.md)
 2. [DIY Advanced - Custom Board](/docs/diy-custom-board.md)
 3. [rx5808 SPI modification](/docs/rx5808-spi-mod.md)
@@ -83,6 +87,7 @@ else
 ```
 
 The two percent helps prevent rapid video switching when both RSSI are close in value.
+![alt text](docs/img/diversity-example.jpg)
 
 ##Contributing
 Any contributions are welcome!
