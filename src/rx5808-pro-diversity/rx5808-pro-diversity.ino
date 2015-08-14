@@ -89,19 +89,18 @@ SOFTWARE.
 #define STATE_SEEK 1
 #define STATE_SCAN 2
 #define STATE_MANUAL 3
-#define STATE_SWITCH 4
+#define STATE_DIVERSITY 4
 #define STATE_SAVE 5
 #define STATE_RSSI_SETUP 6
-#define STATE_DIVERSITY 7
 
 #define START_STATE STATE_SEEK
 #define MAX_STATE STATE_MANUAL
 
 #define CHANNEL_BAND_SIZE 8
 #define CHANNEL_MIN_INDEX 0
-#define CHANNEL_MAX_INDEX 31
+#define CHANNEL_MAX_INDEX 39
 
-#define CHANNEL_MAX 31
+#define CHANNEL_MAX 39
 #define CHANNEL_MIN 0
 
 #define TV_COLS 128
@@ -126,13 +125,15 @@ SOFTWARE.
 #define EEPROM_ADR_RSSI_MAX_B_L 9
 #define EEPROM_ADR_RSSI_MAX_B_H 10
 
+
 // Channels to sent to the SPI registers
 const uint16_t channelTable[] PROGMEM = {
   // Channel 1 - 8
   0x2A05,    0x299B,    0x2991,    0x2987,    0x291D,    0x2913,    0x2909,    0x289F,    // Band A
   0x2903,    0x290C,    0x2916,    0x291F,    0x2989,    0x2992,    0x299C,    0x2A05,    // Band B
   0x2895,    0x288B,    0x2881,    0x2817,    0x2A0F,    0x2A19,    0x2A83,    0x2A8D,    // Band E
-  0x2906,    0x2910,    0x291A,    0x2984,    0x298E,    0x2998,    0x2A02,    0x2A0C  // Band F / Airwave
+  0x2906,    0x2910,    0x291A,    0x2984,    0x298E,    0x2998,    0x2A02,    0x2A0C,    // Band F / Airwave
+  0x281D,    0x288F,    0x2902,    0x2914,    0x2978,    0x2999,    0x2A0C,    0x2A1E     // Band R / Immersion Raceband
 };
 
 // Channels with their Mhz Values
@@ -141,7 +142,8 @@ const uint16_t channelFreqTable[] PROGMEM = {
   5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725, // Band A
   5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866, // Band B
   5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945, // Band E
-  5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880  // Band F / Airwave
+  5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880, // Band F / Airwave
+  5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917  // Band R / Immersion Raceband
 };
 
 // do coding as simple hex value to save memory.
@@ -149,12 +151,13 @@ const uint8_t channelNames[] PROGMEM = {
   0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8,
   0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8,
   0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8,
-  0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8
+  0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8,
+  0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8
 };
 
 // All Channels of the above List ordered by Mhz
 const uint8_t channelList[] PROGMEM = {
-  19, 18, 17, 16, 7, 8, 24, 6, 9, 25, 5, 10, 26, 4, 11, 27, 3, 12, 28, 2, 13, 29, 1, 14, 30, 0, 15, 31, 20, 21, 22, 23
+  19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9, 25, 5, 35, 10, 26, 4, 11, 27, 3, 36, 12, 28, 2, 13, 29, 37, 1, 14, 30, 0, 15, 31, 38, 20, 21, 39, 22, 23
 };
 
 uint8_t channel = 0;
@@ -357,7 +360,7 @@ void loop()
                     TV.draw_rect(8,3+3*MENU_Y_SIZE,100,12,  WHITE, INVERT);
                     state=STATE_MANUAL;
                 break;
-                case 3: // DIP mode or diversity
+                case 3: // Diversity
                     TV.draw_rect(8,3+4*MENU_Y_SIZE,100,12,  WHITE, INVERT);
                     state=STATE_DIVERSITY;
                 break;
@@ -479,7 +482,6 @@ void loop()
             break;
             case STATE_MANUAL: // manual mode
             case STATE_SEEK: // seek mode
-            case STATE_SWITCH: // SWITCH mode
                 TV.select_font(font8x8);
                 TV.draw_rect(0,0,TV_X_MAX,TV_Y_MAX,  WHITE); // outer frame
                 if (state == STATE_MANUAL)
@@ -489,10 +491,6 @@ void loop()
                 else if(state == STATE_SEEK)
                 {
                     TV.printPGM(10, TV_Y_OFFSET,  PSTR("AUTO MODE SEEK"));
-                }
-                else if(state == STATE_SWITCH)
-                {
-                    TV.printPGM(10, TV_Y_OFFSET,  PSTR("  SWITCH MODE "));
                 }
                 TV.draw_line(0,1*TV_Y_GRID,TV_X_MAX,1*TV_Y_GRID,WHITE);
                 TV.printPGM(5,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("BAND: "));
@@ -537,13 +535,14 @@ void loop()
                     case STATE_SEEK: // seek mode
                         TV.printPGM(50,5+1*MENU_Y_SIZE,  PSTR("Search"));
                     break;
-                    case STATE_SWITCH: // SWITCH mode
-                        TV.printPGM(50,5+1*MENU_Y_SIZE,  PSTR("Switch"));
-                    break;
                 }
                 TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Band:"));
                 // print band
-                if(channelIndex > 23)
+                if(channelIndex > 31)
+                {
+                    TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("C/Race   "));
+                }
+                else if(channelIndex > 23)
                 {
                     TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("F/Airwave"));
                 }
@@ -698,7 +697,7 @@ void loop()
     /*****************************************/
     /*   Processing MANUAL MODE / SEEK MODE  */
     /*****************************************/
-    if(state == STATE_MANUAL || state == STATE_SEEK || state == STATE_SWITCH)
+    if(state == STATE_MANUAL || state == STATE_SEEK)
     {
         if(state == STATE_MANUAL) // MANUAL MODE
         {
@@ -730,7 +729,11 @@ void loop()
         if(update_frequency_view) // only updated on changes
         {
             // show current used channel of bank
-            if(channelIndex > 23)
+            if(channelIndex > 31)
+            {
+                TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("C/Race   "));
+            }
+            else if(channelIndex > 23)
             {
                 TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("F/Airwave"));
             }
@@ -866,9 +869,9 @@ void loop()
         rssi_scaled=map(rssi, 1, 100, 5, SCANNER_BAR_SIZE);
         hight = (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled);
         // clear last bar
-        TV.draw_rect((channel * 4), (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_SIZE), 3, SCANNER_BAR_SIZE , BLACK, BLACK);
+        TV.draw_rect((channel * 3), (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_SIZE), 2, SCANNER_BAR_SIZE , BLACK, BLACK);
         //  draw new bar
-        TV.draw_rect((channel * 4), hight, 3, rssi_scaled , WHITE, WHITE);
+        TV.draw_rect((channel * 3), hight, 2, rssi_scaled , WHITE, WHITE);
         // print channelname
         if(state == STATE_SCAN)
         {
@@ -879,7 +882,7 @@ void loop()
                 TV.print(writePos+10, SCANNER_LIST_Y_POS, pgm_read_word_near(channelFreqTable + channelIndex));
                 writePos += 30;
                 // mark bar
-                TV.print((channel * 4) - 3, hight - 5, pgm_read_byte_near(channelNames + channelIndex), HEX);
+                TV.print((channel * 3) - 3, hight - 5, pgm_read_byte_near(channelNames + channelIndex), HEX);
             }
         }
         // next channel
