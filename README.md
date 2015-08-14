@@ -34,6 +34,7 @@ The main goal of this fork was to add diversity to an already amazing feature se
 - New board design taking heat concerns into account.
 - SPI breakout on the advanced board.
 - Breakout rx5808 functionality into its own library.
+- Add racing band to have a total of 40 channels supported.
 
 ##Usage
 ####Screens
