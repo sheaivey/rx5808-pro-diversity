@@ -109,9 +109,9 @@ SOFTWARE.
 #define TV_X_MAX TV_COLS-1
 #define TV_SCANNER_OFFSET 14
 #define SCANNER_BAR_SIZE 52
-#define SCANNER_LIST_X_POS 4
+#define SCANNER_LIST_X_POS 54
 #define SCANNER_LIST_Y_POS 16
-#define SCANNER_MARKER_SIZE 2
+#define SCANNER_MARKER_SIZE 1
 
 #define EEPROM_ADR_STATE 0
 #define EEPROM_ADR_TUNE 1
@@ -133,7 +133,7 @@ const uint16_t channelTable[] PROGMEM = {
   0x2903,    0x290C,    0x2916,    0x291F,    0x2989,    0x2992,    0x299C,    0x2A05,    // Band B
   0x2895,    0x288B,    0x2881,    0x2817,    0x2A0F,    0x2A19,    0x2A83,    0x2A8D,    // Band E
   0x2906,    0x2910,    0x291A,    0x2984,    0x298E,    0x2998,    0x2A02,    0x2A0C,    // Band F / Airwave
-  0x281D,    0x288F,    0x2902,    0x2914,    0x2978,    0x2999,    0x2A0C,    0x2A1E     // Band R / Immersion Raceband
+  0x281D,    0x288F,    0x2902,    0x2914,    0x2978,    0x2999,    0x2A0C,    0x2A1E     // Band C / Immersion Raceband
 };
 
 // Channels with their Mhz Values
@@ -143,16 +143,16 @@ const uint16_t channelFreqTable[] PROGMEM = {
   5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866, // Band B
   5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945, // Band E
   5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880, // Band F / Airwave
-  5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917  // Band R / Immersion Raceband
+  5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917  // Band C / Immersion Raceband
 };
 
 // do coding as simple hex value to save memory.
 const uint8_t channelNames[] PROGMEM = {
-  0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8,
-  0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8,
-  0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8,
-  0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8,
-  0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8
+  0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8, // Band A
+  0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, // Band B
+  0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, // Band E
+  0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, // Band F / Airwave
+  0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8  // Band C / Immersion Raceband
 };
 
 // All Channels of the above List ordered by Mhz
@@ -185,6 +185,7 @@ uint8_t last_dip_band=255;
 uint8_t scan_start=0;
 uint8_t first_tune=1;
 uint8_t force_menu_redraw=0;
+uint16_t rssi_best=RSSI_MIN_VAL; // used for band scaner
 uint16_t rssi_min_a=0;
 uint16_t rssi_max_a=0;
 uint16_t rssi_setup_min_a=0;
@@ -455,6 +456,9 @@ void loop()
                 if(state==STATE_SCAN)
                 {
                     TV.printPGM(10, TV_Y_OFFSET,  PSTR(" BAND SCANNER"));
+                    TV.draw_line(50,1*TV_Y_GRID,50, 1*TV_Y_GRID+9,WHITE);
+                    TV.select_font(font4x6);
+                    TV.print(2, SCANNER_LIST_Y_POS, "BEST:");
                 }
                 else
                 {
@@ -478,6 +482,7 @@ void loop()
                 channel=CHANNEL_MIN;
                 writePos=SCANNER_LIST_X_POS; // reset channel list
                 channelIndex = pgm_read_byte_near(channelList + channel);
+                rssi_best=RSSI_MIN_VAL;
                 scan_start=1;
             break;
             case STATE_MANUAL: // manual mode
@@ -778,16 +783,16 @@ void loop()
         rssi_scaled=map(rssi, 1, 100, 1, SCANNER_BAR_MINI_SIZE);
         hight = (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled);
         // clear last bar
-        TV.draw_rect((channel * 4), (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 3, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
+        TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
         //  draw new bar
-        TV.draw_rect((channel * 4), hight, 3, rssi_scaled , WHITE, WHITE);
+        TV.draw_rect((channel * 3)+4, hight, 2, rssi_scaled , WHITE, WHITE);
         // set marker in spectrum to show current scanned channel
         if(channel < CHANNEL_MAX_INDEX)
         {
             // clear last square
-            TV.draw_rect((last_maker_pos * 4)+2, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  BLACK, BLACK);
+            TV.draw_rect((last_maker_pos * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  BLACK, BLACK);
             // draw next
-            TV.draw_rect((channel * 4)+2, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+            TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
             last_maker_pos=channel;
         }
         else
@@ -853,9 +858,9 @@ void loop()
         if(channel < CHANNEL_MAX_INDEX)
         {
             // clear last square
-            TV.draw_rect((last_maker_pos * 4)+2, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  BLACK, BLACK);
+            TV.draw_rect((last_maker_pos * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  BLACK, BLACK);
             // draw next
-            TV.draw_rect((channel * 4)+2, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+            TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
             last_maker_pos=channel;
         }
         else
@@ -869,27 +874,43 @@ void loop()
         rssi_scaled=map(rssi, 1, 100, 5, SCANNER_BAR_SIZE);
         hight = (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled);
         // clear last bar
-        TV.draw_rect((channel * 3), (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_SIZE), 2, SCANNER_BAR_SIZE , BLACK, BLACK);
+        TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_SIZE), 2, SCANNER_BAR_SIZE , BLACK, BLACK);
         //  draw new bar
-        TV.draw_rect((channel * 3), hight, 2, rssi_scaled , WHITE, WHITE);
+        TV.draw_rect((channel * 3)+4, hight, 2, rssi_scaled , WHITE, WHITE);
         // print channelname
         if(state == STATE_SCAN)
         {
             if (rssi > RSSI_SEEK_TRESHOLD)
             {
-                TV.draw_rect(writePos, SCANNER_LIST_Y_POS, 20, 6,  BLACK, BLACK);
-                TV.print(writePos, SCANNER_LIST_Y_POS, pgm_read_byte_near(channelNames + channelIndex), HEX);
-                TV.print(writePos+10, SCANNER_LIST_Y_POS, pgm_read_word_near(channelFreqTable + channelIndex));
-                writePos += 30;
+                if(rssi_best < rssi) {
+                    rssi_best = rssi;
+                    TV.print(22, SCANNER_LIST_Y_POS, pgm_read_byte_near(channelNames + channelIndex), HEX);
+                    TV.print(32, SCANNER_LIST_Y_POS, pgm_read_word_near(channelFreqTable + channelIndex));
+
+                }
+                else {
+                    if(writePos+10>TV_COLS-2)
+                    { // keep writing on the screen
+                        writePos=SCANNER_LIST_X_POS;
+                    }
+
+                    TV.draw_rect(writePos, SCANNER_LIST_Y_POS, 8, 6,  BLACK, BLACK);
+                    TV.print(writePos, SCANNER_LIST_Y_POS, pgm_read_byte_near(channelNames + channelIndex), HEX);
+                    writePos += 10;
+                }
+
                 // mark bar
-                TV.print((channel * 3) - 3, hight - 5, pgm_read_byte_near(channelNames + channelIndex), HEX);
+                TV.draw_rect((channel * 3) - 5, hight - 5, 8, 7,  BLACK, BLACK);
+                TV.print((channel * 3) - 4, hight - 5, pgm_read_byte_near(channelNames + channelIndex), HEX);
             }
         }
         // next channel
         if (channel < CHANNEL_MAX)
         {
             channel++;
-        } else {
+        }
+        else
+        {
             channel=CHANNEL_MIN;
             writePos=SCANNER_LIST_X_POS; // reset channel list
             if(state == STATE_RSSI_SETUP)
@@ -928,6 +949,7 @@ void loop()
             channel=CHANNEL_MIN;
             writePos=SCANNER_LIST_X_POS; // reset channel list
             scan_start=1;
+            rssi_best=RSSI_MIN_VAL;
         }
         // update index after channel change
         channelIndex = pgm_read_byte_near(channelList + channel);
