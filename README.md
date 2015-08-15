@@ -26,15 +26,16 @@ The main goal of this fork was to add diversity to an already amazing feature se
 - *(NEW)* **Quick Save** - From any home press and hold select for 1 second.
 - *(NEW)* **Diversity** - Receiver select and monitor.
 - *(NEW)* **Led Status** - Power, button pressed, active antenna.
+- *(NEW)* **Race Band** - Added band C/Immersion Race for a total of 40 supported channels.
 - *(REMOVED)* ~~**DIP mode** - Set channel by extern DIP switch~~
 
 ####In the works...
-- Auto switch video from GUI to Receiver on button press.
+- Auto switch video from GUI to Receiver on button press.d
 - OLED Version (No TVout menu system).
 - New board design taking heat concerns into account.
 - SPI breakout on the advanced board.
 - Breakout rx5808 functionality into its own library.
-- Add racing band to have a total of 40 channels supported.
+- Backward compatibility with non-diversity builds.
 
 ##Usage
 ####Screens
