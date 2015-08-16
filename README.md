@@ -5,6 +5,8 @@ The main goal of this fork was to add diversity to an already amazing feature se
 
 [![Video](http://img.youtube.com/vi/NwnQCUikqvI/0.jpg)](http://www.youtube.com/watch?v=NwnQCUikqvI)
 
+The code is also now backward compatible with the original rx5808-pro schematic minus diversity and dip switch mode. For details on updating click [here](/docs/diy-arduino-nano.md).
+
 ## Table of Contents
 1. [Features](#features)
 2. [Usage](#usage)
@@ -27,6 +29,7 @@ The main goal of this fork was to add diversity to an already amazing feature se
 - *(NEW)* **Diversity** - Receiver select and monitor.
 - *(NEW)* **Led Status** - Power, button pressed, active antenna.
 - *(NEW)* **Race Band** - Added band C/Immersion Race for a total of 40 supported channels.
+- *(NEW)* **Backward Compatibility** - Use this code with your existing setup.
 - *(REMOVED)* ~~**DIP mode** - Set channel by extern DIP switch~~
 
 ####In the works...
@@ -35,7 +38,6 @@ The main goal of this fork was to add diversity to an already amazing feature se
 - New board design taking heat concerns into account.
 - SPI breakout on the advanced board.
 - Breakout rx5808 functionality into its own library.
-- Backward compatibility with non-diversity builds.
 
 ##Usage
 ####Screens
