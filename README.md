@@ -33,10 +33,8 @@ The code is also now backward compatible with the original rx5808-pro schematic 
 - *(REMOVED)* ~~**DIP mode** - Set channel by extern DIP switch~~
 
 ####In the works...
-- Auto switch video from GUI to Receiver on button press.d
-- OLED Version (No TVout menu system).
+- Auto switch video from GUI to Receiver on button pressed
 - New board design taking heat concerns into account.
-- SPI breakout on the advanced board.
 - Breakout rx5808 functionality into its own library.
 
 ##Usage
