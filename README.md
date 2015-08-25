@@ -82,7 +82,7 @@ The major software changes are centered around the diversity menu. This required
 
 The diversity switching logic is simple.
 ```
-If Receiver A is greater than Receiver B by two precent
+If Receiver A is greater than Receiver B by two percent
   Select Receiver A
 else
   Select Receiver B.
