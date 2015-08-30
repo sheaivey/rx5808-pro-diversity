@@ -1055,8 +1055,8 @@ void wait_rssi_ready()
     // check if RSSI is stable after tune by checking the time
     uint16_t tune_time = millis()-time_of_tune;
     // module need >20ms to tune.
-    // 30 ms will to a 32 channel scan in 1 second.
-    #define MIN_TUNE_TIME 30
+    // 25 ms will to a 40 channel scan in 1 second.
+    #define MIN_TUNE_TIME 25
     if(tune_time < MIN_TUNE_TIME)
     {
         // wait until tune time is full filled
@@ -1141,7 +1141,6 @@ uint16_t readRSSI(uint8_t receiver)
 #else
 rssi=rssiA;
 #endif
-
 
     // special case for RSSI setup
     if(state==STATE_RSSI_SETUP)
