@@ -30,6 +30,7 @@ The code is also now backward compatible with the original rx5808-pro schematic 
 - *(NEW)* **Led Status** - Power, button pressed, active antenna.
 - *(NEW)* **Race Band** - Added band C/Immersion Race for a total of 40 supported channels.
 - *(NEW)* **Backward Compatibility** - Use this code with your existing setup.
+- *(NEW)* **OLED Version** - Use a 128x64 OLED Display instead of TV_OUT.
 - *(REMOVED)* ~~**DIP mode** - Set channel by extern DIP switch~~
 
 ####In the works...
@@ -74,6 +75,7 @@ For more information on specific hardware implementation:
 
 1. [DIY Simple - Arduino Nano](/docs/diy-arduino-nano.md)
 2. [DIY Advanced - Custom Board](/docs/diy-custom-board.md)
+1. [OLED Version - Arduino Nano](/docs/oled-arduino-nano.md)
 3. [rx5808 SPI modification](/docs/rx5808-spi-mod.md)
 4. [Enclosure Documentation](/docs/enclosure.md)
 

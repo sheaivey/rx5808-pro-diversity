@@ -1,8 +1,7 @@
-#DIY Simple - Arduino Nano
+#OLED Simple - Arduino Nano
 
 ####BOM
-- 4x 1k resistor
-- 1x 470 resistor
+- 3x 1k resistor
 - 3x 330 resistor
 - 2x rx5808 receiver with [spi mod](rx5808-spi-mod.md)
 - 3x LEDs
@@ -11,19 +10,19 @@
 - 1x Buzzer (optional)
 - 1x 4066 digital switch chip
 - 1x Arduino Nano 3.0 328
+- 1x OLED 128x64 display
 
 ####Schematic
-![alt text](img/rx5808-pro-diversity-schematic-simple.jpg)
+![alt text](img/rx5808-pro-diversity-schematic-simple-oled.jpg)
 
-#DIY Basic - Arduino Nano (Not Diversity)
+#OLED Basic - Arduino Nano (Not Diversity)
 You can comment out the following line to remove the diversity menu from the GUI. (Note: dip mode is still not implemented.)
 ```
 #define USE_DIVERSITY
 ```
 
 ####BOM
-- 4x 1k resistor
-- 1x 470 resistor
+- 3x 1k resistor
 - 1x 330 resistor (optional)
 - 1x rx5808 receiver with [spi mod](rx5808-spi-mod.md)
 - 1x LEDs (optional)
@@ -31,6 +30,7 @@ You can comment out the following line to remove the diversity menu from the GUI
 - 1x Toggle switch
 - 1x Buzzer (optional)
 - 1x Arduino Nano 3.0 328
+- 1x OLED 128x64 display
 
 ####Schematic
-![alt text](img/rx5808-pro-original-schematic.jpg)
+![alt text](img/rx5808-pro-original-schematic-oled.jpg)
