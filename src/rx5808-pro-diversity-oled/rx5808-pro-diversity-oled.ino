@@ -769,8 +769,8 @@ void loop()
                 #define RSSI_BAR_SIZE 108
                 rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
 
-                display.fillRect(18 + rssi_scaled, display.height()-20, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
-                display.fillRect(18, display.height()-20, rssi_scaled, 7, WHITE);
+                display.fillRect(18 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
+                display.fillRect(18, display.height()-19, rssi_scaled, 7, WHITE);
 
 
                 // read rssi B
