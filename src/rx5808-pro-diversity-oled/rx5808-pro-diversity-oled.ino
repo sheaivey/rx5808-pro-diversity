@@ -6,6 +6,7 @@
  * Refactored and GUI reworked by Marko Hoepken
  * Universal version my Marko Hoepken
  * Diversity Receiver Mode and GUI improvements by Shea Ivey
+ * OLED Version by Shea Ivey
 
 The MIT License (MIT)
 
@@ -45,7 +46,7 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 // Feature Togglels
 //#define DEBUG
-//#define USE_DIVERSITY
+#define USE_DIVERSITY
 
 
 #define spiDataPin 10
@@ -221,7 +222,8 @@ uint16_t rssi_setup_run=0;
 // SETUP ----------------------------------------------------------------------------
 void setup()
 {
-    // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
+    // Set the address of your OLED Display.
+    // 128x64 ONLY!!
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
     // init done
     display.clearDisplay();   // clears the screen and buffer
