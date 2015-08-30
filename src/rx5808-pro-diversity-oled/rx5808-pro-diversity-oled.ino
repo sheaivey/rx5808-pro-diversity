@@ -83,10 +83,6 @@ Adafruit_SSD1306 display(OLED_RESET);
 // shorter values will make it more reactive, but may lead to double trigger
 #define KEY_DEBOUNCE 200
 
-// Set you TV format (PAL = Europe = 50Hz, NTSC = INT = 60Hz)
-//#define TV_FORMAT NTSC
-#define TV_FORMAT PAL
-
 #define led 13
 // RSSI default raw range
 #define RSSI_MIN_VAL 90
@@ -117,16 +113,6 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 #define CHANNEL_MAX 39
 #define CHANNEL_MIN 0
-
-#define TV_COLS 128
-#define TV_ROWS 96
-#define TV_Y_MAX TV_ROWS-1
-#define TV_X_MAX TV_COLS-1
-#define TV_SCANNER_OFFSET 14
-#define SCANNER_BAR_SIZE 52
-#define SCANNER_LIST_X_POS 54
-#define SCANNER_LIST_Y_POS 16
-#define SCANNER_MARKER_SIZE 1
 
 #define EEPROM_ADR_STATE 0
 #define EEPROM_ADR_TUNE 1
@@ -263,7 +249,7 @@ void setup()
 
 
     // init TV system
-    char retVal = 0;//TV.begin(TV_FORMAT, TV_COLS, TV_ROWS);
+    char retVal = 0;
     // 0 if no error.
     // 1 if x is not divisable by 8.
     // 2 if y is to large (NTSC only cannot fill PAL vertical resolution by 8bit limit)
@@ -550,7 +536,6 @@ void loop()
                 display.print("5945");
                 // trigger new scan from begin
                 channel=CHANNEL_MIN;
-                writePos=SCANNER_LIST_X_POS; // reset channel list
                 channelIndex = pgm_read_byte_near(channelList + channel);
                 rssi_best=RSSI_MIN_VAL;
                 scan_start=1;
@@ -1018,7 +1003,6 @@ void loop()
         else
         {
             channel=CHANNEL_MIN;
-            writePos=SCANNER_LIST_X_POS; // reset channel list
             if(state == STATE_RSSI_SETUP)
             {
                 if(!rssi_setup_run--)
@@ -1056,7 +1040,6 @@ void loop()
             delay(KEY_DEBOUNCE); // debounce
             last_state=255; // force redraw by fake state change ;-)
             channel=CHANNEL_MIN;
-            writePos=SCANNER_LIST_X_POS; // reset channel list
             scan_start=1;
             rssi_best=RSSI_MIN_VAL;
         }
