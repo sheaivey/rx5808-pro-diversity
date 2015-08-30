@@ -3,12 +3,12 @@
 
 #Source Code
 [Enclosure Documentation](../src/rx5808-pro-diversity-oled/rx5808-pro-diversity-oled.ino)
-You will need the following Adafruit libraries: 
+You will need the following Adafruit libraries:
 ```
 Adafruit_SSD1306.h
 Adafruit_GFX.h
 ```
-#OLED Simple - Arduino Nano
+#OLED Diversity - Arduino Nano
 
 ####BOM
 - 3x 1k resistor
