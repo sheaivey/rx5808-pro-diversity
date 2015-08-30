@@ -1,6 +1,13 @@
-#OLED SCREEN SHOTS
+#OLED Screen Shots
 ![alt text](img/screens-oled.jpg)
 
+#Source Code
+[Enclosure Documentation](../src/rx5808-pro-diversity-oled/rx5808-pro-diversity-oled.ino)
+You will need the following Adafruit libraries: 
+```
+Adafruit_SSD1306.h
+Adafruit_GFX.h
+```
 #OLED Simple - Arduino Nano
 
 ####BOM
