@@ -1,3 +1,6 @@
+#OLED SCREEN SHOTS
+![alt text](img/screens-oled.jpg)
+
 #OLED Simple - Arduino Nano
 
 ####BOM
@@ -10,7 +13,7 @@
 - 1x Buzzer (optional)
 - 1x 4066 digital switch chip
 - 1x Arduino Nano 3.0 328
-- 1x OLED 128x64 display
+- 1x OLED 128x64 display (5v tollerant)
 
 ####Schematic
 ![alt text](img/rx5808-pro-diversity-schematic-simple-oled.jpg)
@@ -30,7 +33,7 @@ You can comment out the following line to remove the diversity menu from the GUI
 - 1x Toggle switch
 - 1x Buzzer (optional)
 - 1x Arduino Nano 3.0 328
-- 1x OLED 128x64 display
+- 1x OLED 128x64 display (5v tollerant)
 
 ####Schematic
 ![alt text](img/rx5808-pro-original-schematic-oled.jpg)
