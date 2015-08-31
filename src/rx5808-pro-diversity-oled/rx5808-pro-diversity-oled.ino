@@ -355,8 +355,8 @@ void loop()
             display.setTextColor(BLACK);
             display.drawRect(0, 0, display.width(), display.height(), WHITE);
             display.fillRect(0, 0, display.width(), 11, WHITE);
-            display.setCursor(50,2);
-            display.print("MENU");
+            display.setCursor(22,2);
+            display.print("MODE SELECTION");
             // selection by inverted box
             switch (menu_id)
             {
