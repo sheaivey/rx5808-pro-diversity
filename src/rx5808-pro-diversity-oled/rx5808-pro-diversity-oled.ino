@@ -598,7 +598,7 @@ void loop()
                 display.fillRect(0, 0, display.width(), 11, WHITE);
                 display.drawLine(0, 10, display.width(), 10, WHITE);
                 display.setTextColor(BLACK);
-                display.setCursor(35,2);
+                display.setCursor(25,2);
                 display.print("SAVE SETTINGS");
                 display.setTextColor(WHITE);
                 display.setCursor(5,8*1+4);
