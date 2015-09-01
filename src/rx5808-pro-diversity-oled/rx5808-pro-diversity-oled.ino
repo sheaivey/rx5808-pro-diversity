@@ -742,7 +742,6 @@ void loop()
             display.print("A:");
             display.setCursor(5,display.height()-9);
             display.print("B:");
-            display.display();
             switch (menu_id)
             {
                 case useReceiverAuto:
@@ -776,7 +775,7 @@ void loop()
                 // read rssi B
                 rssi = readRSSI(useReceiverB);
                 rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-                display.fillRect(18 + rssi_scaled, display.height()-20, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
+                display.fillRect(18 + rssi_scaled, display.height()-9, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
                 display.fillRect(18, display.height()-9, rssi_scaled, 7, WHITE);
                 display.display();
             }
