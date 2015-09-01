@@ -742,7 +742,6 @@ void loop()
             display.print("A:");
             display.setCursor(5,display.height()-9);
             display.print("B:");
-            display.display();
             switch (menu_id)
             {
                 case useReceiverAuto:
@@ -776,7 +775,7 @@ void loop()
                 // read rssi B
                 rssi = readRSSI(useReceiverB);
                 rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-                display.fillRect(18 + rssi_scaled, display.height()-20, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
+                display.fillRect(18 + rssi_scaled, display.height()-9, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
                 display.fillRect(18, display.height()-9, rssi_scaled, 7, WHITE);
                 display.display();
             }
@@ -1143,16 +1142,8 @@ uint16_t readRSSI(uint8_t receiver)
 
 #ifdef USE_DIVERSITY
     rssiB = rssiB/10; // average of 10 readings
-    // choosing which receiver RSSI to use.. do not change LED
-    if(receiver == useReceiverA)
+    if(receiver == -1) // no receiver was chosen using diversity
     {
-        rssi=rssiA;
-    }
-    else if(receiver == useReceiverB)
-    {
-        rssi=rssiB;
-    }
-    else{
         switch(diversity_mode)
         {
             case useReceiverAuto:
@@ -1162,37 +1153,31 @@ uint16_t readRSSI(uint8_t receiver)
                     if(rssiA > rssiB)
                     {
                         receiver=useReceiverA;
-                        setReceiver(useReceiverA);
                     }
                     else
                     {
                         receiver=useReceiverB;
-                        setReceiver(useReceiverB);
                     }
                 }
                 else {
                     if(digitalRead(receiverA_led) == HIGH) {
                         receiver=useReceiverA;
-                        setReceiver(useReceiverA);
                     }
                     else {
                         receiver=useReceiverB;
-                        setReceiver(useReceiverB);
                     }
                 }
                 break;
-            case useReceiverA:
-                receiver=useReceiverA;
-                setReceiver(useReceiverA);
-                break;
             case useReceiverB:
                 receiver=useReceiverB;
-                setReceiver(useReceiverB);
                 break;
+            case useReceiverA:
+            default:
+                receiver=useReceiverA;
         }
+        // set the antenna LED and switch the video
+        setReceiver(receiver);
     }
-#else
-rssi=rssiA;
 #endif
 
     // special case for RSSI setup
