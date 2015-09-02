@@ -44,6 +44,11 @@ SOFTWARE.
 #define OLED_RESET 4
 Adafruit_SSD1306 display(OLED_RESET);
 
+#if !defined SSD1306_128_64
+#error("Screen incorrect, please fix Adafruit_SSD1306.h!");
+#endif
+
+
 // Feature Togglels
 //#define DEBUG
 #define USE_DIVERSITY
@@ -210,7 +215,7 @@ void setup()
 {
     // Set the address of your OLED Display.
     // 128x64 ONLY!!
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D or 0x3C (for the 128x64)
     // init done
     display.clearDisplay();   // clears the screen and buffer
     display.display(); // show splashscreen

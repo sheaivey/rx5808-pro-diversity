@@ -49,15 +49,15 @@ SOFTWARE.
 #define rssiPinA A6
 
 #ifdef USE_DIVERSITY
-// Diversity
-#define receiverB_led A1
-#define rssiPinB A7
-#define useReceiverAuto 0
-#define useReceiverA 1
-#define useReceiverB 2
-// rssi strenth should be 2% greater than other receiver before switch.
-// this pervents flicker when rssi are close.
-#define DIVERSITY_CUTOVER 2
+    // Diversity
+    #define receiverB_led A1
+    #define rssiPinB A7
+    #define useReceiverAuto 0
+    #define useReceiverA 1
+    #define useReceiverB 2
+    // rssi strenth should be 2% greater than other receiver before switch.
+    // this pervents flicker when rssi are close.
+    #define DIVERSITY_CUTOVER 2
 #endif
 
 // this two are minimum required
