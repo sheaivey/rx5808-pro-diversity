@@ -104,10 +104,11 @@ Adafruit_SSD1306 display(OLED_RESET);
 #define STATE_SCAN 2
 #define STATE_MANUAL 3
 #ifdef USE_DIVERSITY
-#define STATE_DIVERSITY 4
+    #define STATE_DIVERSITY 4
 #endif
 #define STATE_SAVE 5
 #define STATE_RSSI_SETUP 6
+#define STATE_SCREEN_SAVER 7
 
 #define START_STATE STATE_SEEK
 #define MAX_STATE STATE_MANUAL
@@ -184,6 +185,7 @@ uint8_t man_channel = 0;
 uint8_t last_channel_index = 0;
 uint8_t force_seek=0;
 unsigned long time_of_tune = 0;        // will store last time when tuner was changed
+unsigned long time_screen_saver = 0;
 uint8_t last_maker_pos=0;
 uint8_t last_active_channel=0;
 uint8_t first_channel_marker=1;
@@ -313,7 +315,6 @@ void loop()
     /*******************/
     /*   Mode Select   */
     /*******************/
-    state_last_used=state; // save save settings
     if (digitalRead(buttonMode) == LOW) // key pressed ?
     {
         beep(50); // beep & debounce
@@ -493,8 +494,8 @@ void loop()
         switch (state)
         {
             case STATE_SCAN: // Band Scanner
+                state_last_used=state;
             case STATE_RSSI_SETUP: // RSSI setup
-
                 // draw selected
                 display.drawRect(0, 0, display.width(), display.height(), WHITE);
                 display.fillRect(0, 0, display.width(), 11, WHITE);
@@ -546,19 +547,22 @@ void loop()
                 scan_start=1;
                 display.display();
             break;
-            case STATE_MANUAL: // manual mode
             case STATE_SEEK: // seek mode
+            case STATE_MANUAL: // manual mode
+                state_last_used=state;
                 display.drawRect(0, 0, display.width(), display.height(), WHITE);
                 display.fillRect(0, 0, display.width(), 11, WHITE);
                 display.drawRect(0, 10, display.width(), 11, WHITE);
                 if (state == STATE_MANUAL)
                 {
+                    time_screen_saver=millis();
                     display.setTextColor(BLACK);
                     display.setCursor(35,2);
                     display.print("MANUAL MODE");
                 }
                 else if(state == STATE_SEEK)
                 {
+                    time_screen_saver=0; // dont show screen saver until we found a channel.
                     display.setCursor(25,2);
                     display.setTextColor(BLACK);
                     display.print("AUTO SEEK MODE");
@@ -710,6 +714,56 @@ void loop()
     /*   Processing depending of state   */
     /*************************************/
 
+
+    if(state == STATE_SCREEN_SAVER) {
+        // simple menu
+        char menu_id=diversity_mode;
+        uint8_t in_menu=1;
+
+        display.clearDisplay();
+        display.fillRect(0, 0, display.width(), display.height()-20, WHITE);
+        display.setTextSize(6);
+        display.setTextColor(BLACK);
+        display.setCursor(1,1);
+        display.print(pgm_read_byte_near(channelNames + channelIndex), HEX);
+        display.setTextSize(1);
+        display.setCursor(101,12);
+        display.setTextColor(BLACK);
+        display.print(pgm_read_word_near(channelFreqTable + channelIndex));
+        display.setCursor(0,display.height()-19);
+        display.setTextColor(WHITE);
+        display.print("A:");
+        display.setCursor(0,display.height()-9);
+        display.print("B:");
+        do{
+            delay(10); // timeout delay
+            // show signal strength
+            wait_rssi_ready();
+            if(menu_id == useReceiverAuto) {
+                readRSSI(); // update LED
+            }
+            // read rssi A
+            rssi = random(0, 100);//readRSSI(useReceiverA);
+            #define RSSI_BAR_SIZE 113
+            rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
+
+            display.fillRect(13 + rssi_scaled, display.height()-18, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
+            display.fillRect(13, display.height()-18, rssi_scaled, 7, WHITE);
+
+
+            // read rssi B
+            rssi = random(0, 100);//readRSSI(useReceiverB);
+            rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
+            display.fillRect(13 + rssi_scaled, display.height()-8, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
+            display.fillRect(13, display.height()-8, rssi_scaled, 7, WHITE);
+            display.display();
+        }
+        while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonSeek) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next button press
+        state=state_last_used;
+        time_screen_saver=0;
+        return;
+    }
+
 #ifdef USE_DIVERSITY
     if(state == STATE_DIVERSITY) {
         // simple menu
@@ -819,9 +873,11 @@ void loop()
     {
         if(state == STATE_MANUAL) // MANUAL MODE
         {
+
             // handling of keys
             if( digitalRead(buttonSeek) == LOW)        // channel UP
             {
+                time_screen_saver=millis();
                 beep(50); // beep & debounce
                 delay(KEY_DEBOUNCE); // debounce
                 channelIndex++;
@@ -833,6 +889,7 @@ void loop()
             }
             if( digitalRead(buttonDown) == LOW) // channel DOWN
             {
+                time_screen_saver=millis();
                 beep(50); // beep & debounce
                 delay(KEY_DEBOUNCE); // debounce
                 channelIndex--;
@@ -939,12 +996,14 @@ void loop()
                 display.setTextColor(BLACK,WHITE);
                 display.setCursor(25,2);
                 display.print("AUTO MODE LOCK");
+                time_screen_saver=millis();
                 if (digitalRead(buttonSeek) == LOW) // restart seek if key pressed
                 {
                     beep(50); // beep & debounce
                     delay(KEY_DEBOUNCE); // debounce
                     force_seek=1;
                     seek_found=0;
+                    time_screen_saver=0;
 
                     display.setCursor(25,2);
                     display.print("AUTO SEEK MODE");
@@ -952,6 +1011,9 @@ void loop()
             }
         }
         display.display();
+        if(time_screen_saver+5000 < millis() && time_screen_saver!=0) {
+            state = STATE_SCREEN_SAVER;
+        }
     }
     /****************************/
     /*   Processing SCAN MODE   */
