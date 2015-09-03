@@ -1232,7 +1232,7 @@ uint16_t readRSSI()
 #ifdef USE_DIVERSITY
     return readRSSI(-1);
 }
-uint16_t readRSSI(uint8_t receiver)
+uint16_t readRSSI(char receiver)
 {
 #endif
     uint16_t rssi = 0;
@@ -1243,16 +1243,57 @@ uint16_t readRSSI(uint8_t receiver)
 #endif
     for (uint8_t i = 0; i < 10; i++)
     {
-        rssiA += analogRead(rssiPinA);
+        rssiA += analogRead(rssiPinA);//random(RSSI_MIN_VAL, RSSI_MAX_VAL);//
 
 #ifdef USE_DIVERSITY
-        rssiB += analogRead(rssiPinB);
+        rssiB += analogRead(rssiPinB);//random(RSSI_MAX_VAL-100, RSSI_MAX_VAL);//
 #endif
     }
     rssiA = rssiA/10; // average of 10 readings
 
 #ifdef USE_DIVERSITY
     rssiB = rssiB/10; // average of 10 readings
+#endif
+    // special case for RSSI setup
+    if(state==STATE_RSSI_SETUP)
+    { // RSSI setup
+        if(rssiA < rssi_setup_min_a)
+        {
+            rssi_setup_min_a=rssiA;
+
+            display.setCursor(30,12);
+            display.setTextColor(WHITE,BLACK);
+            display.print( rssi_setup_min_a , DEC);
+        }
+        if(rssiA > rssi_setup_max_a)
+        {
+            rssi_setup_max_a=rssiA;
+
+            display.setCursor(85,12);
+            display.setTextColor(WHITE,BLACK);
+            display.print( rssi_setup_max_a , DEC);
+        }
+
+#ifdef USE_DIVERSITY
+        if(rssiB < rssi_setup_min_b)
+        {
+            rssi_setup_min_b=rssiB;
+        }
+        if(rssiB > rssi_setup_max_b)
+        {
+            rssi_setup_max_b=rssiB;
+        }
+#endif
+    }
+
+
+    rssiA = constrain(rssiA, rssi_min_a, rssi_max_a);    //original 90---250
+    rssiA=rssiA-rssi_min_a; // set zero point (value 0...160)
+    rssiA = map(rssiA, 0, rssi_max_a-rssi_min_a , 1, 100);   // scale from 1..100%
+#ifdef USE_DIVERSITY
+    rssiB = constrain(rssiB, rssi_min_b, rssi_max_b);    //original 90---250
+    rssiB=rssiB-rssi_min_b; // set zero point (value 0...160)
+    rssiB = map(rssiB, 0, rssi_max_a-rssi_min_b , 1, 100);   // scale from 1..100%
     if(receiver == -1) // no receiver was chosen using diversity
     {
         switch(diversity_mode)
@@ -1286,55 +1327,21 @@ uint16_t readRSSI(uint8_t receiver)
             default:
                 receiver=useReceiverA;
         }
+        active_receiver = receiver;
         // set the antenna LED and switch the video
         setReceiver(receiver);
     }
 #endif
 
-    // special case for RSSI setup
-    if(state==STATE_RSSI_SETUP)
-    { // RSSI setup
-        if(rssiA < rssi_setup_min_a)
-        {
-            rssi_setup_min_a=rssiA;
-
-            display.setCursor(30,12);
-            display.setTextColor(WHITE,BLACK);
-            display.print( rssi_setup_min_a , DEC);
-        }
-        if(rssiA > rssi_setup_max_a)
-        {
-            rssi_setup_max_a=rssiA;
-
-            display.setCursor(85,12);
-            display.setTextColor(WHITE,BLACK);
-            display.print( rssi_setup_max_a , DEC);
-        }
-
-#ifdef USE_DIVERSITY
-        if(rssiB < rssi_setup_min_b)
-        {
-            rssi_setup_min_b=rssiB;
-        }
-        if(rssiB > rssi_setup_max_b)
-        {
-            rssi_setup_max_b=rssiB;
-        }
-#endif
-    }
 #ifdef USE_DIVERSITY
     if(receiver == useReceiverA || state==STATE_RSSI_SETUP)
     {
 #endif
-        rssi = constrain(rssiA, rssi_min_a, rssi_max_a);    //original 90---250
-        rssi=rssi-rssi_min_a; // set zero point (value 0...160)
-        rssi = map(rssi, 0, rssi_max_a-rssi_min_a , 1, 100);   // scale from 1..100%
+        rssi = rssiA;
 #ifdef USE_DIVERSITY
     }
     else {
-        rssi = constrain(rssiB, rssi_min_b, rssi_max_b);    //original 90---250
-        rssi=rssi-rssi_min_b; // set zero point (value 0...160)
-        rssi = map(rssi, 0, rssi_max_a-rssi_min_b , 1, 100);   // scale from 1..100%
+        rssi = rssiB;
     }
 #endif
     return (rssi);
