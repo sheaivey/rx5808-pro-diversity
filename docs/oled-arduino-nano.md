@@ -1,6 +1,9 @@
 #OLED Screen Shots
 ![alt text](img/screens-oled.jpg)
 
+Below is a quick video demonstration the performance of the I2C OLED display.
+[![Video](http://img.youtube.com/vi/I4wZWitvHXw/0.jpg)](http://www.youtube.com/watch?v=I4wZWitvHXw)
+
 #Source Code
 [Enclosure Documentation](../src/rx5808-pro-diversity-oled/rx5808-pro-diversity-oled.ino)
 You will need the following Adafruit libraries:

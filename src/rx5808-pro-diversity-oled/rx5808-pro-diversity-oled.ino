@@ -31,8 +31,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-//#include <TVout.h>
-//#include <fontALL.h>
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 
@@ -48,6 +46,7 @@ Adafruit_SSD1306 display(OLED_RESET);
 #error("Screen incorrect, please fix Adafruit_SSD1306.h!");
 #endif
 
+#define CALL_SIGN "CALL SIGN"
 
 // Feature Togglels
 //#define DEBUG
@@ -104,10 +103,11 @@ Adafruit_SSD1306 display(OLED_RESET);
 #define STATE_SCAN 2
 #define STATE_MANUAL 3
 #ifdef USE_DIVERSITY
-#define STATE_DIVERSITY 4
+    #define STATE_DIVERSITY 4
 #endif
 #define STATE_SAVE 5
 #define STATE_RSSI_SETUP 6
+#define STATE_SCREEN_SAVER 7
 
 #define START_STATE STATE_SEEK
 #define MAX_STATE STATE_MANUAL
@@ -173,6 +173,7 @@ uint8_t rssi = 0;
 uint8_t rssi_scaled = 0;
 #ifdef USE_DIVERSITY
 uint8_t diversity_mode = useReceiverAuto;
+uint8_t active_receiver = useReceiverA;
 #endif
 uint8_t hight = 0;
 uint8_t state = START_STATE;
@@ -184,6 +185,7 @@ uint8_t man_channel = 0;
 uint8_t last_channel_index = 0;
 uint8_t force_seek=0;
 unsigned long time_of_tune = 0;        // will store last time when tuner was changed
+unsigned long time_screen_saver = 0;
 uint8_t last_maker_pos=0;
 uint8_t last_active_channel=0;
 uint8_t first_channel_marker=1;
@@ -313,9 +315,9 @@ void loop()
     /*******************/
     /*   Mode Select   */
     /*******************/
-    state_last_used=state; // save save settings
     if (digitalRead(buttonMode) == LOW) // key pressed ?
     {
+        time_screen_saver=0;
         beep(50); // beep & debounce
         delay(KEY_DEBOUNCE/2); // debounce
         beep(50); // beep & debounce
@@ -493,8 +495,8 @@ void loop()
         switch (state)
         {
             case STATE_SCAN: // Band Scanner
+                state_last_used=state;
             case STATE_RSSI_SETUP: // RSSI setup
-
                 // draw selected
                 display.drawRect(0, 0, display.width(), display.height(), WHITE);
                 display.fillRect(0, 0, display.width(), 11, WHITE);
@@ -546,19 +548,22 @@ void loop()
                 scan_start=1;
                 display.display();
             break;
-            case STATE_MANUAL: // manual mode
             case STATE_SEEK: // seek mode
+            case STATE_MANUAL: // manual mode
+                state_last_used=state;
                 display.drawRect(0, 0, display.width(), display.height(), WHITE);
                 display.fillRect(0, 0, display.width(), 11, WHITE);
                 display.drawRect(0, 10, display.width(), 11, WHITE);
                 if (state == STATE_MANUAL)
                 {
+                    time_screen_saver=millis();
                     display.setTextColor(BLACK);
                     display.setCursor(35,2);
                     display.print("MANUAL MODE");
                 }
                 else if(state == STATE_SEEK)
                 {
+                    time_screen_saver=0; // dont show screen saver until we found a channel.
                     display.setCursor(25,2);
                     display.setTextColor(BLACK);
                     display.print("AUTO SEEK MODE");
@@ -710,6 +715,100 @@ void loop()
     /*   Processing depending of state   */
     /*************************************/
 
+    if(state == STATE_SCREEN_SAVER) {
+        // simple menu
+        display.clearDisplay();
+        display.setTextSize(6);
+        display.setTextColor(WHITE);
+        display.setCursor(0,0);
+        display.print(pgm_read_byte_near(channelNames + channelIndex), HEX);
+        display.setTextSize(1);
+        display.setCursor(70,0);
+        display.print(CALL_SIGN);
+        display.setTextSize(2);
+        display.setCursor(70,28);
+        display.setTextColor(WHITE);
+        display.print(pgm_read_word_near(channelFreqTable + channelIndex));
+        display.setTextSize(1);
+#ifdef USE_DIVERSITY
+        display.setCursor(70,18);
+        switch(diversity_mode) {
+            case useReceiverAuto:
+                display.print("AUTO");
+                break;
+            case useReceiverA:
+                display.print("ANTENNA A");
+                break;
+            case useReceiverB:
+                display.print("ANTENNA B");
+                break;
+        }
+        display.setTextColor(BLACK,WHITE);
+        display.fillRect(0, display.height()-19, 7, 9, WHITE);
+        display.setCursor(1,display.height()-18);
+        display.print("A");
+        display.setTextColor(BLACK,WHITE);
+        display.fillRect(0, display.height()-9, 7, 9, WHITE);
+        display.setCursor(1,display.height()-8);
+        display.print("B");
+#endif
+        do{
+            delay(20); // timeout delay
+            // show signal strength
+            rssi = readRSSI(); // update LED
+#ifdef USE_DIVERSITY
+            // read rssi A
+            #define RSSI_BAR_SIZE 119
+            rssi_scaled=map(readRSSI(useReceiverA), 1, 100, 3, RSSI_BAR_SIZE);
+            display.fillRect(7 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
+            if(active_receiver == useReceiverA)
+            {
+                display.fillRect(7, display.height()-19, rssi_scaled, 9, WHITE);
+            }
+            else
+            {
+                display.fillRect(7, display.height()-19, (RSSI_BAR_SIZE), 9, BLACK);
+                display.drawRect(7, display.height()-19, rssi_scaled, 9, WHITE);
+            }
+
+            // read rssi B
+            rssi_scaled=map(readRSSI(useReceiverB), 1, 100, 3, RSSI_BAR_SIZE);
+            display.fillRect(7 + rssi_scaled, display.height()-9, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
+            if(active_receiver == useReceiverB)
+            {
+                display.fillRect(7, display.height()-9, rssi_scaled, 9, WHITE);
+            }
+            else
+            {
+                display.fillRect(7, display.height()-9, (RSSI_BAR_SIZE), 9, BLACK);
+                display.drawRect(7, display.height()-9, rssi_scaled, 9, WHITE);
+            }
+#else
+            display.setTextColor(BLACK);
+            display.fillRect(0, display.height()-19, 25, 19, WHITE);
+            display.setCursor(1,display.height()-13);
+            display.print("RSSI");
+            #define RSSI_BAR_SIZE 101
+            rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
+            display.fillRect(25 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 19, BLACK);
+            display.fillRect(25, display.height()-19, rssi_scaled, 19, WHITE);
+#endif
+            if(rssi < 20)
+            {
+                display.setTextColor(WHITE,BLACK);
+                display.setCursor(50,display.height()-13);
+                display.print("BAD SIGNAL");
+            }
+
+
+            display.display();
+        }
+        while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonSeek) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next button press
+        state=state_last_used;
+        time_screen_saver=0;
+        return;
+    }
+
 #ifdef USE_DIVERSITY
     if(state == STATE_DIVERSITY) {
         // simple menu
@@ -752,19 +851,16 @@ void loop()
                 case useReceiverAuto:
                     break;
                 case useReceiverA:
-                    digitalWrite(receiverA_led, HIGH);
-                    digitalWrite(receiverB_led, LOW);
+                    setReceiver(useReceiverA);
                     break;
                 case useReceiverB:
-                    digitalWrite(receiverA_led, LOW);
-                    digitalWrite(receiverB_led, HIGH);
+                    setReceiver(useReceiverA);
                     break;
             }
             do
             {
                 delay(10); // timeout delay
                 // show signal strength
-                wait_rssi_ready();
                 if(menu_id == useReceiverAuto) {
                     readRSSI(); // update LED
                 }
@@ -819,9 +915,11 @@ void loop()
     {
         if(state == STATE_MANUAL) // MANUAL MODE
         {
+
             // handling of keys
             if( digitalRead(buttonSeek) == LOW)        // channel UP
             {
+                time_screen_saver=millis();
                 beep(50); // beep & debounce
                 delay(KEY_DEBOUNCE); // debounce
                 channelIndex++;
@@ -833,6 +931,7 @@ void loop()
             }
             if( digitalRead(buttonDown) == LOW) // channel DOWN
             {
+                time_screen_saver=millis();
                 beep(50); // beep & debounce
                 delay(KEY_DEBOUNCE); // debounce
                 channelIndex--;
@@ -900,6 +999,7 @@ void loop()
         hight = (display.height()-12-rssi_scaled);
         display.fillRect((channel*3)+4,display.height()-12-14,3,14-rssi_scaled,BLACK);
         display.fillRect((channel*3)+4,hight,3,rssi_scaled,WHITE);
+        display.display();
         if(channel < CHANNEL_MAX_INDEX)
         {
             last_maker_pos=channel;
@@ -916,6 +1016,11 @@ void loop()
                 if ((!force_seek) && (rssi > RSSI_SEEK_TRESHOLD)) // check for found channel
                 {
                     seek_found=1;
+                    display.setTextColor(BLACK,WHITE);
+                    display.setCursor(25,2);
+                    display.print("AUTO MODE LOCK");
+                    time_screen_saver=millis();
+                    display.display();
                     // beep twice as notice of lock
                     beep(100);
                     delay(100);
@@ -936,22 +1041,23 @@ void loop()
             }
             else
             { // seek was successful
-                display.setTextColor(BLACK,WHITE);
-                display.setCursor(25,2);
-                display.print("AUTO MODE LOCK");
                 if (digitalRead(buttonSeek) == LOW) // restart seek if key pressed
                 {
                     beep(50); // beep & debounce
                     delay(KEY_DEBOUNCE); // debounce
                     force_seek=1;
                     seek_found=0;
-
+                    time_screen_saver=0;
+                    display.setTextColor(BLACK,WHITE);
                     display.setCursor(25,2);
                     display.print("AUTO SEEK MODE");
+                    display.display();
                 }
             }
         }
-        display.display();
+        if(time_screen_saver+5000 < millis() && time_screen_saver!=0) {
+            state = STATE_SCREEN_SAVER;
+        }
     }
     /****************************/
     /*   Processing SCAN MODE   */
@@ -1126,7 +1232,7 @@ uint16_t readRSSI()
 #ifdef USE_DIVERSITY
     return readRSSI(-1);
 }
-uint16_t readRSSI(uint8_t receiver)
+uint16_t readRSSI(char receiver)
 {
 #endif
     uint16_t rssi = 0;
@@ -1137,16 +1243,57 @@ uint16_t readRSSI(uint8_t receiver)
 #endif
     for (uint8_t i = 0; i < 10; i++)
     {
-        rssiA += analogRead(rssiPinA);
+        rssiA += analogRead(rssiPinA);//random(RSSI_MIN_VAL, RSSI_MAX_VAL);//
 
 #ifdef USE_DIVERSITY
-        rssiB += analogRead(rssiPinB);
+        rssiB += analogRead(rssiPinB);//random(RSSI_MAX_VAL-100, RSSI_MAX_VAL);//
 #endif
     }
     rssiA = rssiA/10; // average of 10 readings
 
 #ifdef USE_DIVERSITY
     rssiB = rssiB/10; // average of 10 readings
+#endif
+    // special case for RSSI setup
+    if(state==STATE_RSSI_SETUP)
+    { // RSSI setup
+        if(rssiA < rssi_setup_min_a)
+        {
+            rssi_setup_min_a=rssiA;
+
+            display.setCursor(30,12);
+            display.setTextColor(WHITE,BLACK);
+            display.print( rssi_setup_min_a , DEC);
+        }
+        if(rssiA > rssi_setup_max_a)
+        {
+            rssi_setup_max_a=rssiA;
+
+            display.setCursor(85,12);
+            display.setTextColor(WHITE,BLACK);
+            display.print( rssi_setup_max_a , DEC);
+        }
+
+#ifdef USE_DIVERSITY
+        if(rssiB < rssi_setup_min_b)
+        {
+            rssi_setup_min_b=rssiB;
+        }
+        if(rssiB > rssi_setup_max_b)
+        {
+            rssi_setup_max_b=rssiB;
+        }
+#endif
+    }
+
+
+    rssiA = constrain(rssiA, rssi_min_a, rssi_max_a);    //original 90---250
+    rssiA=rssiA-rssi_min_a; // set zero point (value 0...160)
+    rssiA = map(rssiA, 0, rssi_max_a-rssi_min_a , 1, 100);   // scale from 1..100%
+#ifdef USE_DIVERSITY
+    rssiB = constrain(rssiB, rssi_min_b, rssi_max_b);    //original 90---250
+    rssiB=rssiB-rssi_min_b; // set zero point (value 0...160)
+    rssiB = map(rssiB, 0, rssi_max_a-rssi_min_b , 1, 100);   // scale from 1..100%
     if(receiver == -1) // no receiver was chosen using diversity
     {
         switch(diversity_mode)
@@ -1180,55 +1327,21 @@ uint16_t readRSSI(uint8_t receiver)
             default:
                 receiver=useReceiverA;
         }
+        active_receiver = receiver;
         // set the antenna LED and switch the video
         setReceiver(receiver);
     }
 #endif
 
-    // special case for RSSI setup
-    if(state==STATE_RSSI_SETUP)
-    { // RSSI setup
-        if(rssiA < rssi_setup_min_a)
-        {
-            rssi_setup_min_a=rssiA;
-
-            display.setCursor(30,12);
-            display.setTextColor(WHITE,BLACK);
-            display.print( rssi_setup_min_a , DEC);
-        }
-        if(rssiA > rssi_setup_max_a)
-        {
-            rssi_setup_max_a=rssiA;
-
-            display.setCursor(85,12);
-            display.setTextColor(WHITE,BLACK);
-            display.print( rssi_setup_max_a , DEC);
-        }
-
-#ifdef USE_DIVERSITY
-        if(rssiB < rssi_setup_min_b)
-        {
-            rssi_setup_min_b=rssiB;
-        }
-        if(rssiB > rssi_setup_max_b)
-        {
-            rssi_setup_max_b=rssiB;
-        }
-#endif
-    }
 #ifdef USE_DIVERSITY
     if(receiver == useReceiverA || state==STATE_RSSI_SETUP)
     {
 #endif
-        rssi = constrain(rssiA, rssi_min_a, rssi_max_a);    //original 90---250
-        rssi=rssi-rssi_min_a; // set zero point (value 0...160)
-        rssi = map(rssi, 0, rssi_max_a-rssi_min_a , 1, 100);   // scale from 1..100%
+        rssi = rssiA;
 #ifdef USE_DIVERSITY
     }
     else {
-        rssi = constrain(rssiB, rssi_min_b, rssi_max_b);    //original 90---250
-        rssi=rssi-rssi_min_b; // set zero point (value 0...160)
-        rssi = map(rssi, 0, rssi_max_a-rssi_min_b , 1, 100);   // scale from 1..100%
+        rssi = rssiB;
     }
 #endif
     return (rssi);
