@@ -79,6 +79,8 @@ SOFTWARE.
 #define TV_FORMAT PAL
 
 #define led 13
+// number of analog rssi reads to average for the current check.
+#define RSSI_READS 50
 // RSSI default raw range
 #define RSSI_MIN_VAL 90
 #define RSSI_MAX_VAL 300
@@ -217,6 +219,7 @@ void setup()
     // IO INIT
     // initialize digital pin 13 LED as an output.
     pinMode(led, OUTPUT); // status pin for TV mode errors
+    digitalWrite(led, HIGH);
     // buzzer
     pinMode(buzzer, OUTPUT); // Feedback buzzer (active buzzer, not passive piezo)
     digitalWrite(buzzer, HIGH);
@@ -1017,8 +1020,6 @@ void loop()
             beep(UP_BEEP);
         }
     }
-    //rssi = readRSSI();
-
 }
 
 /*###########################################################################*/
@@ -1079,7 +1080,7 @@ uint16_t readRSSI(char receiver)
 #ifdef USE_DIVERSITY
     uint16_t rssiB = 0;
 #endif
-    for (uint8_t i = 0; i < 10; i++)
+    for (uint8_t i = 0; i < RSSI_READS; i++)
     {
         rssiA += analogRead(rssiPinA);//random(RSSI_MAX_VAL-100, RSSI_MAX_VAL);//
 
@@ -1087,10 +1088,10 @@ uint16_t readRSSI(char receiver)
         rssiB += analogRead(rssiPinB);//random(RSSI_MAX_VAL-100, RSSI_MAX_VAL);//
 #endif
     }
-    rssiA = rssiA/10; // average of 10 readings
+    rssiA = rssiA/RSSI_READS; // average of RSSI_READS readings
 
 #ifdef USE_DIVERSITY
-    rssiB = rssiB/10; // average of 10 readings
+    rssiB = rssiB/RSSI_READS; // average of RSSI_READS readings
 #endif
     // special case for RSSI setup
     if(state==STATE_RSSI_SETUP)
@@ -1112,10 +1113,14 @@ uint16_t readRSSI(char receiver)
         if(rssiB < rssi_setup_min_b)
         {
             rssi_setup_min_b=rssiB;
+            TV.print(50, SCANNER_LIST_Y_POS+8, "   ");
+            TV.print(50, SCANNER_LIST_Y_POS+8, rssi_setup_min_b , DEC);
         }
         if(rssiB > rssi_setup_max_b)
         {
             rssi_setup_max_b=rssiB;
+            TV.print(110, SCANNER_LIST_Y_POS+8, "   ");
+            TV.print(110, SCANNER_LIST_Y_POS+8, rssi_setup_max_b , DEC);
         }
 #endif
     }
@@ -1184,13 +1189,13 @@ uint16_t readRSSI(char receiver)
 void setReceiver(uint8_t receiver) {
     if(receiver == useReceiverA)
     {
-        digitalWrite(receiverA_led, HIGH);
         digitalWrite(receiverB_led, LOW);
+        digitalWrite(receiverA_led, HIGH);
     }
     else
     {
-        digitalWrite(receiverB_led, HIGH);
         digitalWrite(receiverA_led, LOW);
+        digitalWrite(receiverB_led, HIGH);
     }
 }
 #endif
