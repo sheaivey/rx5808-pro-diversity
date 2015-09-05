@@ -219,6 +219,7 @@ void setup()
     // IO INIT
     // initialize digital pin 13 LED as an output.
     pinMode(led, OUTPUT); // status pin for TV mode errors
+    digitalWrite(led, HIGH);
     // buzzer
     pinMode(buzzer, OUTPUT); // Feedback buzzer (active buzzer, not passive piezo)
     digitalWrite(buzzer, HIGH);
