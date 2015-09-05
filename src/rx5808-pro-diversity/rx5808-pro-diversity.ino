@@ -1189,13 +1189,13 @@ uint16_t readRSSI(char receiver)
 void setReceiver(uint8_t receiver) {
     if(receiver == useReceiverA)
     {
-        digitalWrite(receiverA_led, HIGH);
         digitalWrite(receiverB_led, LOW);
+        digitalWrite(receiverA_led, HIGH);
     }
     else
     {
-        digitalWrite(receiverB_led, HIGH);
         digitalWrite(receiverA_led, LOW);
+        digitalWrite(receiverB_led, HIGH);
     }
 }
 #endif
