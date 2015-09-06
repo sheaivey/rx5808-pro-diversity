@@ -655,6 +655,7 @@ void loop()
         char menu_id=diversity_mode;
         uint8_t in_menu=1;
         do{
+            diversity_mode = menu_id;
             TV.clear_screen();
             TV.select_font(font8x8);
             TV.draw_rect(0,0,127,95,  WHITE);
@@ -675,13 +676,9 @@ void loop()
                     break;
                 case useReceiverA:
                     TV.draw_rect(8,3+2*MENU_Y_SIZE,100,12,  WHITE, INVERT); // receiver a
-                    digitalWrite(receiverA_led, HIGH);
-                    digitalWrite(receiverB_led, LOW);
                     break;
                 case useReceiverB:
                     TV.draw_rect(8,3+3*MENU_Y_SIZE,100,12,  WHITE, INVERT); // receiver b
-                    digitalWrite(receiverA_led, LOW);
-                    digitalWrite(receiverB_led, HIGH);
                     break;
             }
             do
@@ -689,9 +686,7 @@ void loop()
                 delay(10); // timeout delay
                 // show signal strength
                 wait_rssi_ready();
-                if(menu_id == useReceiverAuto) {
-                    readRSSI(); // update LED
-                }
+                readRSSI(); // update LED
                 // read rssi A
                 rssi = readRSSI(useReceiverA);
                 #define RSSI_BAR_SIZE 100
@@ -699,7 +694,7 @@ void loop()
                 // clear last bar
                 TV.draw_rect(25+rssi_scaled, 6+4*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
                 //  draw new bar
-                TV.draw_rect(25, 6+4*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, WHITE);
+                TV.draw_rect(25, 6+4*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, (active_receiver==useReceiverA ? WHITE:BLACK));
 
                 // read rssi B
                 rssi = readRSSI(useReceiverB);
@@ -707,13 +702,12 @@ void loop()
                 // clear last bar
                 TV.draw_rect(25+rssi_scaled, 6+5*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
                 //  draw new bar
-                TV.draw_rect(25, 6+5*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, WHITE);
+                TV.draw_rect(25, 6+5*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, (active_receiver==useReceiverB ? WHITE:BLACK));
             }
             while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonSeek) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next mode or time out
 
             if(digitalRead(buttonMode) == LOW)        // channel UP
             {
-                diversity_mode = menu_id;
                 in_menu = 0; // exit menu
             }
             else if(digitalRead(buttonSeek) == LOW) {

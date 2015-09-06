@@ -818,6 +818,8 @@ void loop()
         char menu_id=diversity_mode;
         uint8_t in_menu=1;
         do{
+            diversity_mode = menu_id;
+
             display.clearDisplay();
             display.setTextSize(1);
             display.setTextColor(WHITE);
@@ -849,45 +851,46 @@ void loop()
             display.print("A:");
             display.setCursor(5,display.height()-9);
             display.print("B:");
-            switch (menu_id)
-            {
-                case useReceiverAuto:
-                    break;
-                case useReceiverA:
-                    setReceiver(useReceiverA);
-                    break;
-                case useReceiverB:
-                    setReceiver(useReceiverA);
-                    break;
-            }
             do
             {
                 delay(10); // timeout delay
                 // show signal strength
-                if(menu_id == useReceiverAuto) {
-                    readRSSI(); // update LED
-                }
+                readRSSI(); // update LED
                 // read rssi A
                 rssi = readRSSI(useReceiverA);
                 #define RSSI_BAR_SIZE 108
                 rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
 
                 display.fillRect(18 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
-                display.fillRect(18, display.height()-19, rssi_scaled, 7, WHITE);
-
+                if(active_receiver==useReceiverA)
+                {
+                    display.fillRect(18, display.height()-19, rssi_scaled, 7, WHITE);
+                }
+                else
+                {
+                    display.fillRect(18, display.height()-19, rssi_scaled, 7, BLACK);
+                    display.drawRect(18, display.height()-19, rssi_scaled, 7, WHITE);
+                }
 
                 // read rssi B
                 rssi = readRSSI(useReceiverB);
                 rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
                 display.fillRect(18 + rssi_scaled, display.height()-9, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
-                display.fillRect(18, display.height()-9, rssi_scaled, 7, WHITE);
+                if(active_receiver==useReceiverB)
+                {
+                    display.fillRect(18, display.height()-9, rssi_scaled, 7, WHITE);
+                }
+                else
+                {
+                    display.fillRect(18, display.height()-9, rssi_scaled, 7, BLACK);
+                    display.drawRect(18, display.height()-9, rssi_scaled, 7, WHITE);
+                }
                 display.display();
             }
             while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonSeek) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next mode or time out
 
             if(digitalRead(buttonMode) == LOW)        // channel UP
             {
-                diversity_mode = menu_id;
                 in_menu = 0; // exit menu
             }
             else if(digitalRead(buttonSeek) == LOW) {
