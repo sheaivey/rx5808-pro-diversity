@@ -795,9 +795,12 @@ void loop()
 #endif
             if(rssi < 20)
             {
-                display.setTextColor(WHITE,BLACK);
+                display.setTextColor((millis()%250 < 125) ? WHITE : BLACK, BLACK);
                 display.setCursor(50,display.height()-13);
-                display.print("BAD SIGNAL");
+                display.print("LOW SIGNAL");
+            }
+            else {
+                display.drawLine(50,display.height()-10,110,display.height()-10,BLACK);
             }
 
 
