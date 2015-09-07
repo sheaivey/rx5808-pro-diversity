@@ -61,7 +61,7 @@ SOFTWARE.
 #endif
 
 // this two are minimum required
-#define buttonSeek 2
+#define buttonUp 2
 #define buttonMode 3
 // optional comfort buttons
 #define buttonDown 4
@@ -169,7 +169,7 @@ const uint8_t channelList[] PROGMEM = {
   19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9, 25, 5, 35, 10, 26, 4, 11, 27, 3, 36, 12, 28, 2, 13, 29, 37, 1, 14, 30, 0, 15, 31, 38, 20, 21, 39, 22, 23
 };
 
-uint8_t channel = 0;
+char channel = 0;
 uint8_t channelIndex = 0;
 uint8_t rssi = 0;
 uint8_t rssi_scaled = 0;
@@ -186,6 +186,7 @@ uint8_t switch_count = 0;
 uint8_t man_channel = 0;
 uint8_t last_channel_index = 0;
 uint8_t force_seek=0;
+uint8_t seek_direction=1;
 unsigned long time_of_tune = 0;        // will store last time when tuner was changed
 uint8_t last_maker_pos=0;
 uint8_t last_active_channel=0;
@@ -224,8 +225,8 @@ void setup()
     pinMode(buzzer, OUTPUT); // Feedback buzzer (active buzzer, not passive piezo)
     digitalWrite(buzzer, HIGH);
     // minimum control pins
-    pinMode(buttonSeek, INPUT);
-    digitalWrite(buttonSeek, INPUT_PULLUP);
+    pinMode(buttonUp, INPUT);
+    digitalWrite(buttonUp, INPUT_PULLUP);
     pinMode(buttonMode, INPUT);
     digitalWrite(buttonMode, INPUT_PULLUP);
     // optional control
@@ -399,12 +400,12 @@ void loop()
                 break;
             } // end switch
 
-            while(digitalRead(buttonMode) == LOW || digitalRead(buttonSeek) == LOW || digitalRead(buttonDown) == LOW)
+            while(digitalRead(buttonMode) == LOW || digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW)
             {
                 // wait for MODE release
                 in_menu_time_out=50;
             }
-            while(--in_menu_time_out && ((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonSeek) == HIGH) && (digitalRead(buttonDown) == HIGH))) // wait for next key press or time out
+            while(--in_menu_time_out && ((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH))) // wait for next key press or time out
             {
                 delay(100); // timeout delay
             }
@@ -424,7 +425,7 @@ void loop()
                 /*********************/
                 /*   Menu handler   */
                 /*********************/
-                if(digitalRead(buttonSeek) == LOW) {
+                if(digitalRead(buttonUp) == LOW) {
                     menu_id++;
                 }
                 else if(digitalRead(buttonDown) == LOW) {
@@ -707,13 +708,13 @@ void loop()
                 //  draw new bar
                 TV.draw_rect(25, 6+5*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, (active_receiver==useReceiverB ? WHITE:BLACK));
             }
-            while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonSeek) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next mode or time out
+            while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next mode or time out
 
             if(digitalRead(buttonMode) == LOW)        // channel UP
             {
                 in_menu = 0; // exit menu
             }
-            else if(digitalRead(buttonSeek) == LOW) {
+            else if(digitalRead(buttonUp) == LOW) {
                 menu_id++;
             }
             else if(digitalRead(buttonDown) == LOW) {
@@ -742,7 +743,7 @@ void loop()
         if(state == STATE_MANUAL) // MANUAL MODE
         {
             // handling of keys
-            if( digitalRead(buttonSeek) == LOW)        // channel UP
+            if( digitalRead(buttonUp) == LOW)        // channel UP
             {
                 beep(50); // beep & debounce
                 delay(KEY_DEBOUNCE); // debounce
@@ -813,7 +814,7 @@ void loop()
         //  draw new bar
         TV.draw_rect(25, TV_Y_OFFSET+4*TV_Y_GRID, rssi_scaled, 4 , WHITE, WHITE);
         // print bar for spectrum
-        channel=channel_from_index(channelIndex); // get 0...31 index depending of current channel
+        channel=channel_from_index(channelIndex); // get 0...40 index depending of current channel
         #define SCANNER_BAR_MINI_SIZE 14
         rssi_scaled=map(rssi, 1, 100, 1, SCANNER_BAR_MINI_SIZE);
         hight = (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled);
@@ -851,11 +852,14 @@ void loop()
                 { // seeking itself
                     force_seek=0;
                     // next channel
-                    if (channel < CHANNEL_MAX)
+                    channel+=seek_direction;
+                    if (channel > CHANNEL_MAX)
                     {
-                        channel++;
-                    } else {
                         channel=CHANNEL_MIN;
+                    }
+                    if(channel < CHANNEL_MIN)
+                    {
+                        channel=CHANNEL_MAX;
                     }
                     channelIndex = pgm_read_byte_near(channelList + channel);
                 }
@@ -863,8 +867,14 @@ void loop()
             else
             { // seek was successful
                 TV.printPGM(10, TV_Y_OFFSET,  PSTR("AUTO MODE LOCK"));
-                if (digitalRead(buttonSeek) == LOW) // restart seek if key pressed
+                if (digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW) // restart seek if key pressed
                 {
+                    if(digitalRead(buttonUp) == LOW) {
+                        seek_direction = 1;
+                    }
+                    else {
+                        seek_direction = -1;
+                    }
                     beep(50); // beep & debounce
                     delay(KEY_DEBOUNCE); // debounce
                     force_seek=1;
@@ -979,7 +989,7 @@ void loop()
             }
         }
         // new scan possible by press scan
-        if (digitalRead(buttonSeek) == LOW) // force new full new scan
+        if (digitalRead(buttonUp) == LOW) // force new full new scan
         {
             beep(50); // beep & debounce
             delay(KEY_DEBOUNCE); // debounce
