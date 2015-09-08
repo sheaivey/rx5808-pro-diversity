@@ -82,13 +82,33 @@ For more information on specific hardware implementation:
 ##Software
 The major software changes are centered around the diversity menu. This required removing the dip switch mode from the origional project. Within the diversity menu you will find RSSI signal strength for each receiver and the ability to select which mode the receivers are operating in (Auto, Receiver A, Receiver B).
 
+The following values control how often we switch receiver in diversity auto mode.
+
+```
+// rssi strenth should be 2% greater than other receiver before switch.
+// this pervents flicker when rssi values are close and delays diversity checks counter.
+#define DIVERSITY_CUTOVER 2
+
+// number of checks a receiver needs to win over the other to switch receivers.
+// this pervents rapid switching.
+// 1 to 10 is a good range. 1 being fast switching, 10 being slow 100ms to switch.
+#define DIVERSITY_MAX_CHECKS 5
+```
+
 The diversity switching logic is simple.
 ```
 If Receiver A is greater than Receiver B by two percent
-  Select Receiver A
+  check_counter-- // receiverA win
 else
-  Select Receiver B.
+  check_counter++ // receiverB win
+
+If check_counter is zero
+    Set receiverA as active receiver.
+If check_counter is DIVERSITY_MAX_CHECKS
+    Set receiverB as active receiver.
 ```
+
+
 
 The two percent helps prevent rapid video switching when both RSSI are close in value.
 ![diversity example](docs/img/diversity-example.jpg)

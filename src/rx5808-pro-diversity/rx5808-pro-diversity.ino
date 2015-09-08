@@ -56,8 +56,12 @@ SOFTWARE.
     #define useReceiverA 1
     #define useReceiverB 2
     // rssi strenth should be 2% greater than other receiver before switch.
-    // this pervents flicker when rssi are close.
+    // this pervents flicker when rssi values are close and delays diversity checks counter.
     #define DIVERSITY_CUTOVER 2
+    // number of checks a receiver needs to win over the other to switch receivers.
+    // this pervents rapid switching.
+    // 1 to 10 is a good range. 1 being fast switching, 10 being slow 100ms to switch.
+    #define DIVERSITY_MAX_CHECKS 5
 #endif
 
 // this two are minimum required
@@ -176,6 +180,7 @@ uint8_t rssi_scaled = 0;
 #ifdef USE_DIVERSITY
 uint8_t diversity_mode = useReceiverAuto;
 uint8_t active_receiver = useReceiverA;
+char diversity_check_count = 0;
 #endif
 uint8_t hight = 0;
 uint8_t state = START_STATE;
@@ -236,11 +241,10 @@ void setup()
     digitalWrite(buttonSave, INPUT_PULLUP);
     //Receiver Setup
     pinMode(receiverA_led,OUTPUT);
-    digitalWrite(buzzer, HIGH);
 #ifdef USE_DIVERSITY
     pinMode(receiverB_led,OUTPUT);
-    digitalWrite(receiverA_led, LOW);
 #endif
+    setReceiver(useReceiverA);
 #ifdef DEBUG
     Serial.begin(115200);
     Serial.println(F("START:"));
@@ -1145,22 +1149,24 @@ uint16_t readRSSI(char receiver)
                 // select receiver
                 if((int)abs((float)(((float)rssiA - (float)rssiB) / (float)rssiB) * 100.0) >= DIVERSITY_CUTOVER)
                 {
-                    if(rssiA > rssiB)
+                    if(rssiA > rssiB && diversity_check_count > 0)
                     {
-                        receiver=useReceiverA;
+                        diversity_check_count--;
                     }
-                    else
+                    if(rssiA < rssiB && diversity_check_count < DIVERSITY_MAX_CHECKS)
                     {
-                        receiver=useReceiverB;
+                        diversity_check_count++;
+                    }
+                    // have we reached the maximum number of checks to switch receivers?
+                    if(diversity_check_count == 0 || diversity_check_count >= DIVERSITY_MAX_CHECKS) {
+                        receiver=(diversity_check_count == 0) ? useReceiverA : useReceiverB;
+                    }
+                    else {
+                        receiver=active_receiver;
                     }
                 }
                 else {
-                    if(digitalRead(receiverA_led) == HIGH) {
-                        receiver=useReceiverA;
-                    }
-                    else {
-                        receiver=useReceiverB;
-                    }
+                    receiver=active_receiver;
                 }
                 break;
             case useReceiverB:
@@ -1170,7 +1176,6 @@ uint16_t readRSSI(char receiver)
             default:
                 receiver=useReceiverA;
         }
-        active_receiver = receiver;
         // set the antenna LED and switch the video
         setReceiver(receiver);
     }
@@ -1201,6 +1206,7 @@ void setReceiver(uint8_t receiver) {
         digitalWrite(receiverA_led, LOW);
         digitalWrite(receiverB_led, HIGH);
     }
+    active_receiver = receiver;
 }
 #endif
 
