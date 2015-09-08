@@ -757,7 +757,7 @@ void loop()
         display.print("B");
 #endif
         do{
-            delay(20); // timeout delay
+            delay(10); // timeout delay
             // show signal strength
             rssi = readRSSI(); // update LED
 #ifdef USE_DIVERSITY
