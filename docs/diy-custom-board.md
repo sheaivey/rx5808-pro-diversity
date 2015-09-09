@@ -25,11 +25,7 @@ You will also need a programmer to get the Arduino bootloader onto the MEGA328 c
 ![alt text](img/rx5808-pro-diversity-schematic-board-white.jpg)
 
 ####Example
-Below is an example of the board installed into a 7" monitor. This board will also fit into a 5" monitor.
+Below is an example of the board installed into a 7" monitor. This board will also fit into a 5" monitor. There are two outputs one for the currently active rx5808 module. The other is the GUI that from the ATMEGA 328 chip.
 
-There are two outputs one for the currently active rx5808 module. The other is the GUI that from the ATMEGA 328 chip.
-
-This monitor has two inputs and a source button on the front for switching between the video signals.
-
-If your monitor does not allow for two inputs you can use a toggle switch to acheive the same result.
+This monitor has two inputs and a source button on the front for switching between the video signals. If your monitor does not allow for two inputs you can use a toggle switch to acheive the same result.
 ![alt text](img/rx5808-pro-diversity-schematic-monitor-example.jpg)
