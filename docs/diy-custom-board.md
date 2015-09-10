@@ -1,5 +1,5 @@
 #DIY Advanced - Custom Board
-This requires ordering a board from [https://oshpark.com/shared_projects/A27Y4Afh](https://oshpark.com/shared_projects/A27Y4Afh)
+This requires ordering a board from [https://oshpark.com/shared_projects/Wa2PTZE2](https://oshpark.com/shared_projects/Wa2PTZE2)
 You will also need a programmer to get the Arduino bootloader onto the MEGA328 chip. After that you can use the FTDI pins to program the chip from the Arduino IDE. (Select Arduino Pro Mini 5v 328 as the board)
 
 ####BOM
@@ -17,6 +17,8 @@ You will also need a programmer to get the Arduino bootloader onto the MEGA328 c
 - 1x SWITCH-SPDT-SMD
 - 1x 4066D SO14 digital switch chip SMD
 - 1x MEGA 328 TQFP
+- 1x Active Buzzer (Optional)
+- 1x OLED 128x64 display I2C (5v tollerant) (Optional - If you dont want to do TV_Out)
 
 ####Schematic
 ![alt text](img/rx5808-pro-diversity-schematic-eagle.jpg)
