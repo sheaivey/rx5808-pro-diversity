@@ -1,17 +1,20 @@
+#include "settings.h"
+
+#ifdef OLED_128x64_U8G_SCREENS
+#include "screens.h" // function headers
 #include <U8glib.h>
 
-#include "settings.h"
-#include "oled_128x64_display.h"
 #define BLACK 0
 #define WHITE 1
 
+
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_DEV_0|U8G_I2C_OPT_NO_ACK|U8G_I2C_OPT_FAST);	// Fast I2C / TWI
 
-display::display() {
+screens::screens() {
     reset();
 }
 
-void display::reset() {
+void screens::reset() {
     u8g.setFont(u8g_font_fixed_v0);
     u8g.setFontRefHeightExtendedText();
     u8g.setDefaultForegroundColor();
@@ -19,11 +22,11 @@ void display::reset() {
     u8g.setColorIndex(WHITE);
 }
 
-void display::flip() {
+void screens::flip() {
     u8g.setRot180();
 }
 
-void display::drawTitleBox(const char *title) {
+void screens::drawTitleBox(const char *title) {
     u8g.setColorIndex(WHITE);
     u8g.drawFrame(0, 0, u8g.getWidth(), u8g.getHeight());
     u8g.drawBox(0, 0, u8g.getWidth(), 11);
@@ -35,14 +38,14 @@ void display::drawTitleBox(const char *title) {
 }
 
 
-void display::mainMenu(int menu_id){
+void screens::mainMenu(int menu_id){
     u8g.firstPage();
     do {
       drawMainMenu(menu_id);
     } while( u8g.nextPage() );
 }
 
-void display::drawMainMenu(int menu_id) {
+void screens::drawMainMenu(int menu_id) {
     reset(); // start from fresh screen.
     drawTitleBox("MODE SELECTION");
     u8g.setColorIndex(WHITE);
@@ -69,14 +72,14 @@ void display::drawMainMenu(int menu_id) {
 }
 
 
-void display::seekMode() {
+void screens::seekMode() {
     u8g.firstPage();
     do {
       drawSeekMode();
     } while( u8g.nextPage() );
 }
 
-void display::drawSeekMode() {
+void screens::drawSeekMode() {
     reset(); // start from fresh screen.
     drawTitleBox("SEEK MODE");
     /*
@@ -118,4 +121,6 @@ void display::drawSeekMode() {
     //display.setCursor(display.width()-25,display.height()-9);
     //display.print("5945");
     */
+
 }
+#endif

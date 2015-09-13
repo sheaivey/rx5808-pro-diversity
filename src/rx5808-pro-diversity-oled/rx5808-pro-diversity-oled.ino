@@ -33,15 +33,28 @@ SOFTWARE.
 
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
-#include <U8glib.h>
 
 #include "settings.h"
 
-#define OLED_128x64_DISPLAY
-//#define TV_OUT_DISPLAY
 
-#include "display.h"
-display drawScreen;
+#ifdef OLED_128x64_ADAFRUIT_SCREENS
+    #include <Adafruit_SSD1306.h>
+    #include <Adafruit_GFX.h>
+    #include <Wire.h>
+    #include <SPI.h>
+#endif
+
+#ifdef OLED_128x64_U8G_SCREENS
+    #include <U8glib.h>
+#endif
+
+#ifdef TV_OUT_SCREENS
+    #include <TVOut.h>
+    #include <fontALL.h>
+#endif
+
+#include "screens.h"
+screens drawScreen;
 
 
 // Channels to sent to the SPI registers
@@ -127,7 +140,8 @@ uint16_t rssi_setup_run=0;
 void setup()
 {
     // rodate the display outpur 180 degrees.
-    //display.flip();
+    //drawScreen.flip();
+    drawScreen.begin();
 
     // IO INIT
     // initialize digital pin 13 LED as an output.
@@ -176,7 +190,6 @@ void setup()
             delay(100);
         }
     }
-    //TV.select_font(font4x6);
     // Setup Done - LED ON
     digitalWrite(led, HIGH);
 
@@ -375,28 +388,8 @@ void loop()
                 state_last_used=state;
             case STATE_RSSI_SETUP: // RSSI setup
                 // draw selected
-                //display.drawRect(0, 0, display.width(), display.height(), WHITE);
-                //display.fillRect(0, 0, display.width(), 11, WHITE);
-                //display.drawRect(0, 10, display.width(), 11, WHITE);
-
-                if(state==STATE_SCAN)
+                if(state==STATE_RSSI_SETUP)
                 {
-                    //display.setTextColor(BLACK);
-                    //display.setCursor(30,2);
-                    //display.print("BAND SCANNER");
-                    //display.setTextColor(WHITE);
-                    //display.setCursor(5,12);
-                    //display.print("BEST:");
-                }
-                else
-                {
-
-                    //display.setTextColor(BLACK);
-                    //display.setCursor(40,2);
-                    //display.print("RSSI SETUP");
-                    //display.setTextColor(WHITE);
-                    //display.setCursor(5,12);
-                    //display.print("Min:     Max:");
                     // prepare new setup
                     rssi_min_a=0;
                     rssi_max_a=400; // set to max range
@@ -411,19 +404,14 @@ void loop()
                     rssi_setup_run=RSSI_SETUP_RUN;
                 }
 
-                //display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
-                //display.setCursor(2,display.height()-9);
-                //display.print("5645");
-                //display.setCursor(55,display.height()-9);
-                //display.print("5800");
-                //display.setCursor(display.width()-25,display.height()-9);
-                //display.print("5945");
                 // trigger new scan from begin
                 channel=CHANNEL_MIN;
                 channelIndex = pgm_read_byte_near(channelList + channel);
                 rssi_best=RSSI_MIN_VAL;
                 scan_start=1;
-                //display.display();
+
+                drawScreen.bandScanMode(state);
+
             break;
             case STATE_SEEK: // seek mode
             case STATE_MANUAL: // manual mode
@@ -436,7 +424,7 @@ void loop()
                 {
                     time_screen_saver=0; // dont show screen saver until we found a channel.
                 }
-                drawScreen.seekMode();
+                drawScreen.seekMode(state);
 
                 first_channel_marker=1;
                 update_frequency_view=1;
@@ -951,25 +939,18 @@ void loop()
         wait_rssi_ready();
         // value must be ready
         rssi = readRSSI();
-        rssi_scaled=map(rssi, 1, 100, 1, 30);
-        //hight = (display.height()-12-rssi_scaled);
-        //display.fillRect((channel*3)+4,display.height()-12-30,3,30-rssi_scaled,BLACK);
-        //display.fillRect((channel*3)+4,hight,3,rssi_scaled,WHITE);
         if(state == STATE_SCAN)
         {
             if (rssi > RSSI_SEEK_TRESHOLD)
             {
                 if(rssi_best < rssi) {
                     rssi_best = rssi;
-                    //display.setTextColor(WHITE,BLACK);
-                    //display.setCursor(36,12);
-                    //display.print(pgm_read_byte_near(channelNames + channelIndex), HEX);
-                    //display.setCursor(52,12);
-                    //display.print(pgm_read_word_near(channelFreqTable + channelIndex));
-
                 }
             }
         }
+
+        drawScreen.updateBandScanMode(state, channel, rssi, pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex), rssi_setup_min_a, rssi_setup_max_a);
+
         // next channel
         if (channel < CHANNEL_MAX)
         {
@@ -1020,7 +1001,6 @@ void loop()
         }
         // update index after channel change
         channelIndex = pgm_read_byte_near(channelList + channel);
-        //display.display();
     }
 
     /*****************************/
@@ -1210,8 +1190,9 @@ uint16_t readRSSI(char receiver)
 #endif
     return (rssi);
 }
-#ifdef USE_DIVERSITY
 void setReceiver(uint8_t receiver) {
+
+#ifdef USE_DIVERSITY
     if(receiver == useReceiverA)
     {
         digitalWrite(receiverB_led, LOW);
@@ -1222,9 +1203,12 @@ void setReceiver(uint8_t receiver) {
         digitalWrite(receiverA_led, LOW);
         digitalWrite(receiverB_led, HIGH);
     }
+#else
+    digitalWrite(receiverA_led, HIGH);
+#endif
+
     active_receiver = receiver;
 }
-#endif
 
 // Private function: from http://arduino.cc/playground/Code/AvailableMemory
 int freeRam () {

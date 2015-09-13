@@ -2,6 +2,9 @@
 #define settings_h
 
 
+#define OLED_128x64_ADAFRUIT_SCREENS
+//#define OLED_128x64_U8G_SCREENS
+
 #define CALL_SIGN "CALL SIGN"
 
 // Feature Togglels
@@ -17,12 +20,13 @@
 #define receiverA_led A0
 #define rssiPinA A6
 
+#define useReceiverA 1
+
 #ifdef USE_DIVERSITY
     // Diversity
     #define receiverB_led A1
     #define rssiPinB A7
     #define useReceiverAuto 0
-    #define useReceiverA 1
     #define useReceiverB 2
     // rssi strenth should be 2% greater than other receiver before switch.
     // this pervents flicker when rssi values are close and delays diversity checks counter.
