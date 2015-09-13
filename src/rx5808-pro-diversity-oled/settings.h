@@ -9,7 +9,7 @@
 
 // Feature Togglels
 //#define DEBUG
-#define USE_DIVERSITY
+//#define USE_DIVERSITY
 
 
 #define spiDataPin 10
@@ -18,14 +18,14 @@
 
 // Receiver PINS
 #define receiverA_led A0
-#define rssiPinA A6
+#define rssiPinA A2
 
 #define useReceiverA 1
 
 #ifdef USE_DIVERSITY
     // Diversity
     #define receiverB_led A1
-    #define rssiPinB A7
+    #define rssiPinB A3
     #define useReceiverAuto 0
     #define useReceiverB 2
     // rssi strenth should be 2% greater than other receiver before switch.

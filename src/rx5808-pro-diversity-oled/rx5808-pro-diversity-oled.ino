@@ -95,9 +95,9 @@ char channel = 0;
 uint8_t channelIndex = 0;
 uint8_t rssi = 0;
 uint8_t rssi_scaled = 0;
+uint8_t active_receiver = useReceiverA;
 #ifdef USE_DIVERSITY
 uint8_t diversity_mode = useReceiverAuto;
-uint8_t active_receiver = useReceiverA;
 char diversity_check_count = 0;
 #endif
 uint8_t hight = 0;
@@ -411,7 +411,6 @@ void loop()
                 scan_start=1;
 
                 drawScreen.bandScanMode(state);
-
             break;
             case STATE_SEEK: // seek mode
             case STATE_MANUAL: // manual mode
@@ -554,95 +553,19 @@ void loop()
     /*************************************/
 
     if(state == STATE_SCREEN_SAVER) {
-        // simple menu
-        //display.clearDisplay();
-        //display.setTextSize(6);
-        //display.setTextColor(WHITE);
-        //display.setCursor(0,0);
-        //display.print(pgm_read_byte_near(channelNames + channelIndex), HEX);
-        //display.setTextSize(1);
-        //display.setCursor(70,0);
-        //display.print(CALL_SIGN);
-        //display.setTextSize(2);
-        //display.setCursor(70,28);
-        //display.setTextColor(WHITE);
-        //display.print(pgm_read_word_near(channelFreqTable + channelIndex));
-        //display.setTextSize(1);
 #ifdef USE_DIVERSITY
-        //display.setCursor(70,18);
-        switch(diversity_mode) {
-            case useReceiverAuto:
-                //display.print("AUTO");
-                break;
-            case useReceiverA:
-                //display.print("ANTENNA A");
-                break;
-            case useReceiverB:
-                //display.print("ANTENNA B");
-                break;
-        }
-        //display.setTextColor(BLACK,WHITE);
-        //display.fillRect(0, display.height()-19, 7, 9, WHITE);
-        //display.setCursor(1,display.height()-18);
-        //display.print("A");
-        //display.setTextColor(BLACK,WHITE);
-        //display.fillRect(0, display.height()-9, 7, 9, WHITE);
-        //display.setCursor(1,display.height()-8);
-        //display.print("B");
+        drawScreen.screenSaver(diversity_mode, pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex));
+#else
+        drawScreen.screenSaver(pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex));
 #endif
         do{
             delay(10); // timeout delay
-            // show signal strength
-            rssi = readRSSI(); // update LED
 #ifdef USE_DIVERSITY
-            // read rssi A
-            #define RSSI_BAR_SIZE 119
-            rssi_scaled=map(readRSSI(useReceiverA), 1, 100, 3, RSSI_BAR_SIZE);
-            //display.fillRect(7 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
-            if(active_receiver == useReceiverA)
-            {
-                //display.fillRect(7, display.height()-19, rssi_scaled, 9, WHITE);
-            }
-            else
-            {
-                //display.fillRect(7, display.height()-19, (RSSI_BAR_SIZE), 9, BLACK);
-                //display.drawRect(7, display.height()-19, rssi_scaled, 9, WHITE);
-            }
-
-            // read rssi B
-            rssi_scaled=map(readRSSI(useReceiverB), 1, 100, 3, RSSI_BAR_SIZE);
-            //display.fillRect(7 + rssi_scaled, display.height()-9, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
-            if(active_receiver == useReceiverB)
-            {
-                //display.fillRect(7, display.height()-9, rssi_scaled, 9, WHITE);
-            }
-            else
-            {
-                //display.fillRect(7, display.height()-9, (RSSI_BAR_SIZE), 9, BLACK);
-                //display.drawRect(7, display.height()-9, rssi_scaled, 9, WHITE);
-            }
+            drawScreen.updateScreenSaver(active_receiver, readRSSI(), readRSSI(useReceiverA), readRSSI(useReceiverB));
 #else
-            //display.setTextColor(BLACK);
-            //display.fillRect(0, display.height()-19, 25, 19, WHITE);
-            //display.setCursor(1,display.height()-13);
-            //display.print("RSSI");
-            #define RSSI_BAR_SIZE 101
-            rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-            //display.fillRect(25 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 19, BLACK);
-            //display.fillRect(25, display.height()-19, rssi_scaled, 19, WHITE);
+            drawScreen.updateScreenSaver(readRSSI());
 #endif
-            if(rssi < 20)
-            {
-                //display.setTextColor((millis()%250 < 125) ? WHITE : BLACK, BLACK);
-                //display.setCursor(50,display.height()-13);
-                //display.print("LOW SIGNAL");
-            }
-            else {
-                //display.drawLine(50,display.height()-10,110,display.height()-10,BLACK);
-            }
 
-
-            //display.display();
         }
         while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next button press
         state=state_last_used;
@@ -759,7 +682,6 @@ void loop()
     {
         if(state == STATE_MANUAL) // MANUAL MODE
         {
-
             // handling of keys
             if( digitalRead(buttonUp) == LOW)        // channel UP
             {
@@ -786,64 +708,11 @@ void loop()
                 update_frequency_view=1;
             }
         }
-        // display refresh handler
-        if(update_frequency_view) // only updated on changes
-        {
-            //display.setTextColor(WHITE,BLACK);
-            //display.setCursor(36,12);
-            // show current used channel of bank
-            if(channelIndex > 31)
-            {
-                //display.print("C/Race   ");
-            }
-            else if(channelIndex > 23)
-            {
-                //display.print("F/Airwave");
-            }
-            else if (channelIndex > 15)
-            {
-                //display.print("E        ");
-            }
-            else if (channelIndex > 7)
-            {
-                //display.print("B        ");
-            }
-            else
-            {
-                //display.print("A        ");
-            }
-
-
-            uint8_t active_channel = channelIndex%CHANNEL_BAND_SIZE; // get channel inside band
-            for(int i=0;i<8;i++) {
-                //display.fillRect(15*i+4,21,14,11,i==active_channel? WHITE:BLACK);
-                //display.setTextColor(i==active_channel? BLACK:WHITE);
-                //display.setCursor(15*i+8,23);
-                //display.print((char) (i+'1'));
-            }
-
-            first_channel_marker=0;
-            last_active_channel=active_channel;
-            // show frequence
-            //display.setCursor(101,12);
-            //display.setTextColor(WHITE,BLACK);
-            //display.print(pgm_read_word_near(channelFreqTable + channelIndex));
-        }
         // show signal strength
         wait_rssi_ready();
         rssi = readRSSI();
-        //rssi_scaled=map(rssi, 1, 100, 1, display.width()-3);
-
-        //display.fillRect(1+rssi_scaled, 33, display.width()-3-rssi_scaled, 3, BLACK);
-        //display.fillRect(1, 33, rssi_scaled, 3, WHITE);
-
         channel=channel_from_index(channelIndex); // get 0...40 index depending of current channel
-        //rssi_scaled=map(rssi, 1, 100, 1, 14);
 
-        //hight = (display.height()-12-rssi_scaled);
-        //display.fillRect((channel*3)+4,display.height()-12-14,3,14-rssi_scaled,BLACK);
-        //display.fillRect((channel*3)+4,hight,3,rssi_scaled,WHITE);
-        //display.display();
         if(channel < CHANNEL_MAX_INDEX)
         {
             last_maker_pos=channel;
@@ -860,11 +729,7 @@ void loop()
                 if ((!force_seek) && (rssi > RSSI_SEEK_TRESHOLD)) // check for found channel
                 {
                     seek_found=1;
-                    //display.setTextColor(BLACK,WHITE);
-                    //display.setCursor(25,2);
-                    //display.print("AUTO MODE LOCK");
                     time_screen_saver=millis();
-                    //display.display();
                     // beep twice as notice of lock
                     beep(100);
                     delay(100);
@@ -901,16 +766,13 @@ void loop()
                     force_seek=1;
                     seek_found=0;
                     time_screen_saver=0;
-                    //display.setTextColor(BLACK,WHITE);
-                    //display.setCursor(25,2);
-                    //display.print("AUTO SEEK MODE");
-                    //display.display();
                 }
             }
         }
         if(time_screen_saver+5000 < millis() && time_screen_saver!=0) {
             state = STATE_SCREEN_SAVER;
         }
+        drawScreen.updateSeekMode(state, channelIndex, rssi, pgm_read_word_near(channelFreqTable + channelIndex), seek_found);
     }
     /****************************/
     /*   Processing SCAN MODE   */
@@ -923,8 +785,6 @@ void loop()
             scan_start=0;
             setChannelModule(channelIndex);
             last_channel_index=channelIndex;
-            // keep time of tune to make sure that RSSI is stable when required
-            time_of_tune=millis();
         }
         // channel marker
         if(channel < CHANNEL_MAX_INDEX)
@@ -939,17 +799,23 @@ void loop()
         wait_rssi_ready();
         // value must be ready
         rssi = readRSSI();
+
+        uint8_t bestChannelName = -1;
+        uint16_t bestChannelFrequency = -1;
         if(state == STATE_SCAN)
         {
             if (rssi > RSSI_SEEK_TRESHOLD)
             {
                 if(rssi_best < rssi) {
                     rssi_best = rssi;
+                     bestChannelName = pgm_read_byte_near(channelNames + channelIndex);
+                     bestChannelFrequency = pgm_read_word_near(channelFreqTable + channelIndex);
                 }
             }
         }
 
-        drawScreen.updateBandScanMode(state, channel, rssi, pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex), rssi_setup_min_a, rssi_setup_max_a);
+        drawScreen.updateBandScanMode(state, channel, rssi, bestChannelName, bestChannelFrequency, rssi_setup_min_a, rssi_setup_max_a);
+
 
         // next channel
         if (channel < CHANNEL_MAX)
@@ -1033,10 +899,10 @@ void loop()
 
 void beep(uint16_t time)
 {
-    digitalWrite(led, LOW);
-    digitalWrite(buzzer, LOW);
-    delay(time);
     digitalWrite(led, HIGH);
+    digitalWrite(buzzer, LOW);
+    delay(time/2);
+    digitalWrite(led, LOW);
     digitalWrite(buzzer, HIGH);
 }
 
@@ -1061,7 +927,7 @@ void wait_rssi_ready()
     // check if RSSI is stable after tune by checking the time
     uint16_t tune_time = millis()-time_of_tune;
     // module need >20ms to tune.
-    // 25 ms will to a 40 channel scan in 1 second.
+    // 25 ms will do a 40 channel scan in 1 second.
     #define MIN_TUNE_TIME 25
     if(tune_time < MIN_TUNE_TIME)
     {
