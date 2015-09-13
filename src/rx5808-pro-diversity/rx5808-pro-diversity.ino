@@ -1199,20 +1199,21 @@ uint16_t readRSSI(char receiver)
 }
 
 void setReceiver(uint8_t receiver) {
+#ifdef USE_DIVERSITY
     if(receiver == useReceiverA)
     {
-#ifdef USE_DIVERSITY
-     //   digitalWrite(receiverB_led, LOW);
-#endif
+        digitalWrite(receiverB_led, LOW);
         digitalWrite(receiverA_led, HIGH);
     }
     else
     {
         digitalWrite(receiverA_led, LOW);
-#ifdef USE_DIVERSITY
-    //    digitalWrite(receiverB_led, HIGH);
-#endif
+        digitalWrite(receiverB_led, HIGH);
+
     }
+#else
+    digitalWrite(receiverA_led, HIGH);
+#endif
     active_receiver = receiver;
 }
 
@@ -1346,4 +1347,3 @@ void SERIAL_ENABLE_HIGH()
   digitalWrite(slaveSelectPin, HIGH);
   delayMicroseconds(1);
 }
-

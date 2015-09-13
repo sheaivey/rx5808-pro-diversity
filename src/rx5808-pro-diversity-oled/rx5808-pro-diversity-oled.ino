@@ -61,12 +61,12 @@ Adafruit_SSD1306 display(OLED_RESET);
 #define receiverA_led A0
 #define rssiPinA A6
 
+#define useReceiverA 1
 #ifdef USE_DIVERSITY
     // Diversity
     #define receiverB_led A1
     #define rssiPinB A7
     #define useReceiverAuto 0
-    #define useReceiverA 1
     #define useReceiverB 2
     // rssi strenth should be 2% greater than other receiver before switch.
     // this pervents flicker when rssi values are close and delays diversity checks counter.
@@ -177,9 +177,10 @@ char channel = 0;
 uint8_t channelIndex = 0;
 uint8_t rssi = 0;
 uint8_t rssi_scaled = 0;
+uint8_t active_receiver = useReceiverA;
+
 #ifdef USE_DIVERSITY
 uint8_t diversity_mode = useReceiverAuto;
-uint8_t active_receiver = useReceiverA;
 char diversity_check_count = 0;
 #endif
 uint8_t hight = 0;
@@ -1368,8 +1369,8 @@ uint16_t readRSSI(char receiver)
 #endif
     return (rssi);
 }
-#ifdef USE_DIVERSITY
 void setReceiver(uint8_t receiver) {
+#ifdef USE_DIVERSITY
     if(receiver == useReceiverA)
     {
         digitalWrite(receiverB_led, LOW);
@@ -1379,10 +1380,13 @@ void setReceiver(uint8_t receiver) {
     {
         digitalWrite(receiverA_led, LOW);
         digitalWrite(receiverB_led, HIGH);
+
     }
+#else
+    digitalWrite(receiverA_led, HIGH);
+#endif
     active_receiver = receiver;
 }
-#endif
 
 // Private function: from http://arduino.cc/playground/Code/AvailableMemory
 int freeRam () {
