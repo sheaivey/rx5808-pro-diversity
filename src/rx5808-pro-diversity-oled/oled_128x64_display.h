@@ -12,10 +12,12 @@ class display
         void reset();
         void drawMainMenu(int menu_id);
         void drawTitleBox(const char *title);
+        void drawSeekMode();
 
     public:
         display();
         void mainMenu(int menu_id);
+        void seekMode();
         void flip();
 };
 

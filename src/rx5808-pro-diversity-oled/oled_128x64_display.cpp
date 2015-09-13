@@ -67,3 +67,55 @@ void display::drawMainMenu(int menu_id) {
     u8g.setPrintPos(5,10*4+12);
     u8g.print("SAVE SETUP");
 }
+
+
+void display::seekMode() {
+    u8g.firstPage();
+    do {
+      drawSeekMode();
+    } while( u8g.nextPage() );
+}
+
+void display::drawSeekMode() {
+    reset(); // start from fresh screen.
+    drawTitleBox("SEEK MODE");
+    /*
+    //display.drawRect(0, 0, display.width(), display.height(), WHITE);
+    //display.fillRect(0, 0, display.width(), 11, WHITE);
+    //display.drawRect(0, 10, display.width(), 11, WHITE);
+    if (state == STATE_MANUAL)
+    {
+        time_screen_saver=millis();
+        //display.setTextColor(BLACK);
+        //display.setCursor(35,2);
+        //display.print("MANUAL MODE");
+    }
+    else if(state == STATE_SEEK)
+    {
+        time_screen_saver=0; // dont show screen saver until we found a channel.
+        //display.setCursor(25,2);
+        //display.setTextColor(BLACK);
+        //display.print("AUTO SEEK MODE");
+    }
+    //display.setTextColor(WHITE);
+
+    //display.drawLine(0, 32, display.width(), 32, WHITE);
+    //display.setCursor(5,12);
+    //display.drawLine(97,11,97,20,WHITE);
+    //display.print("BAND:");
+    for(int i=0;i<8;i++) {
+        //display.setCursor(15*i+8,23);
+        //display.print((char) (i+'1'));
+    }
+    //display.drawLine(0, 36, display.width(), 36, WHITE);
+
+
+    //display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
+    //display.setCursor(2,display.height()-9);
+    //display.print("5645");
+    //display.setCursor(55,display.height()-9);
+    //display.print("5800");
+    //display.setCursor(display.width()-25,display.height()-9);
+    //display.print("5945");
+    */
+}
