@@ -25,7 +25,7 @@ class screens
 
         // SEEK & MANUAL MODE
         void drawSeekMode(uint8_t state);
-        void drawUpdateSeekMode(uint8_t state, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked);
+        void drawUpdateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked);
 
         // BAND SCAN
         void drawBandScanMode(uint8_t state);
@@ -50,7 +50,7 @@ class screens
 
         // SEEK & MANUAL MODE
         void seekMode(uint8_t state); // seek and manual mode
-        void updateSeekMode(uint8_t state, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked); // seek and manual mode
+        void updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked); // seek and manual mode
 
         // BAND SCAN
         void bandScanMode(uint8_t state);

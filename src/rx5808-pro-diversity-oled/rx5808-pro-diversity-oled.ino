@@ -721,6 +721,7 @@ void loop()
         {
           //  No action on last position to keep frame intact
         }
+
         // handling for seek mode after screen and RSSI has been fully processed
         if(state == STATE_SEEK) //
         { // SEEK MODE
@@ -772,7 +773,9 @@ void loop()
         if(time_screen_saver+5000 < millis() && time_screen_saver!=0) {
             state = STATE_SCREEN_SAVER;
         }
-        drawScreen.updateSeekMode(state, channelIndex, rssi, pgm_read_word_near(channelFreqTable + channelIndex), seek_found);
+
+        drawScreen.updateSeekMode(state, channelIndex, channel, rssi, pgm_read_word_near(channelFreqTable + channelIndex), seek_found);
+
     }
     /****************************/
     /*   Processing SCAN MODE   */

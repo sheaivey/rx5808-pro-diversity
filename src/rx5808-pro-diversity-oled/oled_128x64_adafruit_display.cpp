@@ -120,31 +120,31 @@ void screens::drawSeekMode(uint8_t state) {
     display.setCursor(display.width()-25,display.height()-9);
     display.print("5945");
 }
-void screens::updateSeekMode(uint8_t state, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked) {
-    drawUpdateSeekMode(state, channel, rssi, channelFrequency, locked);
+void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked) {
+    drawUpdateSeekMode(state, channelIndex, channel, rssi, channelFrequency, locked);
     display.display();
 }
 
-void screens::drawUpdateSeekMode(uint8_t state, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked) {
+void screens::drawUpdateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked) {
     // display refresh handler
-    if(channel != last_channel) // only updated on changes
+    if(channelIndex != last_channel) // only updated on changes
     {
         display.setTextColor(WHITE,BLACK);
         display.setCursor(36,12);
         // show current used channel of bank
-        if(channel > 31)
+        if(channelIndex > 31)
         {
             display.print("C/Race   ");
         }
-        else if(channel > 23)
+        else if(channelIndex > 23)
         {
             display.print("F/Airwave");
         }
-        else if (channel > 15)
+        else if (channelIndex > 15)
         {
             display.print("E        ");
         }
-        else if (channel > 7)
+        else if (channelIndex > 7)
         {
             display.print("B        ");
         }
@@ -153,7 +153,7 @@ void screens::drawUpdateSeekMode(uint8_t state, uint8_t channel, uint8_t rssi, u
             display.print("A        ");
         }
 
-        uint8_t active_channel = channel%CHANNEL_BAND_SIZE; // get channel inside band
+        uint8_t active_channel = channelIndex%CHANNEL_BAND_SIZE; // get channel inside band
         for(int i=0;i<8;i++) {
             display.fillRect(15*i+4,21,14,11,i==active_channel? WHITE:BLACK);
             display.setTextColor(i==active_channel? BLACK:WHITE);
