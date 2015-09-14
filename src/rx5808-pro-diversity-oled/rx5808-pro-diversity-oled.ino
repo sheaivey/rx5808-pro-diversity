@@ -48,14 +48,13 @@ SOFTWARE.
     #include <U8glib.h>
 #endif
 
-#ifdef TV_OUT_SCREENS
-    #include <TVOut.h>
+#ifdef TVOUT_SCREENS
+    #include <TVout.h>
     #include <fontALL.h>
 #endif
 
 #include "screens.h"
 screens drawScreen;
-
 
 // Channels to sent to the SPI registers
 const uint16_t channelTable[] PROGMEM = {
@@ -139,10 +138,6 @@ uint16_t rssi_setup_run=0;
 // SETUP ----------------------------------------------------------------------------
 void setup()
 {
-    // rodate the display outpur 180 degrees.
-    //drawScreen.flip();
-    drawScreen.begin();
-
     // IO INIT
     // initialize digital pin 13 LED as an output.
     pinMode(led, OUTPUT); // status pin for TV mode errors
@@ -177,19 +172,21 @@ void setup()
     // tune to first channel
 
 
-    // init TV system
-    char retVal = 0;
+    // Init Display
     // 0 if no error.
     // 1 if x is not divisable by 8.
     // 2 if y is to large (NTSC only cannot fill PAL vertical resolution by 8bit limit)
     // 4 if there is not enough memory for the frame buffer.
-    if (retVal > 0) {
+    if (drawScreen.begin() > 0) {
         // on Error flicker LED
         while (true) { // stay in ERROR for ever
             digitalWrite(led, !digitalRead(led));
             delay(100);
         }
     }
+    // rodate the display outpur 180 degrees.
+    // drawScreen.flip(); // OLED only!
+
     // Setup Done - LED ON
     digitalWrite(led, HIGH);
 
@@ -440,67 +437,7 @@ void loop()
 #ifdef USE_DIVERSITY
                 EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
 #endif
-
-                //display.drawRect(0, 0, display.width(), display.height(), WHITE);
-                //display.fillRect(0, 0, display.width(), 11, WHITE);
-                //display.drawLine(0, 10, display.width(), 10, WHITE);
-                //display.setTextColor(BLACK);
-                //display.setCursor(25,2);
-                //display.print("SAVE SETTINGS");
-                //display.setTextColor(WHITE);
-                //display.setCursor(5,8*1+4);
-                //display.print("MODE:");
-                //display.setCursor(38,8*1+4);
-                switch (state_last_used)
-                {
-                    case STATE_SCAN: // Band Scanner
-                        //display.print("BAND SCANNER");
-                    break;
-                    case STATE_MANUAL: // manual mode
-                        //display.print("MANUAL");
-                    break;
-                    case STATE_SEEK: // seek mode
-                        //display.print("AUTO SEEK");
-                    break;
-                }
-
-                //display.setCursor(5,8*2+4);
-                //display.print("BAND:");
-                //display.setCursor(38,8*2+4);
-                // print band
-                if(channelIndex > 31)
-                {
-                    //display.print("C/Race");
-                }
-                else if(channelIndex > 23)
-                {
-                    //display.print("F/Airwave");
-                }
-                else if (channelIndex > 15)
-                {
-                    //display.print("E");
-                }
-                else if (channelIndex > 7)
-                {
-                    //display.print("B");
-                }
-                else
-                {
-                    //display.print("A");
-                }
-
-                //display.setCursor(5,8*3+4);
-                //display.print("CHAN:");
-                //display.setCursor(38,8*3+4);
-                uint8_t active_channel = channelIndex%CHANNEL_BAND_SIZE+1; // get channel inside band
-                //display.print(active_channel,DEC);
-                //display.setCursor(5,8*4+4);
-                //display.print("FREQ:     GHz");
-                //display.setCursor(38,8*4+4);
-                //display.print(pgm_read_word_near(channelFreqTable + channelIndex));
-                //display.setCursor(35,8*5+4);
-                //display.print("-- SAVED --");
-                //display.display();
+                drawScreen.save(state_last_used, channelIndex, pgm_read_word_near(channelFreqTable + channelIndex));
                 uint8_t loop=0;
                 for (loop=0;loop<5;loop++)
                 {
@@ -508,18 +445,12 @@ void loop()
                     delay(100);
                 }
                 delay(1000);
-                //display.setCursor(5,8*6+4);
-                //display.print("HOLD MODE RSSI SETUP");
-                //display.display();
+                drawScreen.updateSave("HOLD MODE RSSI SETUP");
                 delay(1000);
                 delay(1000);
                 if (digitalRead(buttonMode) == LOW) // to RSSI setup
                 {
-                    //display.setCursor(5,8*6+4);
-
-                    //display.setTextColor(WHITE,BLACK);
-                    //display.print("ENTERING RSSI SETUP ");
-                    //display.display();
+                    drawScreen.updateSave("ENTERING RSSI SETUP ");
                     uint8_t loop=0;
                     for (loop=0;loop<10;loop++)
                     {
@@ -580,73 +511,12 @@ void loop()
         uint8_t in_menu=1;
         do{
             diversity_mode = menu_id;
-
-            //display.clearDisplay();
-            //display.setTextSize(1);
-            //display.setTextColor(WHITE);
-            //display.drawRect(0, 0, display.width(), display.height(), WHITE);
-            //display.fillRect(0, 0, display.width(), 11, WHITE);
-            //display.drawLine(0, 10, display.width(), 10, WHITE);
-            //display.setTextColor(BLACK);
-            //display.setCursor(40,2);
-            //display.print("DIVERSITY");
-
-            //selected
-            //display.fillRect(0, 10*menu_id+12, display.width(), 11, WHITE);
-
-            //display.setTextColor(menu_id == useReceiverAuto ? BLACK : WHITE);
-            //display.setCursor(5,11*1+2);
-            //display.print("AUTO");
-
-            //display.setTextColor(menu_id == useReceiverA ? BLACK : WHITE);
-            //display.setCursor(5,11*2+2);
-            //display.print("RECEIVER A");
-            //display.setTextColor(menu_id == useReceiverB ? BLACK : WHITE);
-            //display.setCursor(5,11*3+2);
-            //display.print("RECEIVER B");
-
-            // RSSI Strength
-            //display.setTextColor(WHITE);
-            //display.drawRect(0, display.height()-21, display.width(), 11, WHITE);
-            //display.setCursor(5,display.height()-19);
-            //display.print("A:");
-            //display.setCursor(5,display.height()-9);
-            //display.print("B:");
+            drawScreen.diversity(diversity_mode);
             do
             {
                 delay(10); // timeout delay
-                // show signal strength
-                readRSSI(); // update LED
-                // read rssi A
-                rssi = readRSSI(useReceiverA);
-                #define RSSI_BAR_SIZE 108
-                rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-
-                //display.fillRect(18 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
-                if(active_receiver==useReceiverA)
-                {
-                    //display.fillRect(18, display.height()-19, rssi_scaled, 7, WHITE);
-                }
-                else
-                {
-                    //display.fillRect(18, display.height()-19, rssi_scaled, 7, BLACK);
-                    //display.drawRect(18, display.height()-19, rssi_scaled, 7, WHITE);
-                }
-
-                // read rssi B
-                rssi = readRSSI(useReceiverB);
-                rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-                //display.fillRect(18 + rssi_scaled, display.height()-9, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
-                if(active_receiver==useReceiverB)
-                {
-                    //display.fillRect(18, display.height()-9, rssi_scaled, 7, WHITE);
-                }
-                else
-                {
-                    //display.fillRect(18, display.height()-9, rssi_scaled, 7, BLACK);
-                    //display.drawRect(18, display.height()-9, rssi_scaled, 7, WHITE);
-                }
-                //display.display();
+                readRSSI();
+                drawScreen.updateDiversity(active_receiver, readRSSI(useReceiverA), readRSSI(useReceiverB));
             }
             while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next mode or time out
 
@@ -817,8 +687,7 @@ void loop()
             }
         }
 
-        drawScreen.updateBandScanMode(state, channel, rssi, bestChannelName, bestChannelFrequency, rssi_setup_min_a, rssi_setup_max_a);
-
+        drawScreen.updateBandScanMode((state == STATE_RSSI_SETUP), channel, rssi, bestChannelName, bestChannelFrequency, rssi_setup_min_a, rssi_setup_max_a);
 
         // next channel
         if (channel < CHANNEL_MAX)
@@ -972,18 +841,10 @@ uint16_t readRSSI(char receiver)
         if(rssiA < rssi_setup_min_a)
         {
             rssi_setup_min_a=rssiA;
-
-            //display.setCursor(30,12);
-            //display.setTextColor(WHITE,BLACK);
-            //display.print( rssi_setup_min_a , DEC);
         }
         if(rssiA > rssi_setup_max_a)
         {
             rssi_setup_max_a=rssiA;
-
-            //display.setCursor(85,12);
-            //display.setTextColor(WHITE,BLACK);
-            //display.print( rssi_setup_max_a , DEC);
         }
 
 #ifdef USE_DIVERSITY
@@ -1060,7 +921,6 @@ uint16_t readRSSI(char receiver)
     return (rssi);
 }
 void setReceiver(uint8_t receiver) {
-
 #ifdef USE_DIVERSITY
     if(receiver == useReceiverA)
     {

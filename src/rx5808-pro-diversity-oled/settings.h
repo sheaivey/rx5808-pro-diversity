@@ -2,14 +2,15 @@
 #define settings_h
 
 
-#define OLED_128x64_ADAFRUIT_SCREENS
-//#define OLED_128x64_U8G_SCREENS
+//#define OLED_128x64_ADAFRUIT_SCREENS
+//#define TVOUT_SCREENS
+#define OLED_128x64_U8G_SCREENS
 
 #define CALL_SIGN "CALL SIGN"
 
 // Feature Togglels
 //#define DEBUG
-//#define USE_DIVERSITY
+#define USE_DIVERSITY
 
 
 #define spiDataPin 10
