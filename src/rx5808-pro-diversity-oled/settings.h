@@ -1,11 +1,13 @@
 #ifndef settings_h
 #define settings_h
 
-
-//#define OLED_128x64_ADAFRUIT_SCREENS
+// Choose the display you will be using
+#define OLED_128x64_ADAFRUIT_SCREENS
 //#define TVOUT_SCREENS
-#define OLED_128x64_U8G_SCREENS
+// u8glib has performance issues.
+//#define OLED_128x64_U8G_SCREENS
 
+// this will be displayed on the screensaver.
 #define CALL_SIGN "CALL SIGN"
 
 // Feature Togglels
