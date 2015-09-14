@@ -37,21 +37,21 @@ SOFTWARE.
 #include "settings.h"
 
 // uncomment depending on the display you are using.
-// this is an issue with the arduino preprocessor 
+// this is an issue with the arduino preprocessor
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
-    #include <Adafruit_SSD1306.h>
-    #include <Adafruit_GFX.h>
-    #include <Wire.h>
-    #include <SPI.h>
+//    #include <Adafruit_SSD1306.h>
+//    #include <Adafruit_GFX.h>
+//    #include <Wire.h>
+//    #include <SPI.h>
+#endif
+
+#ifdef TVOUT_SCREENS
+    #include <TVout.h>
+    #include <fontALL.h>
 #endif
 
 #ifdef OLED_128x64_U8G_SCREENS
 //    #include <U8glib.h>
-#endif
-
-#ifdef TVOUT_SCREENS
-//    #include <TVout.h>
-//    #include <fontALL.h>
 #endif
 
 #include "screens.h"

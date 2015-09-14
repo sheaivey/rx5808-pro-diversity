@@ -2,8 +2,8 @@
 #define settings_h
 
 // Choose the display you will be using
-#define OLED_128x64_ADAFRUIT_SCREENS
-//#define TVOUT_SCREENS
+//#define OLED_128x64_ADAFRUIT_SCREENS
+#define TVOUT_SCREENS
 // u8glib has performance issues.
 //#define OLED_128x64_U8G_SCREENS
 
