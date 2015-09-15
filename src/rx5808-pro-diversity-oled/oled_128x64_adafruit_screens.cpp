@@ -7,11 +7,17 @@
 #include <Wire.h>
 #include <SPI.h>
 
+// New version of PSTR that uses a temp buffer and returns char *
+// by Shea Ivey
+#define PSTR2(x) PSTRtoBuffer_P(PSTR(x))
+char PSTR2_BUFFER[30]; // adjust depending on need.
+char *PSTRtoBuffer_P(PGM_P str) { uint8_t c='\0', i=0; for(; (c = pgm_read_byte(str)) && i < sizeof(PSTR2_BUFFER); str++, i++) PSTR2_BUFFER[i]=c;PSTR2_BUFFER[i]=c; return PSTR2_BUFFER;}
+
 #define OLED_RESET 4
 Adafruit_SSD1306 display(OLED_RESET);
 
 #if !defined SSD1306_128_64
-#error("Screen incorrect, please fix Adafruit_SSD1306.h!");
+    #error("Screen size incorrect, please fix Adafruit_SSD1306.h!");
 #endif
 
 screens::screens() {
@@ -53,28 +59,28 @@ void screens::drawTitleBox(const char *title) {
 
 void screens::mainMenu(uint8_t menu_id) {
     reset(); // start from fresh screen.
-    drawTitleBox("MODE SELECTION");
+    drawTitleBox(PSTR2("MODE SELECTION"));
 
     display.fillRect(0, 10*menu_id+12, display.width(), 10,WHITE);
 
     display.setTextColor(menu_id == 0 ? BLACK : WHITE);
     display.setCursor(5,10*0+13);
-    display.print("AUTO SEARCH");
+    display.print(PSTR2("AUTO SEARCH"));
     display.setTextColor(menu_id == 1 ? BLACK : WHITE);
     display.setCursor(5,10*1+13);
-    display.print("BAND SCANNER");
+    display.print(PSTR2("BAND SCANNER"));
     display.setTextColor(menu_id == 2 ? BLACK : WHITE);
     display.setCursor(5,10*2+13);
-    display.print("MANUAL MODE");
+    display.print(PSTR2("MANUAL MODE"));
 
 #ifdef USE_DIVERSITY
     display.setTextColor(menu_id == 3 ? BLACK : WHITE);
     display.setCursor(5,10*3+13);
-    display.print("DIVERSITY");
+    display.print(PSTR2("DIVERSITY"));
 #endif
     display.setTextColor(menu_id == 4 ? BLACK : WHITE);
     display.setCursor(5,10*4+13);
-    display.print("SAVE SETUP");
+    display.print(PSTR2("SAVE SETUP"));
 
     display.display();
 }
@@ -84,18 +90,18 @@ void screens::seekMode(uint8_t state) {
     reset(); // start from fresh screen.
     if (state == STATE_MANUAL)
     {
-        drawTitleBox("MANUAL MODE");
+        drawTitleBox(PSTR2("MANUAL MODE"));
     }
     else if(state == STATE_SEEK)
     {
-        drawTitleBox("AUTO SEEK MODE");
+        drawTitleBox(PSTR2("AUTO SEEK MODE"));
     }
     display.setTextColor(WHITE);
     display.drawLine(0, 20, display.width(), 20, WHITE);
     display.drawLine(0, 32, display.width(), 32, WHITE);
     display.setCursor(5,12);
     display.drawLine(97,11,97,20,WHITE);
-    display.print("BAND:");
+    display.print(PSTR2("BAND:"));
     for(uint16_t i=0;i<8;i++) {
         display.setCursor(15*i+8,23);
         display.print((char) (i+'1'));
@@ -103,11 +109,11 @@ void screens::seekMode(uint8_t state) {
     display.drawLine(0, 36, display.width(), 36, WHITE);
     display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
     display.setCursor(2,display.height()-9);
-    display.print("5645");
+    display.print(PSTR2("5645"));
     display.setCursor(55,display.height()-9);
-    display.print("5800");
+    display.print(PSTR2("5800"));
     display.setCursor(display.width()-25,display.height()-9);
-    display.print("5945");
+    display.print(PSTR2("5945"));
     display.display();
 }
 
@@ -120,23 +126,23 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
         // show current used channel of bank
         if(channelIndex > 31)
         {
-            display.print("C/Race   ");
+            display.print(PSTR2("C/Race   "));
         }
         else if(channelIndex > 23)
         {
-            display.print("F/Airwave");
+            display.print(PSTR2("F/Airwave"));
         }
         else if (channelIndex > 15)
         {
-            display.print("E        ");
+            display.print(PSTR2("E        "));
         }
         else if (channelIndex > 7)
         {
-            display.print("B        ");
+            display.print(PSTR2("B        "));
         }
         else
         {
-            display.print("A        ");
+            display.print(PSTR2("A        "));
         }
 
         uint8_t active_channel = channelIndex%CHANNEL_BAND_SIZE; // get channel inside band
@@ -169,13 +175,13 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
         {
             display.setTextColor(BLACK,WHITE);
             display.setCursor(((display.width()-14*6)/2),2);
-            display.print("AUTO MODE LOCK");
+            display.print(PSTR2("AUTO MODE LOCK"));
         }
         else
         {
             display.setTextColor(BLACK,WHITE);
             display.setCursor(((display.width()-14*6)/2),2);
-            display.print("AUTO SEEK MODE");
+            display.print(PSTR2("AUTO SEEK MODE"));
         }
     }
 
@@ -187,25 +193,25 @@ void screens::bandScanMode(uint8_t state) {
     reset(); // start from fresh screen.
     if(state==STATE_SCAN)
     {
-        drawTitleBox("BAND SCANNER");
+        drawTitleBox(PSTR2("BAND SCANNER"));
         display.setCursor(5,12);
-        display.print("BEST:");
+        display.print(PSTR2("BEST:"));
     }
     else
     {
-        drawTitleBox("RSSI SETUP");
+        drawTitleBox(PSTR2("RSSI SETUP"));
         display.setCursor(5,12);
-        display.print("Min:     Max:");
+        display.print(PSTR2("Min:     Max:"));
     }
     display.drawLine(0, 20, display.width(), 20, WHITE);
 
     display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
     display.setCursor(2,display.height()-9);
-    display.print("5645");
+    display.print(PSTR2("5645"));
     display.setCursor(55,display.height()-9);
-    display.print("5800");
+    display.print(PSTR2("5800"));
     display.setCursor(display.width()-25,display.height()-9);
-    display.print("5945");
+    display.print(PSTR2("5945"));
     display.display();
 }
 
@@ -214,15 +220,16 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     uint16_t hight = (display.height()-12-rssi);
     display.fillRect((channel*3)+4,display.height()-12-30,3,30-rssi,BLACK);
     display.fillRect((channel*3)+4,hight,3,rssi,WHITE);
-
-    if(channelName < 255) {
-        display.setTextColor(WHITE,BLACK);
-        display.setCursor(36,12);
-        display.print(channelName, HEX);
-        display.setCursor(52,12);
-        display.print(channelFrequency);
+    if(!in_setup) {
+        if(channelName < 255) {
+            display.setTextColor(WHITE,BLACK);
+            display.setCursor(36,12);
+            display.print(channelName, HEX);
+            display.setCursor(52,12);
+            display.print(channelFrequency);
+        }
     }
-    if(in_setup) {
+    else {
         display.setCursor(30,12);
         display.setTextColor(WHITE,BLACK);
         display.print( rssi_setup_min_a , DEC);
@@ -255,13 +262,13 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
     display.setCursor(70,18);
     switch(diversity_mode) {
         case useReceiverAuto:
-            display.print("AUTO");
+            display.print(PSTR2("AUTO"));
             break;
         case useReceiverA:
-            display.print("ANTENNA A");
+            display.print(PSTR2("ANTENNA A"));
             break;
         case useReceiverB:
-            display.print("ANTENNA B");
+            display.print(PSTR2("ANTENNA B"));
             break;
     }
     display.setTextColor(BLACK,WHITE);
@@ -311,7 +318,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
     display.setTextColor(BLACK);
     display.fillRect(0, display.height()-19, 25, 19, WHITE);
     display.setCursor(1,display.height()-13);
-    display.print("RSSI");
+    display.print(PSTR2("RSSI"));
     #define RSSI_BAR_SIZE 101
     uint8_t rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
     display.fillRect(25 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 19, BLACK);
@@ -321,7 +328,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
     {
         display.setTextColor((millis()%250 < 125) ? WHITE : BLACK, BLACK);
         display.setCursor(50,display.height()-13);
-        display.print("LOW SIGNAL");
+        display.print(PSTR2("LOW SIGNAL"));
     }
 #ifdef USE_DIVERSITY
     else {
@@ -335,21 +342,21 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
 void screens::diversity(uint8_t diversity_mode) {
 
     reset();
-    drawTitleBox("DIVERSITY");
+    drawTitleBox(PSTR2("DIVERSITY"));
 
     //selected
     display.fillRect(0, 10*diversity_mode+12, display.width(), 10, WHITE);
 
     display.setTextColor(diversity_mode == useReceiverAuto ? BLACK : WHITE);
     display.setCursor(5,10*1+3);
-    display.print("AUTO");
+    display.print(PSTR2("AUTO"));
 
     display.setTextColor(diversity_mode == useReceiverA ? BLACK : WHITE);
     display.setCursor(5,10*2+3);
-    display.print("RECEIVER A");
+    display.print(PSTR2("RECEIVER A"));
     display.setTextColor(diversity_mode == useReceiverB ? BLACK : WHITE);
     display.setCursor(5,10*3+3);
-    display.print("RECEIVER B");
+    display.print(PSTR2("RECEIVER B"));
 
     // RSSI Strength
     display.setTextColor(WHITE);
@@ -393,61 +400,61 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
 
 void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency) {
     reset();
-    drawTitleBox("SAVE SETTINGS");
+    drawTitleBox(PSTR2("SAVE SETTINGS"));
 
     display.setTextColor(WHITE);
     display.setCursor(5,8*1+4);
-    display.print("MODE:");
+    display.print(PSTR2("MODE:"));
     display.setCursor(38,8*1+4);
     switch (mode)
     {
         case STATE_SCAN: // Band Scanner
-            display.print("BAND SCANNER");
+            display.print(PSTR2("BAND SCANNER"));
         break;
         case STATE_MANUAL: // manual mode
-            display.print("MANUAL");
+            display.print(PSTR2("MANUAL"));
         break;
         case STATE_SEEK: // seek mode
-            display.print("AUTO SEEK");
+            display.print(PSTR2("AUTO SEEK"));
         break;
     }
 
     display.setCursor(5,8*2+4);
-    display.print("BAND:");
+    display.print(PSTR2("BAND:"));
     display.setCursor(38,8*2+4);
     // print band
     if(channelIndex > 31)
     {
-        display.print("C/Race");
+        display.print(PSTR2("C/Race"));
     }
     else if(channelIndex > 23)
     {
-        display.print("F/Airwave");
+        display.print(PSTR2("F/Airwave"));
     }
     else if (channelIndex > 15)
     {
-        display.print("E");
+        display.print(PSTR2("E"));
     }
     else if (channelIndex > 7)
     {
-        display.print("B");
+        display.print(PSTR2("B"));
     }
     else
     {
-        display.print("A");
+        display.print(PSTR2("A"));
     }
 
     display.setCursor(5,8*3+4);
-    display.print("CHAN:");
+    display.print(PSTR2("CHAN:"));
     display.setCursor(38,8*3+4);
     uint8_t active_channel = channelIndex%CHANNEL_BAND_SIZE+1; // get channel inside band
     display.print(active_channel,DEC);
     display.setCursor(5,8*4+4);
-    display.print("FREQ:     GHz");
+    display.print(PSTR2("FREQ:     GHz"));
     display.setCursor(38,8*4+4);
     display.print(channelFrequency);
     display.setCursor(((display.width()-11*6)/2),8*5+4);
-    display.print("-- SAVED --");
+    display.print(PSTR2("-- SAVED --"));
     display.display();
 }
 
