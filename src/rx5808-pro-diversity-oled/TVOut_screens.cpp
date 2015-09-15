@@ -131,6 +131,10 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
         // set new marker
         TV.draw_rect(active_channel*16+2 ,TV_Y_OFFSET-2+2*TV_Y_GRID,12,12,  WHITE, INVERT); // mark current channel
 
+        // clear last square
+        TV.draw_rect(1, (TV_ROWS - TV_SCANNER_OFFSET + 8),125,SCANNER_MARKER_SIZE,  BLACK, BLACK);
+        // draw next
+        TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
 
         // show frequence
         TV.print(50,TV_Y_OFFSET+3*TV_Y_GRID, channelFrequency);
@@ -150,18 +154,6 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
     //  draw new bar
     TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
-    // set marker in spectrum to show current scanned channel
-    if(channel < CHANNEL_MAX_INDEX)
-    {
-        // clear last square
-        TV.draw_rect(1, (TV_ROWS - TV_SCANNER_OFFSET + 8),125,SCANNER_MARKER_SIZE,  BLACK, BLACK);
-        // draw next
-        TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
-    }
-    else
-    {
-      //  No action on last position to keep frame intact
-    }
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK)
     { // SEEK MODE
@@ -211,7 +203,40 @@ void screens::bandScanMode(uint8_t state) {
 }
 
 void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, uint8_t channelName, uint16_t channelFrequency, uint16_t rssi_setup_min_a, uint16_t rssi_setup_max_a) {
+    // force tune on new scan start to get right RSSI value
 
+    // channel marker
+    if(channel != last_channel) // only updated on changes
+    {
+        // clear last square
+        TV.draw_rect(1, (TV_ROWS - TV_SCANNER_OFFSET + 8),125,SCANNER_MARKER_SIZE,  BLACK, BLACK);
+        // draw next
+        TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+    }
+    // print bar for spectrum
+
+    uint8_t rssi_scaled=map(rssi, 1, 100, 5, SCANNER_BAR_SIZE);
+    // clear last bar
+    TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_SIZE), 2, SCANNER_BAR_SIZE , BLACK, BLACK);
+    //  draw new bar
+    TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
+    // print channelname
+
+    if(!in_setup) {
+        if(channelName < 255) {
+            TV.print(22, SCANNER_LIST_Y_POS, channelName, HEX);
+            TV.print(32, SCANNER_LIST_Y_POS, channelFrequency);
+        }
+    }
+    else {
+            TV.print(50, SCANNER_LIST_Y_POS, "   ");
+            TV.print(50, SCANNER_LIST_Y_POS, rssi_setup_min_a , DEC);
+
+            TV.print(110, SCANNER_LIST_Y_POS, "   ");
+            TV.print(110, SCANNER_LIST_Y_POS, rssi_setup_max_a , DEC);
+    }
+
+    last_channel = channel;
 }
 
 void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency) {
