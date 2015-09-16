@@ -5,11 +5,36 @@ Below is a quick video demonstration the performance of the I2C OLED display.
 [![Video](http://img.youtube.com/vi/I4wZWitvHXw/0.jpg)](http://www.youtube.com/watch?v=I4wZWitvHXw)
 
 #Source Code
-[Enclosure Documentation](../src/rx5808-pro-diversity-oled/rx5808-pro-diversity-oled.ino)
+[Code](../src/rx5808-pro-diversity/rx5808-pro-diversity.ino)
 You will need the following Adafruit libraries:
 ```
 Adafruit_SSD1306.h
 Adafruit_GFX.h
+```
+
+In the settings.h file uncomment the following line OLED_128x64_ADAFRUIT_SCREENS
+```
+// Choose the display you will be using
+// you will also have to uncomment the includes in the main project.
+//#define TVOUT_SCREENS
+#define OLED_128x64_ADAFRUIT_SCREENS
+```
+NOTE: only one screen can be use at a time.
+
+In the main project uncomment the following lines
+```
+// uncomment depending on the display you are using.
+// this is an issue with the arduino preprocessor
+#ifdef TVOUT_SCREENS
+//    #include <TVout.h>
+//    #include <fontALL.h>
+#endif
+#ifdef OLED_128x64_ADAFRUIT_SCREENS
+    #include <Adafruit_SSD1306.h>
+    #include <Adafruit_GFX.h>
+    #include <Wire.h>
+    #include <SPI.h>
+#endif
 ```
 
 Make sure the you have selected the correct screen size in Adafruit_SSD1306.h
@@ -19,7 +44,8 @@ Make sure the you have selected the correct screen size in Adafruit_SSD1306.h
 //   #define SSD1306_96_16
 ```
 
-You may need to change the following line to be the correct I2C address for your OLED display.
+You may need to change the following line to be the correct I2C address for your OLED display. Found in
+[here](../src/rx5808-pro-diversity/oled_128x64_adafruit_screens.cpp)
 ```
 display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
 ```

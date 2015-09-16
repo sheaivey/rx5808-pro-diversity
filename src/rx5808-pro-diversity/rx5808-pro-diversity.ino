@@ -6,6 +6,8 @@
  * Refactored and GUI reworked by Marko Hoepken
  * Universal version my Marko Hoepken
  * Diversity Receiver Mode and GUI improvements by Shea Ivey
+ * OLED Version by Shea Ivey
+ * Seperating display concerns by Shea Ivey
 
 The MIT License (MIT)
 
@@ -30,116 +32,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <TVout.h>
-#include <fontALL.h>
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 
-// Feature Togglels
-//#define DEBUG
-#define USE_DIVERSITY
+#include "settings.h"
 
-
-#define spiDataPin 10
-#define slaveSelectPin 11
-#define spiClockPin 12
-
-// Receiver PINS
-#define receiverA_led A0
-#define rssiPinA A6
-
-#define useReceiverA 1
-
-#ifdef USE_DIVERSITY
-    // Diversity
-    #define receiverB_led A1
-    #define rssiPinB A7
-    #define useReceiverAuto 0
-    #define useReceiverA 1
-    #define useReceiverB 2
-    // rssi strenth should be 2% greater than other receiver before switch.
-    // this pervents flicker when rssi values are close and delays diversity checks counter.
-    #define DIVERSITY_CUTOVER 2
-    // number of checks a receiver needs to win over the other to switch receivers.
-    // this pervents rapid switching.
-    // 1 to 10 is a good range. 1 being fast switching, 10 being slow 100ms to switch.
-    #define DIVERSITY_MAX_CHECKS 5
+// uncomment depending on the display you are using.
+// this is an issue with the arduino preprocessor
+#ifdef TVOUT_SCREENS
+    #include <TVout.h>
+    #include <fontALL.h>
+#endif
+#ifdef OLED_128x64_ADAFRUIT_SCREENS
+//    #include <Adafruit_SSD1306.h>
+//    #include <Adafruit_GFX.h>
+//    #include <Wire.h>
+//    #include <SPI.h>
+#endif
+#ifdef OLED_128x64_U8G_SCREENS
+//    #include <U8glib.h>
 #endif
 
-// this two are minimum required
-#define buttonUp 2
-#define buttonMode 3
-// optional comfort buttons
-#define buttonDown 4
-#define buttonSave 5
-// Buzzer
-#define buzzer 6
-
-// key debounce delay in ms
-// NOTE: good values are in the range of 100-200ms
-// shorter values will make it more reactive, but may lead to double trigger
-#define KEY_DEBOUNCE 200
-
-// Set you TV format (PAL = Europe = 50Hz, NTSC = INT = 60Hz)
-//#define TV_FORMAT NTSC
-#define TV_FORMAT PAL
-
-#define led 13
-// number of analog rssi reads to average for the current check.
-#define RSSI_READS 50
-// RSSI default raw range
-#define RSSI_MIN_VAL 90
-#define RSSI_MAX_VAL 300
-// 75% threshold, when channel is printed in spectrum
-#define RSSI_SEEK_FOUND 75
-// 80% under max value for RSSI
-#define RSSI_SEEK_TRESHOLD 80
-// scan loops for setup run
-#define RSSI_SETUP_RUN 10
-
-#define STATE_SEEK_FOUND 0
-#define STATE_SEEK 1
-#define STATE_SCAN 2
-#define STATE_MANUAL 3
-#ifdef USE_DIVERSITY
-#define STATE_DIVERSITY 4
-#endif
-#define STATE_SAVE 5
-#define STATE_RSSI_SETUP 6
-
-#define START_STATE STATE_SEEK
-#define MAX_STATE STATE_MANUAL
-
-#define CHANNEL_BAND_SIZE 8
-#define CHANNEL_MIN_INDEX 0
-#define CHANNEL_MAX_INDEX 39
-
-#define CHANNEL_MAX 39
-#define CHANNEL_MIN 0
-
-#define TV_COLS 128
-#define TV_ROWS 96
-#define TV_Y_MAX TV_ROWS-1
-#define TV_X_MAX TV_COLS-1
-#define TV_SCANNER_OFFSET 14
-#define SCANNER_BAR_SIZE 52
-#define SCANNER_LIST_X_POS 54
-#define SCANNER_LIST_Y_POS 16
-#define SCANNER_MARKER_SIZE 1
-
-#define EEPROM_ADR_STATE 0
-#define EEPROM_ADR_TUNE 1
-#define EEPROM_ADR_RSSI_MIN_A_L 2
-#define EEPROM_ADR_RSSI_MIN_A_H 3
-#define EEPROM_ADR_RSSI_MAX_A_L 4
-#define EEPROM_ADR_RSSI_MAX_A_H 5
-#ifdef USE_DIVERSITY
-#define EEPROM_ADR_DIVERSITY 6
-#define EEPROM_ADR_RSSI_MIN_B_L 7
-#define EEPROM_ADR_RSSI_MIN_B_H 8
-#define EEPROM_ADR_RSSI_MAX_B_L 9
-#define EEPROM_ADR_RSSI_MAX_B_H 10
-#endif
+#include "screens.h"
+screens drawScreen;
 
 // Channels to sent to the SPI registers
 const uint16_t channelTable[] PROGMEM = {
@@ -180,7 +95,6 @@ uint8_t channelIndex = 0;
 uint8_t rssi = 0;
 uint8_t rssi_scaled = 0;
 uint8_t active_receiver = useReceiverA;
-
 #ifdef USE_DIVERSITY
 uint8_t diversity_mode = useReceiverAuto;
 char diversity_check_count = 0;
@@ -196,6 +110,7 @@ uint8_t last_channel_index = 0;
 uint8_t force_seek=0;
 uint8_t seek_direction=1;
 unsigned long time_of_tune = 0;        // will store last time when tuner was changed
+unsigned long time_screen_saver = 0;
 uint8_t last_maker_pos=0;
 uint8_t last_active_channel=0;
 uint8_t first_channel_marker=1;
@@ -219,8 +134,6 @@ uint16_t rssi_setup_max_b=0;
 #endif
 uint16_t rssi_seek_found=0;
 uint16_t rssi_setup_run=0;
-
-TVout TV;
 
 // SETUP ----------------------------------------------------------------------------
 void setup()
@@ -255,24 +168,25 @@ void setup()
     // SPI pins for RX control
     pinMode (slaveSelectPin, OUTPUT);
     pinMode (spiDataPin, OUTPUT);
-    pinMode (spiClockPin, OUTPUT);
+	pinMode (spiClockPin, OUTPUT);
     // tune to first channel
 
 
-    // init TV system
-    char retVal = TV.begin(TV_FORMAT, TV_COLS, TV_ROWS);
+    // Init Display
     // 0 if no error.
     // 1 if x is not divisable by 8.
     // 2 if y is to large (NTSC only cannot fill PAL vertical resolution by 8bit limit)
     // 4 if there is not enough memory for the frame buffer.
-    if (retVal > 0) {
+    if (drawScreen.begin() > 0) {
         // on Error flicker LED
         while (true) { // stay in ERROR for ever
             digitalWrite(led, !digitalRead(led));
             delay(100);
         }
     }
-    TV.select_font(font4x6);
+    // rodate the display outpur 180 degrees.
+    // drawScreen.flip(); // OLED only!
+
     // Setup Done - LED ON
     digitalWrite(led, HIGH);
 
@@ -319,9 +233,9 @@ void loop()
     /*******************/
     /*   Mode Select   */
     /*******************/
-    state_last_used=state; // save save settings
     if (digitalRead(buttonMode) == LOW) // key pressed ?
     {
+        time_screen_saver=0;
         beep(50); // beep & debounce
         delay(KEY_DEBOUNCE/2); // debounce
         beep(50); // beep & debounce
@@ -361,51 +275,35 @@ void loop()
                 state = STATE_SAVE;
                 break;
             }
-            TV.clear_screen();
-            // simple menu
-            TV.select_font(font8x8);
-            TV.draw_rect(0,0,127,95,  WHITE);
-            TV.draw_line(0,14,127,14,WHITE);
-            TV.printPGM(10, 3,  PSTR("MODE SELECTION"));
-            TV.printPGM(10, 5+1*MENU_Y_SIZE, PSTR("Auto Search"));
-            TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Band Scanner"));
-            TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("Manual Mode"));
-#ifdef USE_DIVERSITY
-            TV.printPGM(10, 5+4*MENU_Y_SIZE, PSTR("Diversity"));
-#endif
-            TV.printPGM(10, 5+5*MENU_Y_SIZE, PSTR("Save Setup"));
-            // selection by inverted box
             switch (menu_id)
             {
                 case 0: // auto search
-                    TV.draw_rect(8,3+1*MENU_Y_SIZE,100,12,  WHITE, INVERT);
                     state=STATE_SEEK;
                     force_seek=1;
                     seek_found=0;
                 break;
                 case 1: // Band Scanner
-                    TV.draw_rect(8,3+2*MENU_Y_SIZE,100,12,  WHITE, INVERT);
                     state=STATE_SCAN;
                     scan_start=1;
                 break;
                 case 2: // manual mode
-                    TV.draw_rect(8,3+3*MENU_Y_SIZE,100,12,  WHITE, INVERT);
                     state=STATE_MANUAL;
                 break;
-#ifdef USE_DIVERSITY
+            #ifdef USE_DIVERSITY
                 case 3: // Diversity
-                    TV.draw_rect(8,3+4*MENU_Y_SIZE,100,12,  WHITE, INVERT);
                     state=STATE_DIVERSITY;
                 break;
-#else
+            #else
                 case 3: // Skip
                     menu_id++;
-#endif
+            #endif
                 case 4: // Save settings
-                    TV.draw_rect(8,3+5*MENU_Y_SIZE,100,12,  WHITE, INVERT);
                     state=STATE_SAVE;
                 break;
             } // end switch
+
+            // draw mode select screen
+            drawScreen.mainMenu(menu_id);
 
             while(digitalRead(buttonMode) == LOW || digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW)
             {
@@ -454,8 +352,6 @@ void loop()
         } while(in_menu);
         last_state=255; // force redraw of current screen
         switch_count = 0;
-        // clean line?
-        TV.print(TV_COLS/2, (TV_ROWS/2), "             ");
     }
     else // key pressed
     { // reset debounce
@@ -479,28 +375,18 @@ void loop()
         /*   Main screen draw   */
         /************************/
         // changed state, clear an draw new screen
-        TV.clear_screen();
+
         // simple menu
         #define TV_Y_GRID 14
         #define TV_Y_OFFSET 3
         switch (state)
         {
             case STATE_SCAN: // Band Scanner
+                state_last_used=state;
             case STATE_RSSI_SETUP: // RSSI setup
-                TV.select_font(font8x8);
-                TV.draw_rect(0,0,TV_X_MAX,1*TV_Y_GRID,  WHITE); // upper frame
-                if(state==STATE_SCAN)
+                // draw selected
+                if(state==STATE_RSSI_SETUP)
                 {
-                    TV.printPGM(10, TV_Y_OFFSET,  PSTR(" BAND SCANNER"));
-                    TV.draw_line(50,1*TV_Y_GRID,50, 1*TV_Y_GRID+9,WHITE);
-                    TV.select_font(font4x6);
-                    TV.print(2, SCANNER_LIST_Y_POS, "BEST:");
-                }
-                else
-                {
-                    TV.printPGM(10, TV_Y_OFFSET,  PSTR("  RSSI SETUP "));
-                    TV.select_font(font4x6);
-                    TV.print(10, SCANNER_LIST_Y_POS, "RSSI Min:     RSSI Max:   ");
                     // prepare new setup
                     rssi_min_a=0;
                     rssi_max_a=400; // set to max range
@@ -514,47 +400,28 @@ void loop()
 #endif
                     rssi_setup_run=RSSI_SETUP_RUN;
                 }
-                TV.draw_rect(0,1*TV_Y_GRID,TV_X_MAX,9,  WHITE); // list frame
-                TV.draw_rect(0,TV_ROWS - TV_SCANNER_OFFSET,TV_X_MAX,13,  WHITE); // lower frame
-                TV.select_font(font4x6);
-                TV.print(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5645");
-                TV.print(57, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5800");
-                TV.print(111, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5945");
+
                 // trigger new scan from begin
                 channel=CHANNEL_MIN;
-                writePos=SCANNER_LIST_X_POS; // reset channel list
                 channelIndex = pgm_read_byte_near(channelList + channel);
                 rssi_best=RSSI_MIN_VAL;
                 scan_start=1;
+
+                drawScreen.bandScanMode(state);
             break;
-            case STATE_MANUAL: // manual mode
             case STATE_SEEK: // seek mode
-                TV.select_font(font8x8);
-                TV.draw_rect(0,0,TV_X_MAX,TV_Y_MAX,  WHITE); // outer frame
+            case STATE_MANUAL: // manual mode
+                state_last_used=state;
                 if (state == STATE_MANUAL)
                 {
-                    TV.printPGM(10, TV_Y_OFFSET,  PSTR(" MANUAL MODE"));
+                    time_screen_saver=millis();
                 }
                 else if(state == STATE_SEEK)
                 {
-                    TV.printPGM(10, TV_Y_OFFSET,  PSTR("AUTO MODE SEEK"));
+                    time_screen_saver=0; // dont show screen saver until we found a channel.
                 }
-                TV.draw_line(0,1*TV_Y_GRID,TV_X_MAX,1*TV_Y_GRID,WHITE);
-                TV.printPGM(5,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("BAND: "));
-                TV.draw_line(0,2*TV_Y_GRID,TV_X_MAX,2*TV_Y_GRID,WHITE);
-                TV.printPGM(5 ,TV_Y_OFFSET-1+2*TV_Y_GRID,  PSTR("1 2 3 4 5 6 7 8"));
-                TV.draw_line(0,3*TV_Y_GRID,TV_X_MAX,3*TV_Y_GRID,WHITE);
-                TV.printPGM(5,TV_Y_OFFSET+3*TV_Y_GRID,  PSTR("FREQ:     GHz"));
-                TV.draw_line(0,4*TV_Y_GRID,TV_X_MAX,4*TV_Y_GRID,WHITE);
-                TV.select_font(font4x6);
-                TV.printPGM(5,TV_Y_OFFSET+4*TV_Y_GRID,  PSTR("RSSI:"));
-                TV.draw_line(0,5*TV_Y_GRID-4,TV_X_MAX,5*TV_Y_GRID-4,WHITE);
-                // frame for tune graph
-                TV.draw_rect(0,TV_ROWS - TV_SCANNER_OFFSET,TV_X_MAX,13,  WHITE); // lower frame
-                TV.print(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5645");
-                TV.print(57, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5800");
-                TV.print(111, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5945");
-                TV.select_font(font8x8);
+                drawScreen.seekMode(state);
+
                 first_channel_marker=1;
                 update_frequency_view=1;
                 force_seek=1;
@@ -570,51 +437,7 @@ void loop()
 #ifdef USE_DIVERSITY
                 EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
 #endif
-                TV.select_font(font8x8);
-                TV.draw_rect(0,0,127,95,  WHITE);
-                TV.draw_line(0,14,127,14,WHITE);
-                TV.printPGM(10, 3,  PSTR("SAVE SETTINGS"));
-                TV.printPGM(10, 5+1*MENU_Y_SIZE, PSTR("Mode:"));
-                switch (state_last_used)
-                {
-                    case STATE_SCAN: // Band Scanner
-                        TV.printPGM(50,5+1*MENU_Y_SIZE,  PSTR("Scanner"));
-                    break;
-                    case STATE_MANUAL: // manual mode
-                        TV.printPGM(50,5+1*MENU_Y_SIZE,  PSTR("Manual"));
-                    break;
-                    case STATE_SEEK: // seek mode
-                        TV.printPGM(50,5+1*MENU_Y_SIZE,  PSTR("Search"));
-                    break;
-                }
-                TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Band:"));
-                // print band
-                if(channelIndex > 31)
-                {
-                    TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("C/Race   "));
-                }
-                else if(channelIndex > 23)
-                {
-                    TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("F/Airwave"));
-                }
-                else if (channelIndex > 15)
-                {
-                    TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("E        "));
-                }
-                else if (channelIndex > 7)
-                {
-                    TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("B        "));
-                }
-                else
-                {
-                    TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("A        "));
-                }
-                TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("Chan:"));
-                uint8_t active_channel = channelIndex%CHANNEL_BAND_SIZE+1; // get channel inside band
-                TV.print(50,5+3*MENU_Y_SIZE,active_channel,DEC);
-                TV.printPGM(10, 5+4*MENU_Y_SIZE, PSTR("FREQ:     GHz"));
-                TV.print(50,5+4*MENU_Y_SIZE, pgm_read_word_near(channelFreqTable + channelIndex));
-                TV.printPGM(10, 5+5*MENU_Y_SIZE, PSTR("--- SAVED ---"));
+                drawScreen.save(state_last_used, channelIndex, pgm_read_word_near(channelFreqTable + channelIndex));
                 uint8_t loop=0;
                 for (loop=0;loop<5;loop++)
                 {
@@ -622,13 +445,12 @@ void loop()
                     delay(100);
                 }
                 delay(1000);
-                TV.select_font(font4x6);
-                TV.printPGM(10, 14+5*MENU_Y_SIZE,     PSTR("Hold MODE to enter RSSI setup"));
+                drawScreen.updateSave("HOLD MODE RSSI SETUP");
                 delay(1000);
                 delay(1000);
                 if (digitalRead(buttonMode) == LOW) // to RSSI setup
                 {
-                    TV.printPGM(10, 14+5*MENU_Y_SIZE, PSTR("ENTERING RSSI SETUP ......   " ));
+                    drawScreen.updateSave("ENTERING RSSI SETUP ");
                     uint8_t loop=0;
                     for (loop=0;loop<10;loop++)
                     {
@@ -645,20 +467,43 @@ void loop()
                 }
                 else
                 {
-                    TV.printPGM(10, 14+5*MENU_Y_SIZE, PSTR("                             "));
                     delay(1000);
                     state=state_last_used; // return to saved function
                 }
-                    force_menu_redraw=1; // we change the state twice, must force redraw of menu
+                force_menu_redraw=1; // we change the state twice, must force redraw of menu
 
             // selection by inverted box
             break;
         } // end switch
+
+        //display.display();
         last_state=state;
     }
     /*************************************/
     /*   Processing depending of state   */
     /*************************************/
+#ifndef TVOUT_SCREENS
+    if(state == STATE_SCREEN_SAVER) {
+#ifdef USE_DIVERSITY
+        drawScreen.screenSaver(diversity_mode, pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex));
+#else
+        drawScreen.screenSaver(pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex));
+#endif
+        do{
+            delay(10); // timeout delay
+#ifdef USE_DIVERSITY
+            drawScreen.updateScreenSaver(active_receiver, readRSSI(), readRSSI(useReceiverA), readRSSI(useReceiverB));
+#else
+            drawScreen.updateScreenSaver(readRSSI());
+#endif
+
+        }
+        while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next button press
+        state=state_last_used;
+        time_screen_saver=0;
+        return;
+    }
+#endif
 
 #ifdef USE_DIVERSITY
     if(state == STATE_DIVERSITY) {
@@ -667,53 +512,12 @@ void loop()
         uint8_t in_menu=1;
         do{
             diversity_mode = menu_id;
-            TV.clear_screen();
-            TV.select_font(font8x8);
-            TV.draw_rect(0,0,127,95,  WHITE);
-            TV.draw_line(0,14,127,14,WHITE);
-            TV.printPGM(10, 3,  PSTR("DIVERSITY"));
-            TV.printPGM(10, 5+1*MENU_Y_SIZE, PSTR("Auto"));
-            TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Receiver A"));
-            TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("Receiver B"));
-            // RSSI Strength
-            TV.draw_line(0,3+4*MENU_Y_SIZE, TV_X_MAX, 3+4*MENU_Y_SIZE, WHITE);
-            TV.printPGM(10, 6+4*MENU_Y_SIZE, PSTR("A:"));
-            TV.draw_line(0,3+5*MENU_Y_SIZE, TV_X_MAX, 3+5*MENU_Y_SIZE, WHITE);
-            TV.printPGM(10, 6+5*MENU_Y_SIZE, PSTR("B:"));
-            switch (menu_id)
-            {
-                case useReceiverAuto:
-                    TV.draw_rect(8,3+1*MENU_Y_SIZE,100,12,  WHITE, INVERT); // auto
-                    break;
-                case useReceiverA:
-                    TV.draw_rect(8,3+2*MENU_Y_SIZE,100,12,  WHITE, INVERT); // receiver a
-                    break;
-                case useReceiverB:
-                    TV.draw_rect(8,3+3*MENU_Y_SIZE,100,12,  WHITE, INVERT); // receiver b
-                    break;
-            }
+            drawScreen.diversity(diversity_mode);
             do
             {
                 delay(10); // timeout delay
-                // show signal strength
-                wait_rssi_ready();
-                readRSSI(); // update LED
-                // read rssi A
-                rssi = readRSSI(useReceiverA);
-                #define RSSI_BAR_SIZE 100
-                rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-                // clear last bar
-                TV.draw_rect(25+rssi_scaled, 6+4*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
-                //  draw new bar
-                TV.draw_rect(25, 6+4*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, (active_receiver==useReceiverA ? WHITE:BLACK));
-
-                // read rssi B
-                rssi = readRSSI(useReceiverB);
-                rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-                // clear last bar
-                TV.draw_rect(25+rssi_scaled, 6+5*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
-                //  draw new bar
-                TV.draw_rect(25, 6+5*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, (active_receiver==useReceiverB ? WHITE:BLACK));
+                readRSSI();
+                drawScreen.updateDiversity(active_receiver, readRSSI(useReceiverA), readRSSI(useReceiverB));
             }
             while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next mode or time out
 
@@ -752,6 +556,7 @@ void loop()
             // handling of keys
             if( digitalRead(buttonUp) == LOW)        // channel UP
             {
+                time_screen_saver=millis();
                 beep(50); // beep & debounce
                 delay(KEY_DEBOUNCE); // debounce
                 channelIndex++;
@@ -763,6 +568,7 @@ void loop()
             }
             if( digitalRead(buttonDown) == LOW) // channel DOWN
             {
+                time_screen_saver=millis();
                 beep(50); // beep & debounce
                 delay(KEY_DEBOUNCE); // debounce
                 channelIndex--;
@@ -773,75 +579,20 @@ void loop()
                 update_frequency_view=1;
             }
         }
-        // display refresh handler
-        if(update_frequency_view) // only updated on changes
-        {
-            // show current used channel of bank
-            if(channelIndex > 31)
-            {
-                TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("C/Race   "));
-            }
-            else if(channelIndex > 23)
-            {
-                TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("F/Airwave"));
-            }
-            else if (channelIndex > 15)
-            {
-                TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("E        "));
-            }
-            else if (channelIndex > 7)
-            {
-                TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("B        "));
-            }
-            else
-            {
-                TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("A        "));
-            }
-            // show channel inside band
-            uint8_t active_channel = channelIndex%CHANNEL_BAND_SIZE; // get channel inside band
-            if(!first_channel_marker)
-            {
-                // clear last marker
-                TV.draw_rect(last_active_channel*16+2 ,TV_Y_OFFSET-2+2*TV_Y_GRID,12,12,  BLACK, INVERT); // mark current channel
-            }
-            first_channel_marker=0;
-            // set new marker
-            TV.draw_rect(active_channel*16+2 ,TV_Y_OFFSET-2+2*TV_Y_GRID,12,12,  WHITE, INVERT); // mark current channel
-            last_active_channel=active_channel;
-            // show frequence
-            TV.print(50,TV_Y_OFFSET+3*TV_Y_GRID, pgm_read_word_near(channelFreqTable + channelIndex));
-        }
         // show signal strength
         wait_rssi_ready();
         rssi = readRSSI();
-        #define RSSI_BAR_SIZE 100
-        rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-        // clear last bar
-        TV.draw_rect(25, TV_Y_OFFSET+4*TV_Y_GRID, RSSI_BAR_SIZE,4 , BLACK, BLACK);
-        //  draw new bar
-        TV.draw_rect(25, TV_Y_OFFSET+4*TV_Y_GRID, rssi_scaled, 4 , WHITE, WHITE);
-        // print bar for spectrum
         channel=channel_from_index(channelIndex); // get 0...40 index depending of current channel
-        #define SCANNER_BAR_MINI_SIZE 14
-        rssi_scaled=map(rssi, 1, 100, 1, SCANNER_BAR_MINI_SIZE);
-        hight = (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled);
-        // clear last bar
-        TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
-        //  draw new bar
-        TV.draw_rect((channel * 3)+4, hight, 2, rssi_scaled , WHITE, WHITE);
-        // set marker in spectrum to show current scanned channel
+
         if(channel < CHANNEL_MAX_INDEX)
         {
-            // clear last square
-            TV.draw_rect((last_maker_pos * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  BLACK, BLACK);
-            // draw next
-            TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
             last_maker_pos=channel;
         }
         else
         {
           //  No action on last position to keep frame intact
         }
+
         // handling for seek mode after screen and RSSI has been fully processed
         if(state == STATE_SEEK) //
         { // SEEK MODE
@@ -850,6 +601,7 @@ void loop()
                 if ((!force_seek) && (rssi > RSSI_SEEK_TRESHOLD)) // check for found channel
                 {
                     seek_found=1;
+                    time_screen_saver=millis();
                     // beep twice as notice of lock
                     beep(100);
                     delay(100);
@@ -864,7 +616,7 @@ void loop()
                     {
                         channel=CHANNEL_MIN;
                     }
-                    if(channel < CHANNEL_MIN)
+                    else if(channel < CHANNEL_MIN)
                     {
                         channel=CHANNEL_MAX;
                     }
@@ -873,7 +625,6 @@ void loop()
             }
             else
             { // seek was successful
-                TV.printPGM(10, TV_Y_OFFSET,  PSTR("AUTO MODE LOCK"));
                 if (digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW) // restart seek if key pressed
                 {
                     if(digitalRead(buttonUp) == LOW) {
@@ -886,11 +637,17 @@ void loop()
                     delay(KEY_DEBOUNCE); // debounce
                     force_seek=1;
                     seek_found=0;
-                    TV.printPGM(10, TV_Y_OFFSET,  PSTR("AUTO MODE SEEK"));
+                    time_screen_saver=0;
                 }
             }
         }
-        TV.delay_frame(1); // clean redraw
+#ifndef TVOUT_SCREENS
+        if(time_screen_saver+5000 < millis() && time_screen_saver!=0) {
+            state = STATE_SCREEN_SAVER;
+        }
+#endif
+        drawScreen.updateSeekMode(state, channelIndex, channel, rssi, pgm_read_word_near(channelFreqTable + channelIndex), seek_found);
+
     }
     /****************************/
     /*   Processing SCAN MODE   */
@@ -903,16 +660,10 @@ void loop()
             scan_start=0;
             setChannelModule(channelIndex);
             last_channel_index=channelIndex;
-            // keep time of tune to make sure that RSSI is stable when required
-            time_of_tune=millis();
         }
         // channel marker
         if(channel < CHANNEL_MAX_INDEX)
         {
-            // clear last square
-            TV.draw_rect((last_maker_pos * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  BLACK, BLACK);
-            // draw next
-            TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
             last_maker_pos=channel;
         }
         else
@@ -923,39 +674,22 @@ void loop()
         wait_rssi_ready();
         // value must be ready
         rssi = readRSSI();
-        rssi_scaled=map(rssi, 1, 100, 5, SCANNER_BAR_SIZE);
-        hight = (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled);
-        // clear last bar
-        TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_SIZE), 2, SCANNER_BAR_SIZE , BLACK, BLACK);
-        //  draw new bar
-        TV.draw_rect((channel * 3)+4, hight, 2, rssi_scaled , WHITE, WHITE);
-        // print channelname
+
         if(state == STATE_SCAN)
         {
             if (rssi > RSSI_SEEK_TRESHOLD)
             {
                 if(rssi_best < rssi) {
                     rssi_best = rssi;
-                    TV.print(22, SCANNER_LIST_Y_POS, pgm_read_byte_near(channelNames + channelIndex), HEX);
-                    TV.print(32, SCANNER_LIST_Y_POS, pgm_read_word_near(channelFreqTable + channelIndex));
-
                 }
-                else {
-                    if(writePos+10>TV_COLS-2)
-                    { // keep writing on the screen
-                        writePos=SCANNER_LIST_X_POS;
-                    }
-
-                    TV.draw_rect(writePos, SCANNER_LIST_Y_POS, 8, 6,  BLACK, BLACK);
-                    TV.print(writePos, SCANNER_LIST_Y_POS, pgm_read_byte_near(channelNames + channelIndex), HEX);
-                    writePos += 10;
-                }
-
-                // mark bar
-                TV.draw_rect((channel * 3) - 5, hight - 5, 8, 7,  BLACK, BLACK);
-                TV.print((channel * 3) - 4, hight - 5, pgm_read_byte_near(channelNames + channelIndex), HEX);
             }
         }
+
+        uint8_t bestChannelName = pgm_read_byte_near(channelNames + channelIndex);
+        uint16_t bestChannelFrequency = pgm_read_word_near(channelFreqTable + channelIndex);
+
+        drawScreen.updateBandScanMode((state == STATE_RSSI_SETUP), channel, rssi, bestChannelName, bestChannelFrequency, rssi_setup_min_a, rssi_setup_max_a);
+
         // next channel
         if (channel < CHANNEL_MAX)
         {
@@ -964,7 +698,6 @@ void loop()
         else
         {
             channel=CHANNEL_MIN;
-            writePos=SCANNER_LIST_X_POS; // reset channel list
             if(state == STATE_RSSI_SETUP)
             {
                 if(!rssi_setup_run--)
@@ -1002,7 +735,6 @@ void loop()
             delay(KEY_DEBOUNCE); // debounce
             last_state=255; // force redraw by fake state change ;-)
             channel=CHANNEL_MIN;
-            writePos=SCANNER_LIST_X_POS; // reset channel list
             scan_start=1;
             rssi_best=RSSI_MIN_VAL;
         }
@@ -1040,10 +772,10 @@ void loop()
 
 void beep(uint16_t time)
 {
-    digitalWrite(led, LOW);
-    digitalWrite(buzzer, LOW);
-    delay(time);
     digitalWrite(led, HIGH);
+    digitalWrite(buzzer, LOW);
+    delay(time/2);
+    digitalWrite(led, LOW);
     digitalWrite(buzzer, HIGH);
 }
 
@@ -1068,7 +800,7 @@ void wait_rssi_ready()
     // check if RSSI is stable after tune by checking the time
     uint16_t tune_time = millis()-time_of_tune;
     // module need >20ms to tune.
-    // 25 ms will to a 40 channel scan in 1 second.
+    // 25 ms will do a 40 channel scan in 1 second.
     #define MIN_TUNE_TIME 25
     if(tune_time < MIN_TUNE_TIME)
     {
@@ -1093,10 +825,10 @@ uint16_t readRSSI(char receiver)
 #endif
     for (uint8_t i = 0; i < RSSI_READS; i++)
     {
-        rssiA += analogRead(rssiPinA);//random(RSSI_MAX_VAL-100, RSSI_MAX_VAL);//
+        rssiA += analogRead(rssiPinA);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
 
 #ifdef USE_DIVERSITY
-        rssiB += analogRead(rssiPinB);//random(RSSI_MAX_VAL-100, RSSI_MAX_VAL);//
+        rssiB += analogRead(rssiPinB);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
 #endif
     }
     rssiA = rssiA/RSSI_READS; // average of RSSI_READS readings
@@ -1110,28 +842,20 @@ uint16_t readRSSI(char receiver)
         if(rssiA < rssi_setup_min_a)
         {
             rssi_setup_min_a=rssiA;
-            TV.print(50, SCANNER_LIST_Y_POS, "   ");
-            TV.print(50, SCANNER_LIST_Y_POS, rssi_setup_min_a , DEC);
         }
         if(rssiA > rssi_setup_max_a)
         {
             rssi_setup_max_a=rssiA;
-            TV.print(110, SCANNER_LIST_Y_POS, "   ");
-            TV.print(110, SCANNER_LIST_Y_POS, rssi_setup_max_a , DEC);
         }
 
 #ifdef USE_DIVERSITY
         if(rssiB < rssi_setup_min_b)
         {
             rssi_setup_min_b=rssiB;
-            TV.print(50, SCANNER_LIST_Y_POS+8, "   ");
-            TV.print(50, SCANNER_LIST_Y_POS+8, rssi_setup_min_b , DEC);
         }
         if(rssiB > rssi_setup_max_b)
         {
             rssi_setup_max_b=rssiB;
-            TV.print(110, SCANNER_LIST_Y_POS+8, "   ");
-            TV.print(110, SCANNER_LIST_Y_POS+8, rssi_setup_max_b , DEC);
         }
 #endif
     }
@@ -1197,7 +921,6 @@ uint16_t readRSSI(char receiver)
 #endif
     return (rssi);
 }
-
 void setReceiver(uint8_t receiver) {
 #ifdef USE_DIVERSITY
     if(receiver == useReceiverA)
@@ -1209,11 +932,11 @@ void setReceiver(uint8_t receiver) {
     {
         digitalWrite(receiverA_led, LOW);
         digitalWrite(receiverB_led, HIGH);
-
     }
 #else
     digitalWrite(receiverA_led, HIGH);
 #endif
+
     active_receiver = receiver;
 }
 
