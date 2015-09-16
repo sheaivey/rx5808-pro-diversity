@@ -1,3 +1,31 @@
+/*
+ * TVOUT by Myles Metzel
+ * Refactored and GUI reworked by Marko Hoepken
+ * Universal version my Marko Hoepken
+ * Diversity Receiver Mode and GUI improvements by Shea Ivey
+
+The MIT License (MIT)
+
+Copyright (c) 2015 Marko Hoepken
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 #include "settings.h"
 
 #ifdef TVOUT_SCREENS
@@ -157,17 +185,18 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK)
     { // SEEK MODE
-
-        // fix title flicker
-        TV.draw_rect(0,0,127,14, WHITE,BLACK);
-        if(locked) {
-            TV.printPGM(((127-14*8)/2), TV_Y_OFFSET,  PSTR("AUTO MODE LOCK"));
+        if(last_channel != channelIndex) {
+            // fix title flicker
+            TV.draw_rect(0,0,127,14, WHITE,BLACK);
+            if(locked) {
+                TV.printPGM(((127-14*8)/2), TV_Y_OFFSET,  PSTR("AUTO MODE LOCK"));
+            }
+            else
+            {
+                TV.printPGM(((127-14*8)/2), TV_Y_OFFSET,  PSTR("AUTO MODE SEEK"));
+            }
+            TV.draw_rect(0,0,127,14,  WHITE,INVERT);
         }
-        else
-        {
-            TV.printPGM(((127-14*8)/2), TV_Y_OFFSET,  PSTR("AUTO MODE SEEK"));
-        }
-        TV.draw_rect(0,0,127,14,  WHITE,INVERT);
     }
 
     last_channel = channelIndex;
@@ -175,6 +204,7 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
 
 void screens::bandScanMode(uint8_t state) {
     reset(); // start from fresh screen.
+    best_rssi = 0;
     if(state==STATE_SCAN)
     {
         drawTitleBox("BAND SCANNER");
@@ -187,6 +217,7 @@ void screens::bandScanMode(uint8_t state) {
     if(state==STATE_SCAN)
     {
         TV.select_font(font4x6);
+        TV.draw_line(50,1*TV_Y_GRID,50, 1*TV_Y_GRID+9,WHITE);
         TV.print(2, SCANNER_LIST_Y_POS, "BEST:");
     }
     else
@@ -204,7 +235,7 @@ void screens::bandScanMode(uint8_t state) {
 
 void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, uint8_t channelName, uint16_t channelFrequency, uint16_t rssi_setup_min_a, uint16_t rssi_setup_max_a) {
     // force tune on new scan start to get right RSSI value
-
+    static uint8_t writePos=SCANNER_LIST_X_POS;
     // channel marker
     if(channel != last_channel) // only updated on changes
     {
@@ -217,15 +248,29 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
 
     uint8_t rssi_scaled=map(rssi, 1, 100, 5, SCANNER_BAR_SIZE);
     // clear last bar
-    TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_SIZE), 2, SCANNER_BAR_SIZE , BLACK, BLACK);
+    TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_SIZE)-5, 2, SCANNER_BAR_SIZE+5 , BLACK, BLACK);
     //  draw new bar
     TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
     // print channelname
 
     if(!in_setup) {
-        if(channelName < 255) {
-            TV.print(22, SCANNER_LIST_Y_POS, channelName, HEX);
-            TV.print(32, SCANNER_LIST_Y_POS, channelFrequency);
+        if (rssi > RSSI_SEEK_TRESHOLD) {
+            if(best_rssi < rssi) {
+                best_rssi = rssi;
+                TV.print(22, SCANNER_LIST_Y_POS, channelName, HEX);
+                TV.print(32, SCANNER_LIST_Y_POS, channelFrequency);
+            }
+            else {
+                if(writePos+10>TV_COLS-2)
+                { // keep writing on the screen
+                    writePos=SCANNER_LIST_X_POS;
+                }
+                TV.draw_rect(writePos, SCANNER_LIST_Y_POS, 8, 6,  BLACK, BLACK);
+                TV.print(writePos, SCANNER_LIST_Y_POS, channelName, HEX);
+                writePos += 10;
+            }
+            TV.draw_rect((channel * 3) - 5, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled) - 5, 8, 7,  BLACK, BLACK);
+            TV.print((channel * 3) - 4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled) - 5, channelName, HEX);
         }
     }
     else {
@@ -243,101 +288,40 @@ void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency) {
     screenSaver(-1, channelName, channelFrequency);
 }
 void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency) {
-    /*
-    reset();
-    display.setTextSize(6);
-    display.setTextColor(WHITE);
-    display.setCursor(0,0);
-    display.print(channelName, HEX);
-    display.setTextSize(1);
-    display.setCursor(70,0);
-    display.print(CALL_SIGN);
-    display.setTextSize(2);
-    display.setCursor(70,28);
-    display.setTextColor(WHITE);
-    display.print(channelFrequency);
-    display.setTextSize(1);
+ // not used in TVOut ... yet
+/*    reset();
+    TV.select_font(font8x8);
+    TV.print(0,0,channelName, HEX);
+    TV.select_font(font6x8);
+    TV.print(70,0,CALL_SIGN);
+    TV.select_font(font8x8);
+    TV.print(70,28,channelFrequency);
+    TV.select_font(font4x6);
 #ifdef USE_DIVERSITY
-    display.setCursor(70,18);
     switch(diversity_mode) {
         case useReceiverAuto:
-            display.print("AUTO");
+            TV.print(70,18,"AUTO");
             break;
         case useReceiverA:
-            display.print("ANTENNA A");
+            TV.print(70,18,"ANTENNA A");
             break;
         case useReceiverB:
-            display.print("ANTENNA B");
+            TV.print(70,18,"ANTENNA B");
             break;
     }
-    display.setTextColor(BLACK,WHITE);
-    display.fillRect(0, display.height()-19, 7, 9, WHITE);
-    display.setCursor(1,display.height()-18);
-    display.print("A");
-    display.setTextColor(BLACK,WHITE);
-    display.fillRect(0, display.height()-9, 7, 9, WHITE);
-    display.setCursor(1,display.height()-8);
-    display.print("B");
+    TV.draw_rect(0, 127-19, 7, 9, WHITE,BLACK);
+    TV.print(1,95-18,"A");
+    TV.draw_rect(0, 127-9, 7, 9, WHITE,BLACK);
+    TV.print(1,95-8,"B");
 #endif
-    display.display();
-    */
+*/
 }
 
 void screens::updateScreenSaver(uint8_t rssi) {
     updateScreenSaver(-1, rssi, -1, -1);
 }
 void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssiA, uint8_t rssiB) {
-/*
-#ifdef USE_DIVERSITY
-    // read rssi A
-    #define RSSI_BAR_SIZE 119
-    uint8_t rssi_scaled=map(rssiA, 1, 100, 3, RSSI_BAR_SIZE);
-    display.fillRect(7 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
-    if(active_receiver == useReceiverA)
-    {
-        display.fillRect(7, display.height()-19, rssi_scaled, 9, WHITE);
-    }
-    else
-    {
-        display.fillRect(7, display.height()-19, (RSSI_BAR_SIZE), 9, BLACK);
-        display.drawRect(7, display.height()-19, rssi_scaled, 9, WHITE);
-    }
-
-    // read rssi B
-    rssi_scaled=map(rssiB, 1, 100, 3, RSSI_BAR_SIZE);
-    display.fillRect(7 + rssi_scaled, display.height()-9, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
-    if(active_receiver == useReceiverB)
-    {
-        display.fillRect(7, display.height()-9, rssi_scaled, 9, WHITE);
-    }
-    else
-    {
-        display.fillRect(7, display.height()-9, (RSSI_BAR_SIZE), 9, BLACK);
-        display.drawRect(7, display.height()-9, rssi_scaled, 9, WHITE);
-    }
-#else
-    display.setTextColor(BLACK);
-    display.fillRect(0, display.height()-19, 25, 19, WHITE);
-    display.setCursor(1,display.height()-13);
-    display.print("RSSI");
-    #define RSSI_BAR_SIZE 101
-    uint8_t rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-    display.fillRect(25 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 19, BLACK);
-    display.fillRect(25, display.height()-19, rssi_scaled, 19, WHITE);
-#endif
-    if(rssi < 20)
-    {
-        display.setTextColor((millis()%250 < 125) ? WHITE : BLACK, BLACK);
-        display.setCursor(50,display.height()-13);
-        display.print("LOW SIGNAL");
-    }
-#ifdef USE_DIVERSITY
-    else {
-        display.drawLine(50,display.height()-10,110,display.height()-10,BLACK);
-    }
-#endif
-    display.display();
-    */
+// not used in TVOut ... yet
 }
 
 #ifdef USE_DIVERSITY
