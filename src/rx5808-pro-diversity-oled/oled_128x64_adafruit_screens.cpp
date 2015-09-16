@@ -1,3 +1,29 @@
+/*
+ * OLED Screens by Shea Ivey
+
+The MIT License (MIT)
+
+Copyright (c) 2015 Shea Ivey
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 #include "settings.h"
 
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
@@ -191,6 +217,7 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
 
 void screens::bandScanMode(uint8_t state) {
     reset(); // start from fresh screen.
+    best_rssi = 0;
     if(state==STATE_SCAN)
     {
         drawTitleBox(PSTR2("BAND SCANNER"));
@@ -216,17 +243,31 @@ void screens::bandScanMode(uint8_t state) {
 }
 
 void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, uint8_t channelName, uint16_t channelFrequency, uint16_t rssi_setup_min_a, uint16_t rssi_setup_max_a) {
-    rssi=map(rssi, 1, 100, 1, 30);
-    uint16_t hight = (display.height()-12-rssi);
-    display.fillRect((channel*3)+4,display.height()-12-30,3,30-rssi,BLACK);
-    display.fillRect((channel*3)+4,hight,3,rssi,WHITE);
+    #define SCANNER_LIST_X_POS 60
+    static uint8_t writePos = SCANNER_LIST_X_POS;
+    uint8_t rssi_scaled=map(rssi, 1, 100, 1, 30);
+    uint16_t hight = (display.height()-12-rssi_scaled);
+    if(channel != last_channel) // only updated on changes
+    {
+        display.fillRect((channel*3)+4,display.height()-12-30,3,30-rssi_scaled,BLACK);
+        display.fillRect((channel*3)+4,hight,3,rssi_scaled,WHITE);
+    }
     if(!in_setup) {
-        if(channelName < 255) {
-            display.setTextColor(WHITE,BLACK);
-            display.setCursor(36,12);
-            display.print(channelName, HEX);
-            display.setCursor(52,12);
-            display.print(channelFrequency);
+        if (rssi > RSSI_SEEK_TRESHOLD) {
+            if(best_rssi < rssi) {
+                best_rssi = rssi;
+                display.setTextColor(WHITE,BLACK);
+                display.setCursor(36,12);
+                display.print(channelName, HEX);
+                display.setCursor(52,12);
+                display.print(channelFrequency);
+            }
+            else {
+                if(writePos+10>display.width()-12)
+                { // keep writing on the screen
+                    writePos=SCANNER_LIST_X_POS;
+                }
+            }
         }
     }
     else {
@@ -239,6 +280,7 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
         display.print( rssi_setup_max_a , DEC);
     }
     display.display();
+    last_channel = channel;
 }
 
 void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency) {
