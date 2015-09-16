@@ -7,6 +7,7 @@
  * Universal version my Marko Hoepken
  * Diversity Receiver Mode and GUI improvements by Shea Ivey
  * OLED Version by Shea Ivey
+ * Seperating display concerns by Shea Ivey
 
 The MIT License (MIT)
 
@@ -38,18 +39,16 @@ SOFTWARE.
 
 // uncomment depending on the display you are using.
 // this is an issue with the arduino preprocessor
+#ifdef TVOUT_SCREENS
+    #include <TVout.h>
+    #include <fontALL.h>
+#endif
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
 //    #include <Adafruit_SSD1306.h>
 //    #include <Adafruit_GFX.h>
 //    #include <Wire.h>
 //    #include <SPI.h>
 #endif
-
-#ifdef TVOUT_SCREENS
-    #include <TVout.h>
-    #include <fontALL.h>
-#endif
-
 #ifdef OLED_128x64_U8G_SCREENS
 //    #include <U8glib.h>
 #endif
@@ -483,7 +482,7 @@ void loop()
     /*************************************/
     /*   Processing depending of state   */
     /*************************************/
-
+#ifndef TVOUT_SCREENS
     if(state == STATE_SCREEN_SAVER) {
 #ifdef USE_DIVERSITY
         drawScreen.screenSaver(diversity_mode, pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex));
@@ -504,6 +503,7 @@ void loop()
         time_screen_saver=0;
         return;
     }
+#endif
 
 #ifdef USE_DIVERSITY
     if(state == STATE_DIVERSITY) {
@@ -641,10 +641,11 @@ void loop()
                 }
             }
         }
+#ifndef TVOUT_SCREENS
         if(time_screen_saver+5000 < millis() && time_screen_saver!=0) {
             state = STATE_SCREEN_SAVER;
         }
-
+#endif
         drawScreen.updateSeekMode(state, channelIndex, channel, rssi, pgm_read_word_near(channelFreqTable + channelIndex), seek_found);
 
     }
@@ -674,19 +675,18 @@ void loop()
         // value must be ready
         rssi = readRSSI();
 
-        uint8_t bestChannelName = -1;
-        uint16_t bestChannelFrequency = -1;
         if(state == STATE_SCAN)
         {
             if (rssi > RSSI_SEEK_TRESHOLD)
             {
                 if(rssi_best < rssi) {
                     rssi_best = rssi;
-                     bestChannelName = pgm_read_byte_near(channelNames + channelIndex);
-                     bestChannelFrequency = pgm_read_word_near(channelFreqTable + channelIndex);
                 }
             }
         }
+
+        uint8_t bestChannelName = pgm_read_byte_near(channelNames + channelIndex);
+        uint16_t bestChannelFrequency = pgm_read_word_near(channelFreqTable + channelIndex);
 
         drawScreen.updateBandScanMode((state == STATE_RSSI_SETUP), channel, rssi, bestChannelName, bestChannelFrequency, rssi_setup_min_a, rssi_setup_max_a);
 
@@ -825,10 +825,10 @@ uint16_t readRSSI(char receiver)
 #endif
     for (uint8_t i = 0; i < RSSI_READS; i++)
     {
-        rssiA += analogRead(rssiPinA);//random(RSSI_MAX_VAL-100, RSSI_MAX_VAL);//
+        rssiA += analogRead(rssiPinA);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
 
 #ifdef USE_DIVERSITY
-        rssiB += analogRead(rssiPinB);//random(RSSI_MAX_VAL-100, RSSI_MAX_VAL);//
+        rssiB += analogRead(rssiPinB);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
 #endif
     }
     rssiA = rssiA/RSSI_READS; // average of RSSI_READS readings
