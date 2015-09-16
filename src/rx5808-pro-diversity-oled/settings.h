@@ -1,9 +1,36 @@
+/*
+ * Setings file by Shea Ivey
+
+The MIT License (MIT)
+
+Copyright (c) 2015 Shea Ivey
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 #ifndef settings_h
 #define settings_h
 
 // Choose the display you will be using
-//#define OLED_128x64_ADAFRUIT_SCREENS
-#define TVOUT_SCREENS
+// you will also have to uncomment the includes in the main project.
+#define OLED_128x64_ADAFRUIT_SCREENS
+//#define TVOUT_SCREENS
 // u8glib has performance issues.
 //#define OLED_128x64_U8G_SCREENS
 
@@ -21,14 +48,14 @@
 
 // Receiver PINS
 #define receiverA_led A0
-#define rssiPinA A2
+#define rssiPinA A6
 
 #define useReceiverA 1
 
 #ifdef USE_DIVERSITY
     // Diversity
     #define receiverB_led A1
-    #define rssiPinB A3
+    #define rssiPinB A7
     #define useReceiverAuto 0
     #define useReceiverB 2
     // rssi strenth should be 2% greater than other receiver before switch.
