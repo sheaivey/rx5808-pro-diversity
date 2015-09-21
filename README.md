@@ -40,18 +40,18 @@ The code is also now backward compatible with the original rx5808-pro schematic 
 
 ##Usage
 ####Screens
+![TVOut Screens](docs/img/screens-tvout.jpg "TVOut Screens")
+1. **Mode Select** - Use the up/down buttons to navigate. Hit mode to select. Don't press anything to return to the last mode selected.
 
-1. **Mode Select** - Use the up/down buttons to navigate. Hit mode to select. Don't press anything to return to the last mode selected. ![GUI Screen](docs/img/screen-menu.jpg "Mode Select")
+2. **Auto Scan** - Scans all bands until a signal with good signal strength is found.
 
-2. **Auto Scan** - Scans all bands until a signal with good signal strength is found. ![GUI Screen](docs/img/screen-auto-scan.jpg "Auto Scan")
+3. **Manual Mode** - Will hold on a manualy selected channel.
 
-4. **Band Scaner** - Scans all bands and presents them with a sitnal strength bar graph. ![GUI Screen](docs/img/screen-band-scan.jpg "Band Scaner")
+4. **Band Scaner** - Scans all bands and presents them with a sitnal strength bar graph.
 
-3. **Manual Mode** - Will hold on a manualy selected channel. ![GUI Screen](docs/img/screen-manual.jpg "Manual Mode")
+5. **Diversity** - Select which receiver to use or auto. Also Displays signal strength of each antenna.
 
-5. **Diversity** - Select which receiver to use or auto. Also Displays signal strength of each antenna. ![GUI Screen](docs/img/screen-diversity.jpg "Diversity")
-
-6. **Save** - Saves last used channel and mode for next power cycle. This is also where you enter RSSI calibration mode. ![GUI Screen](docs/img/screen-save.jpg "Save")
+6. **Save** - Saves last used channel and mode for next power cycle. This is also where you enter RSSI calibration mode.
 
 ####Initial Setup
 When powering on for the first time it is best to calibrate your RSSI. To do this follow these steps below. (You can repeat this process as many times as needed for best results.)
@@ -77,7 +77,6 @@ For more information on specific hardware implementation:
 2. [DIY Advanced - Custom Board](/docs/diy-custom-board.md)
 1. [OLED Version - Arduino Nano](/docs/oled-arduino-nano.md)
 3. [rx5808 SPI modification](/docs/rx5808-spi-mod.md)
-4. [Enclosure Documentation](/docs/enclosure.md)
 
 ##Software
 The major software changes are centered around the diversity menu. This required removing the dip switch mode from the origional project. Within the diversity menu you will find RSSI signal strength for each receiver and the ability to select which mode the receivers are operating in (Auto, Receiver A, Receiver B).
