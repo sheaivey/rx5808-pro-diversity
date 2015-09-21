@@ -490,7 +490,7 @@ void loop()
         drawScreen.screenSaver(pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex));
 #endif
         do{
-            delay(10); // timeout delay
+            //delay(10); // timeout delay
 #ifdef USE_DIVERSITY
             drawScreen.updateScreenSaver(active_receiver, readRSSI(), readRSSI(useReceiverA), readRSSI(useReceiverB));
 #else
@@ -515,7 +515,7 @@ void loop()
             drawScreen.diversity(diversity_mode);
             do
             {
-                delay(10); // timeout delay
+                //delay(10); // timeout delay
                 readRSSI();
                 drawScreen.updateDiversity(active_receiver, readRSSI(useReceiverA), readRSSI(useReceiverB));
             }
@@ -647,7 +647,6 @@ void loop()
         }
 #endif
         drawScreen.updateSeekMode(state, channelIndex, channel, rssi, pgm_read_word_near(channelFreqTable + channelIndex), seek_found);
-
     }
     /****************************/
     /*   Processing SCAN MODE   */
