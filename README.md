@@ -20,7 +20,7 @@ The code is also now backward compatible with the original rx5808-pro schematic 
 - **User control** - 3 Button navigation, up, down, select.
 - **Manual Mode** - Set channel manual
 - **Search Mode** - Search next channel based on RSSI
-- **Scanner** - Print spectrum of all 32 channels
+- **Scanner** - Print spectrum of all 40 channels
 - **Save mode** - Save startup mode (manu, seek, scan)
 - **Save channel** - Startup with last saved channel
 - **Beeper** - Acustic feedback on important actions
@@ -66,7 +66,7 @@ I have also added LEDs to represent which antenna is currently being selected.
 
 ![diversity simple schematic](docs/img/rx5808-pro-diversity-schematic-simple.jpg)
 
-For more information on specific hardware implementation:
+For more information on specific hardware implementations:
 
 1. [DIY Simple - Arduino Nano](/docs/diy-arduino-nano.md)
 2. [DIY Advanced - Custom Board](/docs/diy-custom-board.md)
@@ -121,6 +121,8 @@ Please follow [CONTRIBUTING.md](CONTRIBUTING.md) for standard practices regardin
 - Refactored and GUI reworked by Marko Hoepken
 - Universal version my Marko Hoepken
 - Diversity Receiver Board and GUI improvements by Shea Ivey
+- Adding Race Band by Shea Ivey
+- Seperating Display concerns for TVOut and OLED by Shea Ivey
 
 ####License
 The MIT License (MIT)
