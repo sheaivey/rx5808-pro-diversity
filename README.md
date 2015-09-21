@@ -34,23 +34,18 @@ The code is also now backward compatible with the original rx5808-pro schematic 
 - *(REMOVED)* ~~**DIP mode** - Set channel by extern DIP switch~~
 
 ####In the works...
-- Auto switch video from GUI to Receiver on button pressed
-- New board design taking heat concerns into account.
 - Breakout rx5808 functionality into its own library.
 
 ##Usage
 ####Screens
+
 ![TVOut Screens](docs/img/screens-tvout.jpg "TVOut Screens")
+
 1. **Mode Select** - Use the up/down buttons to navigate. Hit mode to select. Don't press anything to return to the last mode selected.
-
 2. **Auto Scan** - Scans all bands until a signal with good signal strength is found.
-
 3. **Manual Mode** - Will hold on a manualy selected channel.
-
 4. **Band Scaner** - Scans all bands and presents them with a sitnal strength bar graph.
-
 5. **Diversity** - Select which receiver to use or auto. Also Displays signal strength of each antenna.
-
 6. **Save** - Saves last used channel and mode for next power cycle. This is also where you enter RSSI calibration mode.
 
 ####Initial Setup
