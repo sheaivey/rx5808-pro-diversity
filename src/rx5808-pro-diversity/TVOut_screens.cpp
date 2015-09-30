@@ -63,6 +63,10 @@ screens::screens() {
 }
 
 char screens::begin() {
+    // 0 if no error.
+    // 1 if x is not divisable by 8.
+    // 2 if y is to large (NTSC only cannot fill PAL vertical resolution by 8bit limit)
+    // 4 if there is not enough memory for the frame buffer.
     return TV.begin(TV_FORMAT, TV_COLS, TV_ROWS);
 }
 
@@ -88,7 +92,10 @@ void screens::mainMenu(uint8_t menu_id) {
     TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Band Scanner"));
     TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("Manual Mode"));
 #ifdef USE_DIVERSITY
-    TV.printPGM(10, 5+4*MENU_Y_SIZE, PSTR("Diversity"));
+    if( isDiversity() )
+    {
+        TV.printPGM(10, 5+4*MENU_Y_SIZE, PSTR("Diversity"));
+    }
 #endif
     TV.printPGM(10, 5+5*MENU_Y_SIZE, PSTR("Save Setup"));
     // selection by inverted box
