@@ -172,11 +172,10 @@ void setup()
     // tune to first channel
 
 
+    // Setup Done - LED ON
+    digitalWrite(led, HIGH);
+
     // Init Display
-    // 0 if no error.
-    // 1 if x is not divisable by 8.
-    // 2 if y is to large (NTSC only cannot fill PAL vertical resolution by 8bit limit)
-    // 4 if there is not enough memory for the frame buffer.
     if (drawScreen.begin() > 0) {
         // on Error flicker LED
         while (true) { // stay in ERROR for ever
@@ -184,11 +183,8 @@ void setup()
             delay(100);
         }
     }
-    // rodate the display outpur 180 degrees.
+    // rodate the display output 180 degrees.
     // drawScreen.flip(); // OLED only!
-
-    // Setup Done - LED ON
-    digitalWrite(led, HIGH);
 
     // use values only of EEprom is not 255 = unsaved
     uint8_t eeprom_check = EEPROM.read(EEPROM_ADR_STATE);
@@ -291,7 +287,13 @@ void loop()
                 break;
             #ifdef USE_DIVERSITY
                 case 3: // Diversity
-                    state=STATE_DIVERSITY;
+                    if(isDiversity()) {
+                        state=STATE_DIVERSITY;
+                    }
+                    else {
+                        menu_id++;
+                        state=STATE_SAVE;
+                    }
                 break;
             #else
                 case 3: // Skip
@@ -335,6 +337,9 @@ void loop()
                 }
                 else if(digitalRead(buttonDown) == LOW) {
                     menu_id--;
+                    if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
+                        menu_id--;
+                    }
                 }
 
                 if (menu_id > MAX_MENU)
@@ -920,6 +925,7 @@ uint16_t readRSSI(char receiver)
 #endif
     return (rssi);
 }
+
 void setReceiver(uint8_t receiver) {
 #ifdef USE_DIVERSITY
     if(receiver == useReceiverA)
@@ -939,20 +945,11 @@ void setReceiver(uint8_t receiver) {
     active_receiver = receiver;
 }
 
-// Private function: from http://arduino.cc/playground/Code/AvailableMemory
-int freeRam () {
-  extern int __heap_start, *__brkval;
-  int v;
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-}
-
 void setChannelModule(uint8_t channel)
 {
   uint8_t i;
   uint16_t channelData;
 
-  //channelData = pgm_read_word(&channelTable[channel]);
-  //channelData = channelTable[channel];
   channelData = pgm_read_word_near(channelTable + channel);
 
   // bit bash out 25 bits of data

@@ -36,6 +36,7 @@ SOFTWARE.
 //#define OLED_128x64_U8G_SCREENS
 
 // this will be displayed on the screensaver.
+// Up to 10 letters
 #define CALL_SIGN "CALL SIGN"
 
 // Feature Togglels
@@ -93,7 +94,7 @@ SOFTWARE.
 // 80% under max value for RSSI
 #define RSSI_SEEK_TRESHOLD 80
 // scan loops for setup run
-#define RSSI_SETUP_RUN 10
+#define RSSI_SETUP_RUN 3
 
 #define STATE_SEEK_FOUND 0
 #define STATE_SEEK 1
@@ -128,6 +129,8 @@ SOFTWARE.
     #define EEPROM_ADR_RSSI_MIN_B_H 8
     #define EEPROM_ADR_RSSI_MAX_B_L 9
     #define EEPROM_ADR_RSSI_MAX_B_H 10
+
+    #define isDiversity() (analogRead(rssiPinB) >= 5)
 #endif
 
 #endif // file_defined
