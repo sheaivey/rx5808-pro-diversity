@@ -99,6 +99,7 @@ uint8_t active_receiver = useReceiverA;
 uint8_t diversity_mode = useReceiverAuto;
 char diversity_check_count = 0;
 #endif
+uint8_t rssi_seek_threshold = RSSI_SEEK_TRESHOLD;
 uint8_t hight = 0;
 uint8_t state = START_STATE;
 uint8_t state_last_used=START_STATE;
@@ -111,7 +112,6 @@ uint8_t force_seek=0;
 uint8_t seek_direction=1;
 unsigned long time_of_tune = 0;        // will store last time when tuner was changed
 unsigned long time_screen_saver = 0;
-uint8_t last_maker_pos=0;
 uint8_t last_active_channel=0;
 uint8_t first_channel_marker=1;
 uint8_t update_frequency_view=0;
@@ -415,6 +415,8 @@ void loop()
                 drawScreen.bandScanMode(state);
             break;
             case STATE_SEEK: // seek mode
+                rssi_seek_threshold = RSSI_SEEK_TRESHOLD;
+                rssi_best=RSSI_MIN_VAL;
             case STATE_MANUAL: // manual mode
                 state_last_used=state;
                 if (state == STATE_MANUAL)
@@ -426,6 +428,11 @@ void loop()
                     time_screen_saver=0; // dont show screen saver until we found a channel.
                 }
                 drawScreen.seekMode(state);
+
+                // return user to their saved channel after bandscan
+                if(state_last_used == STATE_SCAN || state_last_used == STATE_RSSI_SETUP) {
+                    channelIndex=EEPROM.read(EEPROM_ADR_TUNE);
+                }
 
                 first_channel_marker=1;
                 update_frequency_view=1;
@@ -587,23 +594,15 @@ void loop()
         // show signal strength
         wait_rssi_ready();
         rssi = readRSSI();
+        rssi_best = (rssi > rssi_best) ? rssi : rssi_best;
         channel=channel_from_index(channelIndex); // get 0...40 index depending of current channel
-
-        if(channel < CHANNEL_MAX_INDEX)
-        {
-            last_maker_pos=channel;
-        }
-        else
-        {
-          //  No action on last position to keep frame intact
-        }
 
         // handling for seek mode after screen and RSSI has been fully processed
         if(state == STATE_SEEK) //
         { // SEEK MODE
             if(!seek_found) // search if not found
             {
-                if ((!force_seek) && (rssi > RSSI_SEEK_TRESHOLD)) // check for found channel
+                if ((!force_seek) && (rssi > rssi_seek_threshold)) // check for found channel
                 {
                     seek_found=1;
                     time_screen_saver=millis();
@@ -619,12 +618,17 @@ void loop()
                     channel+=seek_direction;
                     if (channel > CHANNEL_MAX)
                     {
+                        // calculate next pass new seek threshold
+                        rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0));
                         channel=CHANNEL_MIN;
                     }
                     else if(channel < CHANNEL_MIN)
                     {
+                        // calculate next pass new seek threshold
+                        rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0));
                         channel=CHANNEL_MAX;
                     }
+                    rssi_seek_threshold = rssi_seek_threshold < 5 ? 5 : rssi_seek_threshold; // make sure we are not stopping on everyting
                     channelIndex = pgm_read_byte_near(channelList + channel);
                 }
             }
@@ -665,15 +669,7 @@ void loop()
             setChannelModule(channelIndex);
             last_channel_index=channelIndex;
         }
-        // channel marker
-        if(channel < CHANNEL_MAX_INDEX)
-        {
-            last_maker_pos=channel;
-        }
-        else
-        {
-          //  No action on last position to keep frame intact
-        }
+
         // print bar for spectrum
         wait_rssi_ready();
         // value must be ready
