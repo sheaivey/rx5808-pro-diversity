@@ -121,7 +121,7 @@ uint8_t last_dip_band=255;
 uint8_t scan_start=0;
 uint8_t first_tune=1;
 uint8_t force_menu_redraw=0;
-uint16_t rssi_best=RSSI_MIN_VAL; // used for band scaner
+uint16_t rssi_best=0; // used for band scaner
 uint16_t rssi_min_a=0;
 uint16_t rssi_max_a=0;
 uint16_t rssi_setup_min_a=0;
@@ -409,7 +409,7 @@ void loop()
                 // trigger new scan from begin
                 channel=CHANNEL_MIN;
                 channelIndex = pgm_read_byte_near(channelList + channel);
-                rssi_best=RSSI_MIN_VAL;
+                rssi_best=0;
                 scan_start=1;
 
                 drawScreen.bandScanMode(state);
@@ -443,6 +443,9 @@ void loop()
                 // diversity menu is below this is just a place holder.
             break;
 #endif
+            case STATE_SETUP_MENU:
+
+            break;
             case STATE_SAVE:
                 EEPROM.write(EEPROM_ADR_TUNE,channelIndex);
                 EEPROM.write(EEPROM_ADR_STATE,state_last_used);
@@ -488,7 +491,6 @@ void loop()
             break;
         } // end switch
 
-        //display.display();
         last_state=state;
     }
     /*************************************/
@@ -743,10 +745,23 @@ void loop()
             last_state=255; // force redraw by fake state change ;-)
             channel=CHANNEL_MIN;
             scan_start=1;
-            rssi_best=RSSI_MIN_VAL;
+            rssi_best=0;
         }
         // update index after channel change
         channelIndex = pgm_read_byte_near(channelList + channel);
+    }
+
+
+    if(state == STATE_SETUP_MENU)
+    {
+        // draw setup menu
+            // Save Frequency
+            // Channel Order Channel/Frequency
+            // Beeps enable/disable
+            // Calibrate RSSI
+            // Edit Call Sign
+
+            // draw call sign menu
     }
 
     /*****************************/
