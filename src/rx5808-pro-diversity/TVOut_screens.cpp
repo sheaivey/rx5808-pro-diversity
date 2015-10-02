@@ -132,7 +132,7 @@ void screens::seekMode(uint8_t state) {
 
 }
 
-void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked) {
+void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, uint8_t rssi_seek_threshold, bool locked) {
     // display refresh handler
     TV.select_font(font8x8);
     if(channelIndex != last_channel) // only updated on changes

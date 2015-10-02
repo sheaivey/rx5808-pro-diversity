@@ -83,7 +83,7 @@ char screens::begin() {
         display.print(PSTR2("DISABLED"));
     }
 #endif
-    display.setCursor(((display.width() - (strlen(PSTR2(CALL_SIGN))*13)) / 2),8*4+4);
+    display.setCursor(((display.width() - (strlen(PSTR2(CALL_SIGN))*12)) / 2),8*4+4);
     display.setTextSize(2);
     display.print(PSTR2(CALL_SIGN));
     display.display();
@@ -177,7 +177,7 @@ void screens::seekMode(uint8_t state) {
     display.display();
 }
 
-void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked) {
+void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, uint8_t rssi_seek_threshold, bool locked) {
     // display refresh handler
     if(channelIndex != last_channel) // only updated on changes
     {
@@ -231,6 +231,14 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK) //
     { // SEEK MODE
+
+        rssi_scaled=map(rssi_seek_threshold, 1, 100, 1, 14);
+
+        display.fillRect(1,display.height()-12-14,2,14,BLACK);
+        display.drawLine(1,display.height()-12-rssi_scaled,2,display.height()-12-rssi_scaled, WHITE);
+        display.fillRect(display.width()-3,display.height()-12-14,2,14,BLACK);
+        display.drawLine(display.width()-3,display.height()-12-rssi_scaled,display.width(),display.height()-12-rssi_scaled, WHITE);
+
         if(locked) // search if not found
         {
             display.setTextColor(BLACK,WHITE);

@@ -416,7 +416,7 @@ void loop()
             break;
             case STATE_SEEK: // seek mode
                 rssi_seek_threshold = RSSI_SEEK_TRESHOLD;
-                rssi_best=RSSI_MIN_VAL;
+                rssi_best=0;
             case STATE_MANUAL: // manual mode
                 state_last_used=state;
                 if (state == STATE_MANUAL)
@@ -595,11 +595,16 @@ void loop()
         wait_rssi_ready();
         rssi = readRSSI();
         rssi_best = (rssi > rssi_best) ? rssi : rssi_best;
+
         channel=channel_from_index(channelIndex); // get 0...40 index depending of current channel
 
         // handling for seek mode after screen and RSSI has been fully processed
         if(state == STATE_SEEK) //
         { // SEEK MODE
+
+            // recalculate rssi_seek_threshold
+            ((int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0)) > rssi_seek_threshold) ? (rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0))) : false;
+
             if(!seek_found) // search if not found
             {
                 if ((!force_seek) && (rssi > rssi_seek_threshold)) // check for found channel
@@ -621,12 +626,14 @@ void loop()
                         // calculate next pass new seek threshold
                         rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0));
                         channel=CHANNEL_MIN;
+                        rssi_best = 0;
                     }
                     else if(channel < CHANNEL_MIN)
                     {
                         // calculate next pass new seek threshold
                         rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0));
                         channel=CHANNEL_MAX;
+                        rssi_best = 0;
                     }
                     rssi_seek_threshold = rssi_seek_threshold < 5 ? 5 : rssi_seek_threshold; // make sure we are not stopping on everyting
                     channelIndex = pgm_read_byte_near(channelList + channel);
@@ -655,7 +662,7 @@ void loop()
             state = STATE_SCREEN_SAVER;
         }
 #endif
-        drawScreen.updateSeekMode(state, channelIndex, channel, rssi, pgm_read_word_near(channelFreqTable + channelIndex), seek_found);
+        drawScreen.updateSeekMode(state, channelIndex, channel, rssi, pgm_read_word_near(channelFreqTable + channelIndex), rssi_seek_threshold, seek_found);
     }
     /****************************/
     /*   Processing SCAN MODE   */
