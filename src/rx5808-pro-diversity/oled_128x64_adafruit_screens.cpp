@@ -51,7 +51,7 @@ screens::screens() {
     last_rssi = 0;
 }
 
-char screens::begin() {
+char screens::begin(const char *call_sign) {
     // Set the address of your OLED Display.
     // 128x64 ONLY!!
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D or 0x3C (for the 128x64)
@@ -60,7 +60,7 @@ char screens::begin() {
 
     display.fillRect(0, 0, display.width(), 11,WHITE);
     display.setTextColor(BLACK);
-    display.setCursor(((display.width() - (strlen(PSTR2(CALL_SIGN))*6)) / 2),2);
+    display.setCursor(((display.width() - (10*6)) / 2),2);
     display.print(PSTR2("Boot Check"));
 
     display.setTextColor(WHITE);
@@ -83,9 +83,9 @@ char screens::begin() {
         display.print(PSTR2("DISABLED"));
     }
 #endif
-    display.setCursor(((display.width() - (strlen(PSTR2(CALL_SIGN))*12)) / 2),8*4+4);
+    display.setCursor(((display.width() - (strlen(call_sign)*12)) / 2),8*4+4);
     display.setTextSize(2);
-    display.print(PSTR2(CALL_SIGN));
+    display.print(call_sign);
     display.display();
     delay(2000);
     return 0; // no errors
@@ -140,7 +140,7 @@ void screens::mainMenu(uint8_t menu_id) {
 #endif
     display.setTextColor(menu_id == 4 ? BLACK : WHITE);
     display.setCursor(5,10*4+13);
-    display.print(PSTR2("SAVE SETUP"));
+    display.print(PSTR2("SETUP MENU"));
 
     display.display();
 }
@@ -329,10 +329,10 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     last_channel = channel;
 }
 
-void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency) {
-    screenSaver(-1, channelName, channelFrequency);
+void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency, const char *call_sign) {
+    screenSaver(-1, channelName, channelFrequency, call_sign);
 }
-void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency) {
+void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency, const char *call_sign) {
     reset();
     display.setTextSize(6);
     display.setTextColor(WHITE);
@@ -340,7 +340,7 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
     display.print(channelName, HEX);
     display.setTextSize(1);
     display.setCursor(70,0);
-    display.print(PSTR2(CALL_SIGN));
+    display.print(call_sign);
     display.setTextSize(2);
     display.setCursor(70,28);
     display.setTextColor(WHITE);
@@ -500,6 +500,63 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
     display.display();
 }
 #endif
+
+
+void screens::setupMenu(){
+}
+void screens::updateSetupMenu(uint8_t menu_id, bool settings_beeps, bool settings_orderby_channel, const char *call_sign, char editing){
+    reset();
+    drawTitleBox(PSTR2("SETUP MENU"));
+    //selected
+    display.fillRect(0, 10*menu_id+12, display.width(), 10, WHITE);
+
+    display.setTextColor(menu_id == 0 ? BLACK : WHITE);
+    display.setCursor(5,10*1+3);
+    display.print(PSTR2("SEEK BY:"));
+    display.setCursor(display.width()-6*9-3,10*1+3);
+    if(settings_orderby_channel) {
+        display.print(PSTR2("  CHANNEL"));
+    }
+    else {
+        display.print(PSTR2("FREQUENCY"));
+    }
+
+    display.setTextColor(menu_id == 1 ? BLACK : WHITE);
+    display.setCursor(5,10*2+3);
+    display.print(PSTR2("BEEPS:"));
+    display.setCursor(display.width()-6*3-3,10*2+3);
+    if(settings_beeps) {
+        display.print(PSTR2(" ON"));
+    }
+    else {
+        display.print(PSTR2("OFF"));
+    }
+
+    display.setTextColor(menu_id == 2 ? BLACK : WHITE);
+    display.setCursor(5,10*3+3);
+    display.print(PSTR2("CALIBRATE RSSI"));
+
+    display.setTextColor(menu_id == 3 ? BLACK : WHITE);
+    display.setCursor(5,10*4+3);
+    display.print(PSTR2("CALL SIGN:"));
+    display.setCursor(display.width()-6*10-2,10*4+3);
+    if(editing>=0) {
+        display.fillRect(display.width()-6*10-4, 10*3+13, 6*10+3, 8, BLACK);
+        display.fillRect(display.width()-6*(10-editing)-3, 10*3+13, 7, 8, WHITE); //set cursor
+        for(uint8_t i=0; i<10; i++) {
+            display.setTextColor(i == editing ? BLACK : WHITE);
+            display.print(call_sign[i]);
+        }
+    }
+    else {
+        display.print(call_sign);
+    }
+
+    display.setTextColor(menu_id == 4 ? BLACK : WHITE);
+    display.setCursor(5,10*5+3);
+    display.print(PSTR2("SAVE & EXIT"));
+    display.display();
+}
 
 void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency) {
     reset();
