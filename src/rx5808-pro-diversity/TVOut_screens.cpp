@@ -62,7 +62,7 @@ screens::screens() {
     last_rssi = 0;
 }
 
-char screens::begin() {
+char screens::begin(const char *call_sign) {
     // 0 if no error.
     // 1 if x is not divisable by 8.
     // 2 if y is to large (NTSC only cannot fill PAL vertical resolution by 8bit limit)
@@ -364,7 +364,15 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
 }
 #endif
 
-void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency) {
+
+void screens::setupMenu(){
+}
+void screens::updateSetupMenu(uint8_t menu_id, bool settings_beeps, bool settings_orderby_channel, const char *call_sign, char editing){
+    reset();
+    drawTitleBox("SETUP MENU");
+}
+
+void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency, const char *call_sign) {
     reset();
     drawTitleBox("SAVE SETTINGS");
     TV.printPGM(10, 5+1*MENU_Y_SIZE, PSTR("Mode:"));

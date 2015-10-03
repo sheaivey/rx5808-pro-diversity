@@ -134,4 +134,8 @@ SOFTWARE.
     #define isDiversity() (analogRead(rssiPinB) >= 5)
 #endif
 
+#define EEPROM_ADR_BEEP 11
+#define EEPROM_ADR_ORDERBY 12
+#define EEPROM_ADR_CALLSIGN 20
+
 #endif // file_defined

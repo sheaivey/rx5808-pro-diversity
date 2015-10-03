@@ -512,10 +512,9 @@ void screens::updateSetupMenu(uint8_t menu_id, bool settings_beeps, bool setting
 
     display.setTextColor(menu_id == 0 ? BLACK : WHITE);
     display.setCursor(5,10*1+3);
-    display.print(PSTR2("SEEK BY:"));
-    display.setCursor(display.width()-6*9-3,10*1+3);
+    display.print(PSTR2("ORDER: "));
     if(settings_orderby_channel) {
-        display.print(PSTR2("  CHANNEL"));
+        display.print(PSTR2("CHANNEL  "));
     }
     else {
         display.print(PSTR2("FREQUENCY"));
@@ -523,26 +522,21 @@ void screens::updateSetupMenu(uint8_t menu_id, bool settings_beeps, bool setting
 
     display.setTextColor(menu_id == 1 ? BLACK : WHITE);
     display.setCursor(5,10*2+3);
-    display.print(PSTR2("BEEPS:"));
-    display.setCursor(display.width()-6*3-3,10*2+3);
+    display.print(PSTR2("BEEPS: "));
     if(settings_beeps) {
-        display.print(PSTR2(" ON"));
+        display.print(PSTR2("ON "));
     }
     else {
         display.print(PSTR2("OFF"));
     }
 
+
     display.setTextColor(menu_id == 2 ? BLACK : WHITE);
     display.setCursor(5,10*3+3);
-    display.print(PSTR2("CALIBRATE RSSI"));
-
-    display.setTextColor(menu_id == 3 ? BLACK : WHITE);
-    display.setCursor(5,10*4+3);
-    display.print(PSTR2("CALL SIGN:"));
-    display.setCursor(display.width()-6*10-2,10*4+3);
+    display.print(PSTR2("SIGN : "));
     if(editing>=0) {
-        display.fillRect(display.width()-6*10-4, 10*3+13, 6*10+3, 8, BLACK);
-        display.fillRect(display.width()-6*(10-editing)-3, 10*3+13, 7, 8, WHITE); //set cursor
+        display.fillRect(6*6+5, 10*2+13, display.width()-(6*6+6), 8, BLACK);
+        display.fillRect(6*7+6*(editing)+4, 10*2+13, 7, 8, WHITE); //set cursor
         for(uint8_t i=0; i<10; i++) {
             display.setTextColor(i == editing ? BLACK : WHITE);
             display.print(call_sign[i]);
@@ -552,13 +546,17 @@ void screens::updateSetupMenu(uint8_t menu_id, bool settings_beeps, bool setting
         display.print(call_sign);
     }
 
+    display.setTextColor(menu_id == 3 ? BLACK : WHITE);
+    display.setCursor(5,10*4+3);
+    display.print(PSTR2("CALIBRATE RSSI"));
+
     display.setTextColor(menu_id == 4 ? BLACK : WHITE);
     display.setCursor(5,10*5+3);
     display.print(PSTR2("SAVE & EXIT"));
     display.display();
 }
 
-void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency) {
+void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency,const char *call_sign) {
     reset();
     drawTitleBox(PSTR2("SAVE SETTINGS"));
 
@@ -613,7 +611,13 @@ void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency
     display.print(PSTR2("FREQ:     GHz"));
     display.setCursor(38,8*4+4);
     display.print(channelFrequency);
-    display.setCursor(((display.width()-11*6)/2),8*5+4);
+
+    display.setCursor(5,8*5+4);
+    display.print(PSTR2("SIGN:"));
+    display.setCursor(38,8*5+4);
+    display.print(call_sign);
+
+    display.setCursor(((display.width()-11*6)/2),8*6+4);
     display.print(PSTR2("-- SAVED --"));
     display.display();
 }

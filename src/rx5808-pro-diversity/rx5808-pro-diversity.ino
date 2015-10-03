@@ -176,8 +176,11 @@ void setup()
     uint8_t eeprom_check = EEPROM.read(EEPROM_ADR_STATE);
     if(eeprom_check == 255) // unused
     {
+        // save 8 bit
         EEPROM.write(EEPROM_ADR_STATE,START_STATE);
         EEPROM.write(EEPROM_ADR_TUNE,CHANNEL_MIN_INDEX);
+        EEPROM.write(EEPROM_ADR_BEEP,settings_beeps);
+        EEPROM.write(EEPROM_ADR_ORDERBY,settings_orderby_channel);
         // save 16 bit
         EEPROM.write(EEPROM_ADR_RSSI_MIN_A_L,lowByte(RSSI_MIN_VAL));
         EEPROM.write(EEPROM_ADR_RSSI_MIN_A_H,highByte(RSSI_MIN_VAL));
@@ -186,6 +189,10 @@ void setup()
         EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,highByte(RSSI_MAX_VAL));
 
         // save default call sign
+        strcpy(call_sign, CALL_SIGN); // load callsign
+        for(uint8_t i = 0;i<sizeof(call_sign);i++) {
+            EEPROM.write(EEPROM_ADR_CALLSIGN+i,call_sign[i]);
+        }
 
 
 
@@ -204,6 +211,14 @@ void setup()
     // read last setting from eeprom
     state=EEPROM.read(EEPROM_ADR_STATE);
     channelIndex=EEPROM.read(EEPROM_ADR_TUNE);
+    settings_beeps=EEPROM.read(EEPROM_ADR_BEEP);
+    settings_orderby_channel=EEPROM.read(EEPROM_ADR_ORDERBY);
+
+    // load saved call sign
+    for(uint8_t i = 0;i<sizeof(call_sign);i++) {
+        call_sign[i] = EEPROM.read(EEPROM_ADR_CALLSIGN+i);
+    }
+
     rssi_min_a=((EEPROM.read(EEPROM_ADR_RSSI_MIN_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_A_L)));
     rssi_max_a=((EEPROM.read(EEPROM_ADR_RSSI_MAX_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_A_L)));
 #ifdef USE_DIVERSITY
@@ -213,7 +228,6 @@ void setup()
 #endif
     force_menu_redraw=1;
 
-    strcpy(call_sign, CALL_SIGN); // load callsign
     // tune to first channel
 
     // Setup Done - LED ON
@@ -456,42 +470,23 @@ void loop()
             case STATE_SAVE:
                 EEPROM.write(EEPROM_ADR_TUNE,channelIndex);
                 EEPROM.write(EEPROM_ADR_STATE,state_last_used);
+                EEPROM.write(EEPROM_ADR_BEEP,settings_beeps);
+                EEPROM.write(EEPROM_ADR_ORDERBY,settings_orderby_channel);
+                // save call sign
+                for(uint8_t i = 0;i<sizeof(call_sign);i++) {
+                    EEPROM.write(EEPROM_ADR_CALLSIGN+i,call_sign[i]);
+                }
 #ifdef USE_DIVERSITY
                 EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
 #endif
-                drawScreen.save(state_last_used, channelIndex, pgm_read_word_near(channelFreqTable + channelIndex));
-                uint8_t loop=0;
-                for (loop=0;loop<5;loop++)
+                drawScreen.save(state_last_used, channelIndex, pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
+                for (uint8_t loop=0;loop<5;loop++)
                 {
                     beep(100); // beep
                     delay(100);
                 }
-                delay(1000);
-                drawScreen.updateSave("HOLD MODE RSSI SETUP");
-                delay(1000);
-                delay(1000);
-                if (digitalRead(buttonMode) == LOW) // to RSSI setup
-                {
-                    drawScreen.updateSave("ENTERING RSSI SETUP ");
-                    uint8_t loop=0;
-                    for (loop=0;loop<10;loop++)
-                    {
-                        #define RSSI_SETUP_BEEP 25
-                        beep(RSSI_SETUP_BEEP); // beep & debounce
-                        delay(RSSI_SETUP_BEEP); // debounce
-                    }
-                    state=STATE_RSSI_SETUP;
-                    while(digitalRead(buttonMode) == LOW)
-                    {
-                        // wait for release
-                    }
-                    delay(KEY_DEBOUNCE);  // debounce
-                }
-                else
-                {
-                    delay(1000);
-                    state=state_last_used; // return to saved function
-                }
+                delay(3000);
+                state=state_last_used; // return to saved function
                 force_menu_redraw=1; // we change the state twice, must force redraw of menu
 
             // selection by inverted box
@@ -796,15 +791,21 @@ void loop()
                     case 1:// Beeps enable/disable
                         settings_beeps = !settings_beeps;
                         break;
-                    case 2:// Calibrate RSSI
-                        in_menu = 0; // save & exit menu
-                        state=STATE_RSSI_SETUP;
-                        break;
-                    case 3:// Edit Call Sign
+                    case 2:// Edit Call Sign
                         editing++;
                         if(editing>9) {
                             editing=-1;
                         }
+                        break;
+                    case 3:// Calibrate RSSI
+                        in_menu = 0;
+                        for (uint8_t loop=0;loop<10;loop++)
+                        {
+                            #define RSSI_SETUP_BEEP 25
+                            beep(RSSI_SETUP_BEEP); // beep & debounce
+                            delay(RSSI_SETUP_BEEP); // debounce
+                        }
+                        state=STATE_RSSI_SETUP;
                         break;
                     case 4:
                         in_menu = 0; // save & exit menu
@@ -818,6 +819,7 @@ void loop()
                 }
                 else { // change current letter in place
                     call_sign[editing]++;
+                    call_sign[editing] > '}' ? call_sign[editing] = ' ' : false; // loop to oter end
                 }
 
             }
@@ -827,6 +829,7 @@ void loop()
                 }
                 else { // change current letter in place
                     call_sign[editing]--;
+                    call_sign[editing] < ' ' ? call_sign[editing] = '}' : false; // loop to oter end
                 }
             }
 
