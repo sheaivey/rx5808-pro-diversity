@@ -47,7 +47,7 @@ class screens
 
     public:
         screens();
-        char begin();
+        char begin(const char *call_sign);
         void flip();
 
         // MAIN MENU
@@ -62,8 +62,8 @@ class screens
         void updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, uint8_t channelName, uint16_t channelFrequency, uint16_t rssi_setup_min_a, uint16_t rssi_setup_max_a);
 
         // SCREEN SAVER
-        void screenSaver(uint8_t channelName, uint16_t channelFrequency);
-        void screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency);
+        void screenSaver(uint8_t channelName, uint16_t channelFrequency, const char *call_sign);
+        void screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency, const char *call_sign);
         void updateScreenSaver(uint8_t rssi);
         void updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssiA, uint8_t rssiB); // diversity
 
