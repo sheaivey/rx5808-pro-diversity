@@ -40,14 +40,14 @@ SOFTWARE.
 // uncomment depending on the display you are using.
 // this is an issue with the arduino preprocessor
 #ifdef TVOUT_SCREENS
-//    #include <TVout.h>
-//    #include <fontALL.h>
+    #include <TVout.h>
+    #include <fontALL.h>
 #endif
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
-    #include <Adafruit_SSD1306.h>
-    #include <Adafruit_GFX.h>
-    #include <Wire.h>
-    #include <SPI.h>
+//    #include <Adafruit_SSD1306.h>
+//    #include <Adafruit_GFX.h>
+//    #include <Wire.h>
+//    #include <SPI.h>
 #endif
 #ifdef OLED_128x64_U8G_SCREENS
 //    #include <U8glib.h>
@@ -791,6 +791,7 @@ void loop()
                     case 1:// Beeps enable/disable
                         settings_beeps = !settings_beeps;
                         break;
+
                     case 2:// Edit Call Sign
                         editing++;
                         if(editing>9) {
@@ -816,6 +817,11 @@ void loop()
             else if(digitalRead(buttonUp) == LOW) {
                 if(editing == -1) {
                     menu_id++;
+#ifdef TVOUT_SCREENS
+                    if(menu_id == 2) {
+                        menu_id++;
+                    }
+#endif
                 }
                 else { // change current letter in place
                     call_sign[editing]++;
@@ -826,6 +832,12 @@ void loop()
             else if(digitalRead(buttonDown) == LOW) {
                 if(editing == -1) {
                     menu_id--;
+
+#ifdef TVOUT_SCREENS
+                    if(menu_id == 2) {
+                        menu_id--;
+                    }
+#endif
                 }
                 else { // change current letter in place
                     call_sign[editing]--;
