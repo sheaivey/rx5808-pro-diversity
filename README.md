@@ -1,11 +1,11 @@
 #Introduction
-This project originated [here](https://code.google.com/p/rx5808-pro/) and has been modified to include diversity receiver menu.
-
-The main goal of this fork was to add diversity to an already amazing feature set. Please see the following video for a quick intro of the project.
+The main goal of this project is to add diversity to an already amazing feature set. Please see the following video for a quick intro of the project.
 
 [![Video](http://img.youtube.com/vi/NwnQCUikqvI/0.jpg)](http://www.youtube.com/watch?v=NwnQCUikqvI)
 
 The code is also now backward compatible with the original rx5808-pro schematic minus diversity and dip switch mode. For details on updating click [here](/docs/diy-arduino-nano.md).
+
+This project originated [here](https://code.google.com/p/rx5808-pro/) and has been modified to include diversity receiver menu.
 
 ## Table of Contents
 1. [Features](#features)
@@ -31,10 +31,8 @@ The code is also now backward compatible with the original rx5808-pro schematic 
 - *(NEW)* **Race Band** - Added band C/Immersion Race for a total of 40 supported channels.
 - *(NEW)* **Backward Compatibility** - Use this code with your existing setup.
 - *(NEW)* **OLED Version** - Use a 128x64 OLED Display instead of TV_OUT.
+- *(NEW)* **Setup Menu** - Creating menu for toggling settings.
 - *(REMOVED)* ~~**DIP mode** - Set channel by extern DIP switch~~
-
-####In the works...
-- Breakout rx5808 functionality into its own library.
 
 ##Usage
 ####Screens
@@ -46,16 +44,21 @@ The code is also now backward compatible with the original rx5808-pro schematic 
 3. **Manual Mode** - Will hold on a manualy selected channel.
 4. **Band Scaner** - Scans all bands and presents them with a sitnal strength bar graph.
 5. **Diversity** - Select which receiver to use or auto. Also Displays signal strength of each antenna.
-6. **Save** - Saves last used channel and mode for next power cycle. This is also where you enter RSSI calibration mode.
+6. **Setup Menu** - Saves last used channel and mode for next power cycle. This is also where you enter RSSI calibration mode.
+    1. **ORDER** - Change the Manual Mode channel seek order by frequency or channel number.
+    2. **BEEPS** - Turn beeps on or off.
+    3. **SIGN** - Edit your call sign. ( OLED Only )
+    4. **Calibrate RSSI** - Calibrate the min and max RSSI values.
+    5. **Save & Exit**
 
 ####Initial Setup
 When powering on for the first time it is best to calibrate your RSSI. To do this follow these steps below. (You can repeat this process as many times as needed for best results.)
 
 1. Power on your receiver and transmitter and place them about 10 to 20 feet apart from one another. (If you are using directional antennas make sure they are pointed at your transmitter for best results.)
-2. next navigate to the "Save Setup" menu.
-3. Wait for 1 second then hold Mode button for 3 seconds.
-4. when you release the mode button you will enter RSSI calibration screen. This will scan all channels 10 times getting the min and max RSSI strength.
-5. Once all 10 scans are complete you will be returned to the last home screen. You should now be able to have accurate RSSI readings and also auto scan to active channels.
+2. Next navigate to the "Setup Menu".
+3. Next navigate to "Calibrate RSSI".
+4. Now that you are in the RSSI calibration screen, the receiver will scan all channels 3 times getting the min and max RSSI strength.
+5. Once all 3 scans are complete you will be returned to the last home screen. You should now be able to have accurate RSSI readings and also auto scan to active channels.
 
 ##Hardware
 This project is centered around the rx5808 5.8ghz receiver module which can be found at a number of online stores.
@@ -117,12 +120,13 @@ Please follow [CONTRIBUTING.md](CONTRIBUTING.md) for standard practices regardin
 - SPI driver based on fs_skyrf_58g-main.c Written by Simon Chambers
 - TVOUT by Myles Metzel
 - Scanner by Johan Hermen
-- Inital 2 Button version by Peter (pete1990)
+- Initial 2 Button version by Peter (pete1990)
 - Refactored and GUI reworked by Marko Hoepken
 - Universal version my Marko Hoepken
 - Diversity Receiver Board and GUI improvements by Shea Ivey
 - Adding Race Band by Shea Ivey
-- Seperating Display concerns for TVOut and OLED by Shea Ivey
+- Separating Display concerns for TVOut and OLED by Shea Ivey
+- Adding Setup Menu by Shea Ivey
 
 ####License
 The MIT License (MIT)
