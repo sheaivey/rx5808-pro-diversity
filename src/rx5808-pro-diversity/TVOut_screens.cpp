@@ -62,7 +62,7 @@ screens::screens() {
     last_rssi = 0;
 }
 
-char screens::begin() {
+char screens::begin(const char *call_sign) {
     // 0 if no error.
     // 1 if x is not divisable by 8.
     // 2 if y is to large (NTSC only cannot fill PAL vertical resolution by 8bit limit)
@@ -97,7 +97,7 @@ void screens::mainMenu(uint8_t menu_id) {
         TV.printPGM(10, 5+4*MENU_Y_SIZE, PSTR("Diversity"));
     }
 #endif
-    TV.printPGM(10, 5+5*MENU_Y_SIZE, PSTR("Save Setup"));
+    TV.printPGM(10, 5+5*MENU_Y_SIZE, PSTR("Setup Menu"));
     // selection by inverted box
 
     TV.draw_rect(0,3+(menu_id+1)*MENU_Y_SIZE,127,12,  WHITE, INVERT);
@@ -132,7 +132,7 @@ void screens::seekMode(uint8_t state) {
 
 }
 
-void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked) {
+void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, uint8_t rssi_seek_threshold, bool locked) {
     // display refresh handler
     TV.select_font(font8x8);
     if(channelIndex != last_channel) // only updated on changes
@@ -192,6 +192,13 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK)
     { // SEEK MODE
+
+        rssi_scaled=map(rssi_seek_threshold, 1, 100, 1, SCANNER_BAR_MINI_SIZE);
+
+        TV.draw_rect(1,(TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE),2,SCANNER_BAR_MINI_SIZE-1,BLACK,BLACK);
+        TV.draw_line(1,(TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled),3,(TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), WHITE);
+        TV.draw_rect(TV_X_MAX-2,(TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE),1,SCANNER_BAR_MINI_SIZE-1,BLACK,BLACK);
+        TV.draw_line(TV_X_MAX-2,(TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled),TV_X_MAX,(TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), WHITE);
         if(last_channel != channelIndex) {
             // fix title flicker
             TV.draw_rect(0,0,127,14, WHITE,BLACK);
@@ -291,10 +298,10 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     last_channel = channel;
 }
 
-void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency) {
-    screenSaver(-1, channelName, channelFrequency);
+void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency, const char *call_sign) {
+    screenSaver(-1, channelName, channelFrequency, call_sign);
 }
-void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency) {
+void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency, const char *call_sign) {
  // not used in TVOut ... yet
 /*    reset();
     TV.select_font(font8x8);
@@ -364,7 +371,55 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
 }
 #endif
 
-void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency) {
+
+void screens::setupMenu(){
+}
+void screens::updateSetupMenu(uint8_t menu_id,bool settings_beeps,bool settings_orderby_channel, const char *call_sign, char editing){
+    reset();
+    drawTitleBox("SETUP MENU");
+
+    TV.printPGM(5, 5+1*MENU_Y_SIZE, PSTR("ORDER: "));
+    if(settings_orderby_channel) {
+        TV.printPGM(5+(6*8), 5+1*MENU_Y_SIZE, PSTR("CHANNEL  "));
+    }
+    else {
+        TV.printPGM(5+(6*8), 5+1*MENU_Y_SIZE, PSTR("FREQUENCY"));
+    }
+
+
+    TV.printPGM(5, 5+2*MENU_Y_SIZE, PSTR("BEEPS: "));
+    if(settings_beeps) {
+        TV.printPGM(5+(6*8), 5+2*MENU_Y_SIZE, PSTR("ON "));
+    }
+    else {
+        TV.printPGM(5+(6*8), 5+2*MENU_Y_SIZE, PSTR("OFF"));
+    }
+
+
+/* NO NEED FOR CALL SIGN IN TVOUT MODE
+    TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("SIGN : "));
+    if(editing>=0) {
+        for(uint8_t i=0; i<10; i++) {
+            TV.print(5+((7+i)*8), 5+3*MENU_Y_SIZE, call_sign[i]);
+        }
+
+        TV.draw_rect(5+((7)*8),3+(menu_id+1)*MENU_Y_SIZE,TV_X_MAX-(5+((7)*8)),12,  WHITE, INVERT);
+        TV.draw_rect(5+((7+editing)*8),3+(menu_id+1)*MENU_Y_SIZE,8,12,  BLACK, INVERT);
+    }
+    else {
+        TV.print(5+(6*8), 5+3*MENU_Y_SIZE, call_sign);
+    }
+*/
+
+    TV.printPGM(5, 5+4*MENU_Y_SIZE, PSTR("CALIBRATE RSSI"));
+
+
+    TV.printPGM(5, 5+5*MENU_Y_SIZE, PSTR("SAVE & EXIT"));
+
+    TV.draw_rect(0,3+(menu_id+1)*MENU_Y_SIZE,127,12,  WHITE, INVERT);
+}
+
+void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency, const char *call_sign) {
     reset();
     drawTitleBox("SAVE SETTINGS");
     TV.printPGM(10, 5+1*MENU_Y_SIZE, PSTR("Mode:"));

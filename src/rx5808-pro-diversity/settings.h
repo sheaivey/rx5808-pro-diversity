@@ -103,9 +103,10 @@ SOFTWARE.
 #ifdef USE_DIVERSITY
     #define STATE_DIVERSITY 4
 #endif
-#define STATE_SAVE 5
-#define STATE_RSSI_SETUP 6
-#define STATE_SCREEN_SAVER 7
+#define STATE_SETUP_MENU 5
+#define STATE_SAVE 6
+#define STATE_RSSI_SETUP 7
+#define STATE_SCREEN_SAVER 8
 
 #define START_STATE STATE_SEEK
 #define MAX_STATE STATE_MANUAL
@@ -132,5 +133,9 @@ SOFTWARE.
 
     #define isDiversity() (analogRead(rssiPinB) >= 5)
 #endif
+
+#define EEPROM_ADR_BEEP 11
+#define EEPROM_ADR_ORDERBY 12
+#define EEPROM_ADR_CALLSIGN 20
 
 #endif // file_defined

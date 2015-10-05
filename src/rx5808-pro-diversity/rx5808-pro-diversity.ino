@@ -99,6 +99,7 @@ uint8_t active_receiver = useReceiverA;
 uint8_t diversity_mode = useReceiverAuto;
 char diversity_check_count = 0;
 #endif
+uint8_t rssi_seek_threshold = RSSI_SEEK_TRESHOLD;
 uint8_t hight = 0;
 uint8_t state = START_STATE;
 uint8_t state_last_used=START_STATE;
@@ -111,17 +112,14 @@ uint8_t force_seek=0;
 uint8_t seek_direction=1;
 unsigned long time_of_tune = 0;        // will store last time when tuner was changed
 unsigned long time_screen_saver = 0;
-uint8_t last_maker_pos=0;
 uint8_t last_active_channel=0;
-uint8_t first_channel_marker=1;
-uint8_t update_frequency_view=0;
 uint8_t seek_found=0;
 uint8_t last_dip_channel=255;
 uint8_t last_dip_band=255;
 uint8_t scan_start=0;
 uint8_t first_tune=1;
 uint8_t force_menu_redraw=0;
-uint16_t rssi_best=RSSI_MIN_VAL; // used for band scaner
+uint16_t rssi_best=0; // used for band scaner
 uint16_t rssi_min_a=0;
 uint16_t rssi_max_a=0;
 uint16_t rssi_setup_min_a=0;
@@ -134,6 +132,10 @@ uint16_t rssi_setup_max_b=0;
 #endif
 uint16_t rssi_seek_found=0;
 uint16_t rssi_setup_run=0;
+
+char call_sign[10];
+bool settings_beeps = true;
+bool settings_orderby_channel = true;
 
 // SETUP ----------------------------------------------------------------------------
 void setup()
@@ -169,35 +171,31 @@ void setup()
     pinMode (slaveSelectPin, OUTPUT);
     pinMode (spiDataPin, OUTPUT);
 	pinMode (spiClockPin, OUTPUT);
-    // tune to first channel
-
-
-    // Setup Done - LED ON
-    digitalWrite(led, HIGH);
-
-    // Init Display
-    if (drawScreen.begin() > 0) {
-        // on Error flicker LED
-        while (true) { // stay in ERROR for ever
-            digitalWrite(led, !digitalRead(led));
-            delay(100);
-        }
-    }
-    // rodate the display output 180 degrees.
-    // drawScreen.flip(); // OLED only!
 
     // use values only of EEprom is not 255 = unsaved
     uint8_t eeprom_check = EEPROM.read(EEPROM_ADR_STATE);
     if(eeprom_check == 255) // unused
     {
+        // save 8 bit
         EEPROM.write(EEPROM_ADR_STATE,START_STATE);
         EEPROM.write(EEPROM_ADR_TUNE,CHANNEL_MIN_INDEX);
+        EEPROM.write(EEPROM_ADR_BEEP,settings_beeps);
+        EEPROM.write(EEPROM_ADR_ORDERBY,settings_orderby_channel);
         // save 16 bit
         EEPROM.write(EEPROM_ADR_RSSI_MIN_A_L,lowByte(RSSI_MIN_VAL));
         EEPROM.write(EEPROM_ADR_RSSI_MIN_A_H,highByte(RSSI_MIN_VAL));
         // save 16 bit
         EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L,lowByte(RSSI_MAX_VAL));
         EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,highByte(RSSI_MAX_VAL));
+
+        // save default call sign
+        strcpy(call_sign, CALL_SIGN); // load callsign
+        for(uint8_t i = 0;i<sizeof(call_sign);i++) {
+            EEPROM.write(EEPROM_ADR_CALLSIGN+i,call_sign[i]);
+        }
+
+
+
 #ifdef USE_DIVERSITY
         // diversity
         EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
@@ -213,6 +211,14 @@ void setup()
     // read last setting from eeprom
     state=EEPROM.read(EEPROM_ADR_STATE);
     channelIndex=EEPROM.read(EEPROM_ADR_TUNE);
+    settings_beeps=EEPROM.read(EEPROM_ADR_BEEP);
+    settings_orderby_channel=EEPROM.read(EEPROM_ADR_ORDERBY);
+
+    // load saved call sign
+    for(uint8_t i = 0;i<sizeof(call_sign);i++) {
+        call_sign[i] = EEPROM.read(EEPROM_ADR_CALLSIGN+i);
+    }
+
     rssi_min_a=((EEPROM.read(EEPROM_ADR_RSSI_MIN_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_A_L)));
     rssi_max_a=((EEPROM.read(EEPROM_ADR_RSSI_MAX_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_A_L)));
 #ifdef USE_DIVERSITY
@@ -221,6 +227,23 @@ void setup()
     rssi_max_b=((EEPROM.read(EEPROM_ADR_RSSI_MAX_B_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_B_L)));
 #endif
     force_menu_redraw=1;
+
+    // tune to first channel
+
+    // Setup Done - LED ON
+    digitalWrite(led, HIGH);
+
+    // Init Display
+    if (drawScreen.begin(call_sign) > 0) {
+        // on Error flicker LED
+        while (true) { // stay in ERROR for ever
+            digitalWrite(led, !digitalRead(led));
+            delay(100);
+        }
+    }
+    // rodate the display output 180 degrees.
+    // drawScreen.flip(); // OLED only!
+
 }
 
 // LOOP ----------------------------------------------------------------------------
@@ -229,6 +252,9 @@ void loop()
     /*******************/
     /*   Mode Select   */
     /*******************/
+    uint8_t in_menu;
+    uint8_t in_menu_time_out;
+
     if (digitalRead(buttonMode) == LOW) // key pressed ?
     {
         time_screen_saver=0;
@@ -239,9 +265,9 @@ void loop()
 
         uint8_t press_time=0;
         // on entry wait for release
-        while(digitalRead(buttonMode) == LOW)
+        while(digitalRead(buttonMode) == LOW && press_time < 10)
         {
-            delay(10);
+            delay(100);
             press_time++;
         }
         #define MAX_MENU 4
@@ -253,8 +279,8 @@ void loop()
         {
             state=STATE_SEEK;
         }
-        uint8_t in_menu=1;
-        uint8_t in_menu_time_out=50; // 20x 100ms = 5 seconds
+        in_menu=1;
+        in_menu_time_out=50; // 20x 100ms = 5 seconds
         /*
         Enter Mode menu
         Show current mode
@@ -292,15 +318,15 @@ void loop()
                     }
                     else {
                         menu_id++;
-                        state=STATE_SAVE;
+                        state=STATE_SETUP_MENU;
                     }
                 break;
             #else
                 case 3: // Skip
                     menu_id++;
             #endif
-                case 4: // Save settings
-                    state=STATE_SAVE;
+                case 4: // Setup Menu
+                    state=STATE_SETUP_MENU;
                 break;
             } // end switch
 
@@ -382,8 +408,6 @@ void loop()
         // changed state, clear an draw new screen
 
         // simple menu
-        #define TV_Y_GRID 14
-        #define TV_Y_OFFSET 3
         switch (state)
         {
             case STATE_SCAN: // Band Scanner
@@ -409,14 +433,16 @@ void loop()
                 // trigger new scan from begin
                 channel=CHANNEL_MIN;
                 channelIndex = pgm_read_byte_near(channelList + channel);
-                rssi_best=RSSI_MIN_VAL;
+                rssi_best=0;
                 scan_start=1;
 
                 drawScreen.bandScanMode(state);
             break;
             case STATE_SEEK: // seek mode
+                rssi_seek_threshold = RSSI_SEEK_TRESHOLD;
+                rssi_best=0;
+                force_seek=1;
             case STATE_MANUAL: // manual mode
-                state_last_used=state;
                 if (state == STATE_MANUAL)
                 {
                     time_screen_saver=millis();
@@ -427,61 +453,46 @@ void loop()
                 }
                 drawScreen.seekMode(state);
 
-                first_channel_marker=1;
-                update_frequency_view=1;
-                force_seek=1;
+                // return user to their saved channel after bandscan
+                if(state_last_used == STATE_SCAN || last_state == STATE_RSSI_SETUP) {
+                    channelIndex=EEPROM.read(EEPROM_ADR_TUNE);
+                }
+                state_last_used=state;
             break;
 #ifdef USE_DIVERSITY
             case STATE_DIVERSITY:
                 // diversity menu is below this is just a place holder.
             break;
 #endif
+            case STATE_SETUP_MENU:
+
+            break;
             case STATE_SAVE:
                 EEPROM.write(EEPROM_ADR_TUNE,channelIndex);
                 EEPROM.write(EEPROM_ADR_STATE,state_last_used);
+                EEPROM.write(EEPROM_ADR_BEEP,settings_beeps);
+                EEPROM.write(EEPROM_ADR_ORDERBY,settings_orderby_channel);
+                // save call sign
+                for(uint8_t i = 0;i<sizeof(call_sign);i++) {
+                    EEPROM.write(EEPROM_ADR_CALLSIGN+i,call_sign[i]);
+                }
 #ifdef USE_DIVERSITY
                 EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
 #endif
-                drawScreen.save(state_last_used, channelIndex, pgm_read_word_near(channelFreqTable + channelIndex));
-                uint8_t loop=0;
-                for (loop=0;loop<5;loop++)
+                drawScreen.save(state_last_used, channelIndex, pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
+                for (uint8_t loop=0;loop<5;loop++)
                 {
                     beep(100); // beep
                     delay(100);
                 }
-                delay(1000);
-                drawScreen.updateSave("HOLD MODE RSSI SETUP");
-                delay(1000);
-                delay(1000);
-                if (digitalRead(buttonMode) == LOW) // to RSSI setup
-                {
-                    drawScreen.updateSave("ENTERING RSSI SETUP ");
-                    uint8_t loop=0;
-                    for (loop=0;loop<10;loop++)
-                    {
-                        #define RSSI_SETUP_BEEP 25
-                        beep(RSSI_SETUP_BEEP); // beep & debounce
-                        delay(RSSI_SETUP_BEEP); // debounce
-                    }
-                    state=STATE_RSSI_SETUP;
-                    while(digitalRead(buttonMode) == LOW)
-                    {
-                        // wait for release
-                    }
-                    delay(KEY_DEBOUNCE);  // debounce
-                }
-                else
-                {
-                    delay(1000);
-                    state=state_last_used; // return to saved function
-                }
+                delay(3000);
+                state=state_last_used; // return to saved function
                 force_menu_redraw=1; // we change the state twice, must force redraw of menu
 
             // selection by inverted box
             break;
         } // end switch
 
-        //display.display();
         last_state=state;
     }
     /*************************************/
@@ -490,7 +501,7 @@ void loop()
 #ifndef TVOUT_SCREENS
     if(state == STATE_SCREEN_SAVER) {
 #ifdef USE_DIVERSITY
-        drawScreen.screenSaver(diversity_mode, pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex));
+        drawScreen.screenSaver(diversity_mode, pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
 #else
         drawScreen.screenSaver(pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex));
 #endif
@@ -556,6 +567,7 @@ void loop()
     /*****************************************/
     if(state == STATE_MANUAL || state == STATE_SEEK)
     {
+        channel=channel_from_index(channelIndex); // get 0...40 index depending of current channel
         if(state == STATE_MANUAL) // MANUAL MODE
         {
             // handling of keys
@@ -565,11 +577,12 @@ void loop()
                 beep(50); // beep & debounce
                 delay(KEY_DEBOUNCE); // debounce
                 channelIndex++;
+                channel++;
+                channel > CHANNEL_MAX ? channel = CHANNEL_MIN : false;
                 if (channelIndex > CHANNEL_MAX_INDEX)
                 {
                     channelIndex = CHANNEL_MIN_INDEX;
                 }
-                update_frequency_view=1;
             }
             if( digitalRead(buttonDown) == LOW) // channel DOWN
             {
@@ -577,33 +590,35 @@ void loop()
                 beep(50); // beep & debounce
                 delay(KEY_DEBOUNCE); // debounce
                 channelIndex--;
+                channel--;
+                channel < CHANNEL_MIN ? channel = CHANNEL_MAX : false;
                 if (channelIndex > CHANNEL_MAX_INDEX) // negative overflow
                 {
                     channelIndex = CHANNEL_MAX_INDEX;
                 }
-                update_frequency_view=1;
             }
+
+            if(!settings_orderby_channel) { // order by frequency
+                channelIndex = pgm_read_byte_near(channelList + channel);
+            }
+
         }
         // show signal strength
         wait_rssi_ready();
         rssi = readRSSI();
-        channel=channel_from_index(channelIndex); // get 0...40 index depending of current channel
+        rssi_best = (rssi > rssi_best) ? rssi : rssi_best;
 
-        if(channel < CHANNEL_MAX_INDEX)
-        {
-            last_maker_pos=channel;
-        }
-        else
-        {
-          //  No action on last position to keep frame intact
-        }
 
         // handling for seek mode after screen and RSSI has been fully processed
         if(state == STATE_SEEK) //
         { // SEEK MODE
+
+            // recalculate rssi_seek_threshold
+            ((int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0)) > rssi_seek_threshold) ? (rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0))) : false;
+
             if(!seek_found) // search if not found
             {
-                if ((!force_seek) && (rssi > RSSI_SEEK_TRESHOLD)) // check for found channel
+                if ((!force_seek) && (rssi > rssi_seek_threshold)) // check for found channel
                 {
                     seek_found=1;
                     time_screen_saver=millis();
@@ -619,12 +634,19 @@ void loop()
                     channel+=seek_direction;
                     if (channel > CHANNEL_MAX)
                     {
+                        // calculate next pass new seek threshold
+                        rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0));
                         channel=CHANNEL_MIN;
+                        rssi_best = 0;
                     }
                     else if(channel < CHANNEL_MIN)
                     {
+                        // calculate next pass new seek threshold
+                        rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0));
                         channel=CHANNEL_MAX;
+                        rssi_best = 0;
                     }
+                    rssi_seek_threshold = rssi_seek_threshold < 5 ? 5 : rssi_seek_threshold; // make sure we are not stopping on everyting
                     channelIndex = pgm_read_byte_near(channelList + channel);
                 }
             }
@@ -651,7 +673,7 @@ void loop()
             state = STATE_SCREEN_SAVER;
         }
 #endif
-        drawScreen.updateSeekMode(state, channelIndex, channel, rssi, pgm_read_word_near(channelFreqTable + channelIndex), seek_found);
+        drawScreen.updateSeekMode(state, channelIndex, channel, rssi, pgm_read_word_near(channelFreqTable + channelIndex), rssi_seek_threshold, seek_found);
     }
     /****************************/
     /*   Processing SCAN MODE   */
@@ -665,15 +687,7 @@ void loop()
             setChannelModule(channelIndex);
             last_channel_index=channelIndex;
         }
-        // channel marker
-        if(channel < CHANNEL_MAX_INDEX)
-        {
-            last_maker_pos=channel;
-        }
-        else
-        {
-          //  No action on last position to keep frame intact
-        }
+
         // print bar for spectrum
         wait_rssi_ready();
         // value must be ready
@@ -740,10 +754,111 @@ void loop()
             last_state=255; // force redraw by fake state change ;-)
             channel=CHANNEL_MIN;
             scan_start=1;
-            rssi_best=RSSI_MIN_VAL;
+            rssi_best=0;
         }
         // update index after channel change
         channelIndex = pgm_read_byte_near(channelList + channel);
+    }
+
+
+    if(state == STATE_SETUP_MENU)
+    {
+        // simple menu
+        char menu_id=diversity_mode;
+        in_menu=1;
+        drawScreen.setupMenu();
+        int editing = -1;
+        do{
+            in_menu_time_out=50;
+            drawScreen.updateSetupMenu(menu_id, settings_beeps, settings_orderby_channel, call_sign, editing);
+            while(--in_menu_time_out && ((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH))) // wait for next key press or time out
+            {
+                delay(100); // timeout delay
+            }
+
+            if(in_menu_time_out <= 0 ) {
+                state = state_last_used;
+                break; // Timed out, Don't save...
+            }
+
+            if(digitalRead(buttonMode) == LOW)        // channel UP
+            {
+                // do something about the users selection
+                switch(menu_id) {
+                    case 0: // Channel Order Channel/Frequency
+                        settings_orderby_channel = !settings_orderby_channel;
+                        break;
+                    case 1:// Beeps enable/disable
+                        settings_beeps = !settings_beeps;
+                        break;
+
+                    case 2:// Edit Call Sign
+                        editing++;
+                        if(editing>9) {
+                            editing=-1;
+                        }
+                        break;
+                    case 3:// Calibrate RSSI
+                        in_menu = 0;
+                        for (uint8_t loop=0;loop<10;loop++)
+                        {
+                            #define RSSI_SETUP_BEEP 25
+                            beep(RSSI_SETUP_BEEP); // beep & debounce
+                            delay(RSSI_SETUP_BEEP); // debounce
+                        }
+                        state=STATE_RSSI_SETUP;
+                        break;
+                    case 4:
+                        in_menu = 0; // save & exit menu
+                        state=STATE_SAVE;
+                        break;
+                }
+            }
+            else if(digitalRead(buttonUp) == LOW) {
+                if(editing == -1) {
+                    menu_id++;
+#ifdef TVOUT_SCREENS
+                    if(menu_id == 2) {
+                        menu_id++;
+                    }
+#endif
+                }
+                else { // change current letter in place
+                    call_sign[editing]++;
+                    call_sign[editing] > '}' ? call_sign[editing] = ' ' : false; // loop to oter end
+                }
+
+            }
+            else if(digitalRead(buttonDown) == LOW) {
+                if(editing == -1) {
+                    menu_id--;
+
+#ifdef TVOUT_SCREENS
+                    if(menu_id == 2) {
+                        menu_id--;
+                    }
+#endif
+                }
+                else { // change current letter in place
+                    call_sign[editing]--;
+                    call_sign[editing] < ' ' ? call_sign[editing] = '}' : false; // loop to oter end
+                }
+            }
+
+            if(menu_id > 4) {
+                menu_id = 0;
+            }
+            if(menu_id < 0) {
+                menu_id = 4;
+            }
+
+            beep(50); // beep & debounce
+            do{
+                delay(150);// wait for button release
+            }
+            while(editing==-1 && (digitalRead(buttonMode) == LOW || digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW));
+        }
+        while(in_menu);
     }
 
     /*****************************/
@@ -777,7 +892,9 @@ void loop()
 void beep(uint16_t time)
 {
     digitalWrite(led, HIGH);
-    digitalWrite(buzzer, LOW);
+    if(settings_beeps){
+        digitalWrite(buzzer, LOW); // activate beep
+    }
     delay(time/2);
     digitalWrite(led, LOW);
     digitalWrite(buzzer, HIGH);
