@@ -363,9 +363,12 @@ void loop()
                 }
                 else if(digitalRead(buttonDown) == LOW) {
                     menu_id--;
+
+#ifdef USE_DIVERSITY
                     if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
                         menu_id--;
                     }
+#endif
                 }
 
                 if (menu_id > MAX_MENU)
@@ -764,7 +767,7 @@ void loop()
     if(state == STATE_SETUP_MENU)
     {
         // simple menu
-        char menu_id=diversity_mode;
+        char menu_id=0;
         in_menu=1;
         drawScreen.setupMenu();
         int editing = -1;
