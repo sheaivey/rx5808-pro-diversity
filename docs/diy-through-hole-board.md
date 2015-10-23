@@ -15,7 +15,7 @@ Throughhole version of PCB using an Arduino Pro Mini
 - 1x OLED 128x64 display I2C (5v tollerant) Pin order must be VCC GND SCL SDA
 
 
-![alt text](img/v1.0/t-box%201.0%20rev4%20front.png)
-![alt text](img/v1.0/t-box%201.0%20rev4%20back.png)
+![alt text](img/t-box%201.0%20rev4%20front.png)
+![alt text](img/t-box%201.0%20rev4%20back.png)
 
 Board available at [OSHPark](https://oshpark.com/shared_projects/0Lq0DYFU)
