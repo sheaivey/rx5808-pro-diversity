@@ -7,7 +7,7 @@ Throughhole version of PCB using an Atmega328P chip.
 - 3x 330 resistor
 - 2x rx5808 receiver with [spi mod](rx5808-spi-mod.md)
 - 3x 5mm LEDs
-- 3x Miniature Tactile Button
+- 3x Miniature Tactile Button (9.5mm high if using T-Box enclosure)
 - 1x DSN-MIN-360 Step Down regulator.
 - 2x RP-SMA/SMA connector board mountable
 - 1x 4066 digital switch chip
@@ -33,7 +33,7 @@ Throughhole version of PCB using an Arduino Pro Mini
 - 3x 330 resistor
 - 2x rx5808 receiver with [spi mod](rx5808-spi-mod.md)
 - 3x 5mm LEDs
-- 3x Miniature Tactile Button
+- 3x Miniature Tactile Button (9.5mm high if using T-Box enclosure)
 - 1x DSN-MIN-360 Step Down regulator.
 - 2x RP-SMA/SMA connector board mountable
 - 1x 4066 digital switch chip
