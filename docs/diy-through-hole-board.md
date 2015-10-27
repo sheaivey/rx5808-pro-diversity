@@ -1,6 +1,26 @@
 #T-Box v1.1 rev 1
 Throughhole version of PCB using an Atmega328P chip.
 
+#Source Code
+In the settings.h file you will need to change the following lines
+```
+#define rssiPinA A6
+```
+to
+```
+#define rssiPinA A2
+```
+
+and also
+
+```
+    #define rssiPinB A7
+```
+to
+```
+    #define rssiPinB A3
+```
+
 ####BOM
 - 3x 1k resistor
 - 2x 100k resistor
