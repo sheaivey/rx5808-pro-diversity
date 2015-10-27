@@ -1,5 +1,5 @@
 #DIY Advanced - Custom Board
-This requires ordering a board from [https://oshpark.com/shared_projects/7J17i6at](https://oshpark.com/shared_projects/Wa2PTZE2)
+This requires ordering a board from [https://oshpark.com/shared_projects/7J17i6at](https://oshpark.com/shared_projects/7J17i6at)
 No bootloader is nessissary with this board. Program the board using the SPI breakout pins. (Select Arduino Pro Mini 5v 328 as the board)
 
 ####BOM
