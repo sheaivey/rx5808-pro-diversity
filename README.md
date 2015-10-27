@@ -72,6 +72,7 @@ I have also added LEDs to represent which antenna is currently being selected.
 For more information on specific hardware implementations:
 
 1. [DIY Simple - Arduino Nano](/docs/diy-arduino-nano.md)
+1. [DIY Intermediate - Custom Board (T-Box)](/docs/diy-through-hole-board.md)
 2. [DIY Advanced - Custom Board](/docs/diy-custom-board.md)
 1. [OLED Version - Arduino Nano](/docs/oled-arduino-nano.md)
 3. [rx5808 SPI modification](/docs/rx5808-spi-mod.md)
@@ -127,6 +128,7 @@ Please follow [CONTRIBUTING.md](CONTRIBUTING.md) for standard practices regardin
 - Adding Race Band by Shea Ivey
 - Separating Display concerns for TVOut and OLED by Shea Ivey
 - Adding Setup Menu by Shea Ivey
+- DIY Throughole board and documentation. by RCDaddy
 
 ####License
 The MIT License (MIT)
