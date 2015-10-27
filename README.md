@@ -127,6 +127,7 @@ Please follow [CONTRIBUTING.md](CONTRIBUTING.md) for standard practices regardin
 - Adding Race Band by Shea Ivey
 - Separating Display concerns for TVOut and OLED by Shea Ivey
 - Adding Setup Menu by Shea Ivey
+- DIY Throughole board and documentation. by RCDaddy
 
 ####License
 The MIT License (MIT)
