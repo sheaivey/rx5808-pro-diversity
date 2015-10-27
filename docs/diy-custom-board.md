@@ -1,30 +1,35 @@
 #DIY Advanced - Custom Board
-This requires ordering a board from [https://oshpark.com/shared_projects/Wa2PTZE2](https://oshpark.com/shared_projects/Wa2PTZE2)
-You will also need a programmer to get the Arduino bootloader onto the MEGA328 chip. After that you can use the FTDI pins to program the chip from the Arduino IDE. (Select Arduino Pro Mini 5v 328 as the board)
+This requires ordering a board from [https://oshpark.com/shared_projects/7J17i6at](https://oshpark.com/shared_projects/Wa2PTZE2)
+No bootloader is nessissary with this board. Program the board using the SPI breakout pins. (Select Arduino Pro Mini 5v 328 as the board)
 
 ####BOM
-- 4x 1K ohm resistor 603
-- 1x 470 ohm resistor 603
-- 1x 10K ohm resistor 603
-- 3x 330 ohm resistor 603
-- 2x 22pf capacitor 603
-- 1x 0.1uf capacitor 603
+- 4x 1K ohm resistor 0805
+- 1x 470 ohm resistor 0805
+- 3x 330 ohm resistor 0805
+- 2x 100k ohm resistor 0805
+- 2x 22pf capacitor 0805
 - 1x 16.0000mhz crystal
 - 2x rx5808 receiver with [spi mod](rx5808-spi-mod.md)
-- 3x LEDs 603
-- 1x Navigation switch
+- 3x LEDs 0805
+- 1x [Navigation switch](https://www.sparkfun.com/products/8184)
 - 2x SMA Connector
-- 1x SWITCH-SPDT-SMD
 - 1x 4066D SO14 digital switch chip SMD
 - 1x MEGA 328 TQFP
 - 1x Active Buzzer (Optional)
-- 1x OLED 128x64 display I2C (5v tollerant) (Optional - If you dont want to do TV_Out)
+- 1x OLED 128x64 display I2C (5v tollerant) (Optional - If you don't want to do TV_Out)
 
 ####Schematic
 ![alt text](img/rx5808-pro-diversity-schematic-eagle.jpg)
 
 ####Board
+Silk:
 ![alt text](img/rx5808-pro-diversity-schematic-board-white.jpg)
+Top:
+![alt text](img/rx5808-pro-diversity-monitor-top.png)
+Bottom:
+![alt text](img/rx5808-pro-diversity-monitor-bottom.png)
+
+
 
 ####Example
 Below is an example of the board installed into a 7" monitor. This board will also fit into a 5" monitor. There are two outputs one for the currently active rx5808 module. The other is the GUI that from the ATMEGA 328 chip.
