@@ -163,10 +163,6 @@ void setup()
     pinMode(receiverB_led,OUTPUT);
 #endif
     setReceiver(useReceiverA);
-#ifdef DEBUG
-    Serial.begin(115200);
-    Serial.println(F("START:"));
-#endif
     // SPI pins for RX control
     pinMode (slaveSelectPin, OUTPUT);
     pinMode (spiDataPin, OUTPUT);
