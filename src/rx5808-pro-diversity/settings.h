@@ -40,8 +40,8 @@ SOFTWARE.
 #define CALL_SIGN "CALL SIGN"
 
 // Feature Togglels
-//#define DEBUG
 #define USE_DIVERSITY
+#define USE_IR_EMITTER
 
 
 #define spiDataPin 10
