@@ -240,6 +240,10 @@ void setup()
     // rodate the display output 180 degrees.
     // drawScreen.flip(); // OLED only!
 
+#ifdef USE_IR_EMITTER
+    // Used to Transmit IR Payloads
+    Serial.begin(9600);
+#endif
 }
 
 // LOOP ----------------------------------------------------------------------------
@@ -566,9 +570,19 @@ void loop()
     /*****************************************/
     if(state == STATE_MANUAL || state == STATE_SEEK)
     {
+        // read rssi
+        wait_rssi_ready();
+        rssi = readRSSI();
+        rssi_best = (rssi > rssi_best) ? rssi : rssi_best;
+
         channel=channel_from_index(channelIndex); // get 0...40 index depending of current channel
         if(state == STATE_MANUAL) // MANUAL MODE
         {
+#ifdef USE_IR_EMITTER
+            if(millis() % 1000 == 0 && rssi < 20) { // send channel info every second until rssi is locked.
+                sendIRPayload();
+            }
+#endif
             // handling of keys
             if( digitalRead(buttonUp) == LOW)        // channel UP
             {
@@ -602,11 +616,6 @@ void loop()
             }
 
         }
-        // show signal strength
-        wait_rssi_ready();
-        rssi = readRSSI();
-        rssi_best = (rssi > rssi_best) ? rssi : rssi_best;
-
 
         // handling for seek mode after screen and RSSI has been fully processed
         if(state == STATE_SEEK) //
