@@ -1061,6 +1061,25 @@ void setReceiver(uint8_t receiver) {
     active_receiver = receiver;
 }
 
+
+#ifdef USE_IR_EMITTER
+void sendIRPayload() {
+    uint8_t check_sum = 2;
+    Serial.write(2); // start of payload
+    check_sum += channelIndex;
+    Serial.write(channelIndex); // send channel
+    for(uint8_t i=0; i < 10;i++) {
+        if(call_sign[i] == '\0') {
+            break;
+        }
+        check_sum += (char)call_sign[i];
+        Serial.write(call_sign[i]); // send char of call_sign
+    }
+    Serial.write(3);  // end of payload
+    Serial.write(check_sum); // send ceck_sum for payload validation
+}
+#endif
+
 void setChannelModule(uint8_t channel)
 {
   uint8_t i;
