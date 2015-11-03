@@ -112,6 +112,7 @@ uint8_t force_seek=0;
 uint8_t seek_direction=1;
 unsigned long time_of_tune = 0;        // will store last time when tuner was changed
 unsigned long time_screen_saver = 0;
+unsigned long time_next_payload = 0;
 uint8_t last_active_channel=0;
 uint8_t seek_found=0;
 uint8_t last_dip_channel=255;
@@ -508,11 +509,12 @@ void loop()
         drawScreen.screenSaver(pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex));
 #endif
         do{
-            //delay(10); // timeout delay
+            rssi = readRSSI();
+
 #ifdef USE_DIVERSITY
-            drawScreen.updateScreenSaver(active_receiver, readRSSI(), readRSSI(useReceiverA), readRSSI(useReceiverB));
+            drawScreen.updateScreenSaver(active_receiver, rssi, readRSSI(useReceiverA), readRSSI(useReceiverB));
 #else
-            drawScreen.updateScreenSaver(readRSSI());
+            drawScreen.updateScreenSaver(rssi);
 #endif
 
         }
@@ -578,8 +580,9 @@ void loop()
         if(state == STATE_MANUAL) // MANUAL MODE
         {
 #ifdef USE_IR_EMITTER
-            if(millis() % 1000 == 0 && rssi < 20) { // send channel info every second until rssi is locked.
+            if(time_next_payload+1000 < millis() && rssi <= 20) { // send channel info every second until rssi is locked.
                 sendIRPayload();
+                time_next_payload = millis();
             }
 #endif
             // handling of keys
@@ -676,7 +679,8 @@ void loop()
             }
         }
 #ifndef TVOUT_SCREENS
-        if(time_screen_saver+5000 < millis() && time_screen_saver!=0) {
+        // change to screensaver after lock and 5 seconds has passed.
+        if(time_screen_saver+5000 < millis() && time_screen_saver!=0 && rssi > 20) {
             state = STATE_SCREEN_SAVER;
         }
 #endif
@@ -1072,6 +1076,10 @@ void setReceiver(uint8_t receiver) {
 
 #ifdef USE_IR_EMITTER
 void sendIRPayload() {
+    // beep twice before transmitting.
+    beep(100);
+    delay(100);
+    beep(100);
     uint8_t check_sum = 2;
     Serial.write(2); // start of payload
     check_sum += channelIndex;
