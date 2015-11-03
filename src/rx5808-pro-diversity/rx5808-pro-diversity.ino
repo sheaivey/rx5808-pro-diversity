@@ -359,16 +359,15 @@ void loop()
                 /*   Menu handler   */
                 /*********************/
                 if(digitalRead(buttonUp) == LOW) {
-                    menu_id++;
-                }
-                else if(digitalRead(buttonDown) == LOW) {
                     menu_id--;
-
 #ifdef USE_DIVERSITY
                     if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
                         menu_id--;
                     }
 #endif
+                }
+                else if(digitalRead(buttonDown) == LOW) {
+                    menu_id++;
                 }
 
                 if (menu_id > MAX_MENU)
@@ -545,10 +544,10 @@ void loop()
                 in_menu = 0; // exit menu
             }
             else if(digitalRead(buttonUp) == LOW) {
-                menu_id++;
+                menu_id--;
             }
             else if(digitalRead(buttonDown) == LOW) {
-                menu_id--;
+                menu_id++;
             }
 
             if(menu_id > useReceiverB) {
@@ -824,10 +823,10 @@ void loop()
             }
             else if(digitalRead(buttonUp) == LOW) {
                 if(editing == -1) {
-                    menu_id++;
+                    menu_id--;
 #ifdef TVOUT_SCREENS
                     if(menu_id == 2) {
-                        menu_id++;
+                        menu_id--;
                     }
 #endif
                 }
@@ -839,11 +838,11 @@ void loop()
             }
             else if(digitalRead(buttonDown) == LOW) {
                 if(editing == -1) {
-                    menu_id--;
+                    menu_id++;
 
 #ifdef TVOUT_SCREENS
                     if(menu_id == 2) {
-                        menu_id--;
+                        menu_id++;
                     }
 #endif
                 }
