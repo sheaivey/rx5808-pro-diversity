@@ -82,7 +82,7 @@ char screens::begin(const char *call_sign) {
 #ifdef USE_DIVERSITY
     display.print(PSTR2("Diversity:"));
     display.display();
-    delay(500);
+    delay(250);
     display.setCursor(display.width()-6*8,8*2+4);
     if(isDiversity()) {
         display.print(PSTR2(" ENABLED"));
@@ -95,7 +95,7 @@ char screens::begin(const char *call_sign) {
     display.setTextSize(2);
     display.print(call_sign);
     display.display();
-    delay(2000);
+    delay(1250);
     return 0; // no errors
 }
 
