@@ -660,20 +660,21 @@ void loop()
             }
             else
             { // seek was successful
-                if (digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW) // restart seek if key pressed
-                {
-                    if(digitalRead(buttonUp) == LOW) {
-                        seek_direction = 1;
-                    }
-                    else {
-                        seek_direction = -1;
-                    }
-                    beep(50); // beep & debounce
-                    delay(KEY_DEBOUNCE); // debounce
-                    force_seek=1;
-                    seek_found=0;
-                    time_screen_saver=0;
+
+            }
+            if (digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW) // restart seek if key pressed
+            {
+                if(digitalRead(buttonUp) == LOW) {
+                    seek_direction = 1;
                 }
+                else {
+                    seek_direction = -1;
+                }
+                beep(50); // beep & debounce
+                delay(KEY_DEBOUNCE); // debounce
+                force_seek=1;
+                seek_found=0;
+                time_screen_saver=0;
             }
         }
 #ifndef TVOUT_SCREENS
