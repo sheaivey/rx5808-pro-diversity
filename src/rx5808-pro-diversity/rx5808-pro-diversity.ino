@@ -238,8 +238,6 @@ void setup()
             delay(100);
         }
     }
-    // rodate the display output 180 degrees.
-    // drawScreen.flip(); // OLED only!
 
 #ifdef USE_IR_EMITTER
     // Used to Transmit IR Payloads
