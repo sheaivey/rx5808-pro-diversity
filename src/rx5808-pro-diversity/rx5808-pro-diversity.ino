@@ -40,14 +40,14 @@ SOFTWARE.
 // uncomment depending on the display you are using.
 // this is an issue with the arduino preprocessor
 #ifdef TVOUT_SCREENS
-    #include <TVout.h>
-    #include <fontALL.h>
+//    #include <TVout.h>
+//    #include <fontALL.h>
 #endif
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
-//    #include <Adafruit_SSD1306.h>
-//    #include <Adafruit_GFX.h>
-//    #include <Wire.h>
-//    #include <SPI.h>
+    #include <Adafruit_SSD1306.h>
+    #include <Adafruit_GFX.h>
+    #include <Wire.h>
+    #include <SPI.h>
 #endif
 #ifdef OLED_128x64_U8G_SCREENS
 //    #include <U8glib.h>
@@ -112,6 +112,7 @@ uint8_t force_seek=0;
 uint8_t seek_direction=1;
 unsigned long time_of_tune = 0;        // will store last time when tuner was changed
 unsigned long time_screen_saver = 0;
+unsigned long time_next_payload = 0;
 uint8_t last_active_channel=0;
 uint8_t seek_found=0;
 uint8_t last_dip_channel=255;
@@ -163,10 +164,6 @@ void setup()
     pinMode(receiverB_led,OUTPUT);
 #endif
     setReceiver(useReceiverA);
-#ifdef DEBUG
-    Serial.begin(115200);
-    Serial.println(F("START:"));
-#endif
     // SPI pins for RX control
     pinMode (slaveSelectPin, OUTPUT);
     pinMode (spiDataPin, OUTPUT);
@@ -241,9 +238,11 @@ void setup()
             delay(100);
         }
     }
-    // rodate the display output 180 degrees.
-    // drawScreen.flip(); // OLED only!
 
+#ifdef USE_IR_EMITTER
+    // Used to Transmit IR Payloads
+    Serial.begin(9600);
+#endif
 }
 
 // LOOP ----------------------------------------------------------------------------
@@ -359,16 +358,15 @@ void loop()
                 /*   Menu handler   */
                 /*********************/
                 if(digitalRead(buttonUp) == LOW) {
-                    menu_id++;
-                }
-                else if(digitalRead(buttonDown) == LOW) {
                     menu_id--;
-
 #ifdef USE_DIVERSITY
                     if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
                         menu_id--;
                     }
 #endif
+                }
+                else if(digitalRead(buttonDown) == LOW) {
+                    menu_id++;
                 }
 
                 if (menu_id > MAX_MENU)
@@ -509,11 +507,12 @@ void loop()
         drawScreen.screenSaver(pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex));
 #endif
         do{
-            //delay(10); // timeout delay
+            rssi = readRSSI();
+
 #ifdef USE_DIVERSITY
-            drawScreen.updateScreenSaver(active_receiver, readRSSI(), readRSSI(useReceiverA), readRSSI(useReceiverB));
+            drawScreen.updateScreenSaver(active_receiver, rssi, readRSSI(useReceiverA), readRSSI(useReceiverB));
 #else
-            drawScreen.updateScreenSaver(readRSSI());
+            drawScreen.updateScreenSaver(rssi);
 #endif
 
         }
@@ -545,10 +544,10 @@ void loop()
                 in_menu = 0; // exit menu
             }
             else if(digitalRead(buttonUp) == LOW) {
-                menu_id++;
+                menu_id--;
             }
             else if(digitalRead(buttonDown) == LOW) {
-                menu_id--;
+                menu_id++;
             }
 
             if(menu_id > useReceiverB) {
@@ -570,9 +569,20 @@ void loop()
     /*****************************************/
     if(state == STATE_MANUAL || state == STATE_SEEK)
     {
+        // read rssi
+        wait_rssi_ready();
+        rssi = readRSSI();
+        rssi_best = (rssi > rssi_best) ? rssi : rssi_best;
+
         channel=channel_from_index(channelIndex); // get 0...40 index depending of current channel
         if(state == STATE_MANUAL) // MANUAL MODE
         {
+#ifdef USE_IR_EMITTER
+            if(time_next_payload+1000 < millis() && rssi <= 50) { // send channel info every second until rssi is locked.
+                sendIRPayload();
+                time_next_payload = millis();
+            }
+#endif
             // handling of keys
             if( digitalRead(buttonUp) == LOW)        // channel UP
             {
@@ -606,11 +616,6 @@ void loop()
             }
 
         }
-        // show signal strength
-        wait_rssi_ready();
-        rssi = readRSSI();
-        rssi_best = (rssi > rssi_best) ? rssi : rssi_best;
-
 
         // handling for seek mode after screen and RSSI has been fully processed
         if(state == STATE_SEEK) //
@@ -655,24 +660,27 @@ void loop()
             }
             else
             { // seek was successful
-                if (digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW) // restart seek if key pressed
-                {
-                    if(digitalRead(buttonUp) == LOW) {
-                        seek_direction = 1;
-                    }
-                    else {
-                        seek_direction = -1;
-                    }
-                    beep(50); // beep & debounce
-                    delay(KEY_DEBOUNCE); // debounce
-                    force_seek=1;
-                    seek_found=0;
-                    time_screen_saver=0;
+
+            }
+            if (digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW) // restart seek if key pressed
+            {
+                if(digitalRead(buttonUp) == LOW) {
+                    seek_direction = 1;
                 }
+                else {
+                    seek_direction = -1;
+                }
+                beep(50); // beep & debounce
+                delay(KEY_DEBOUNCE); // debounce
+                force_seek=1;
+                seek_found=0;
+                time_screen_saver=0;
             }
         }
 #ifndef TVOUT_SCREENS
-        if(time_screen_saver+5000 < millis() && time_screen_saver!=0) {
+        // change to screensaver after lock and 5 seconds has passed.
+        if(time_screen_saver+5000 < millis() && time_screen_saver != 0 && rssi > 50 ||
+            (time_screen_saver != 0 && time_screen_saver + (SCREENSAVER_TIMEOUT*1000) < millis())) {
             state = STATE_SCREEN_SAVER;
         }
 #endif
@@ -733,16 +741,18 @@ void loop()
                     EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L,(rssi_max_a & 0xff));
                     EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,(rssi_max_a >> 8));
 
-
 #ifdef USE_DIVERSITY
-                    rssi_min_b=rssi_setup_min_b;
-                    rssi_max_b=rssi_setup_max_b;
-                    // save 16 bit
-                    EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,(rssi_min_b & 0xff));
-                    EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,(rssi_min_b >> 8));
-                    // save 16 bit
-                    EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,(rssi_max_b & 0xff));
-                    EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,(rssi_max_b >> 8));
+
+                    if(isDiversity()) { // only calibrate RSSI B when diversity is detected.
+                        rssi_min_b=rssi_setup_min_b;
+                        rssi_max_b=rssi_setup_max_b;
+                        // save 16 bit
+                        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,(rssi_min_b & 0xff));
+                        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,(rssi_min_b >> 8));
+                        // save 16 bit
+                        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,(rssi_max_b & 0xff));
+                        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,(rssi_max_b >> 8));
+                    }
 #endif
                     state=EEPROM.read(EEPROM_ADR_STATE);
                     beep(1000);
@@ -819,10 +829,10 @@ void loop()
             }
             else if(digitalRead(buttonUp) == LOW) {
                 if(editing == -1) {
-                    menu_id++;
+                    menu_id--;
 #ifdef TVOUT_SCREENS
                     if(menu_id == 2) {
-                        menu_id++;
+                        menu_id--;
                     }
 #endif
                 }
@@ -834,11 +844,11 @@ void loop()
             }
             else if(digitalRead(buttonDown) == LOW) {
                 if(editing == -1) {
-                    menu_id--;
+                    menu_id++;
 
 #ifdef TVOUT_SCREENS
                     if(menu_id == 2) {
-                        menu_id--;
+                        menu_id++;
                     }
 #endif
                 }
@@ -1064,6 +1074,29 @@ void setReceiver(uint8_t receiver) {
 
     active_receiver = receiver;
 }
+
+
+#ifdef USE_IR_EMITTER
+void sendIRPayload() {
+    // beep twice before transmitting.
+    beep(100);
+    delay(100);
+    beep(100);
+    uint8_t check_sum = 2;
+    Serial.write(2); // start of payload
+    check_sum += channelIndex;
+    Serial.write(channelIndex); // send channel
+    for(uint8_t i=0; i < 10;i++) {
+        if(call_sign[i] == '\0') {
+            break;
+        }
+        check_sum += (char)call_sign[i];
+        Serial.write(call_sign[i]); // send char of call_sign
+    }
+    Serial.write(3);  // end of payload
+    Serial.write(check_sum); // send ceck_sum for payload validation
+}
+#endif
 
 void setChannelModule(uint8_t channel)
 {
