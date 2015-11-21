@@ -578,7 +578,7 @@ void loop()
         if(state == STATE_MANUAL) // MANUAL MODE
         {
 #ifdef USE_IR_EMITTER
-            if(time_next_payload+1000 < millis() && rssi <= 20) { // send channel info every second until rssi is locked.
+            if(time_next_payload+1000 < millis() && rssi <= 50) { // send channel info every second until rssi is locked.
                 sendIRPayload();
                 time_next_payload = millis();
             }
