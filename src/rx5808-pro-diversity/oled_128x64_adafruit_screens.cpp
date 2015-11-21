@@ -55,6 +55,14 @@ char screens::begin(const char *call_sign) {
     // Set the address of your OLED Display.
     // 128x64 ONLY!!
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D or 0x3C (for the 128x64)
+#ifdef USE_FLIP_SCREEN
+    flip();
+#endif
+
+#ifdef USE_BOOT_LOGO
+    display.display(); // show splash screen
+    delay(3000);
+#endif
     // init done
     reset();
 
@@ -99,7 +107,7 @@ void screens::reset() {
 }
 
 void screens::flip() {
-    display.setRotation(3);
+    display.setRotation(2);
 }
 
 void screens::drawTitleBox(const char *title) {
