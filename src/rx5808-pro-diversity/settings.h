@@ -108,6 +108,9 @@ SOFTWARE.
 #define STATE_RSSI_SETUP 7
 #define STATE_SCREEN_SAVER 8
 
+// Seconds to wait before force entering screensaver
+#define SCREENSAVER_TIMEOUT 30
+
 #define START_STATE STATE_SEEK
 #define MAX_STATE STATE_MANUAL
 

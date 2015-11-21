@@ -680,7 +680,8 @@ void loop()
         }
 #ifndef TVOUT_SCREENS
         // change to screensaver after lock and 5 seconds has passed.
-        if(time_screen_saver+5000 < millis() && time_screen_saver!=0 && rssi > 20) {
+        if(time_screen_saver+5000 < millis() && time_screen_saver != 0 && rssi > 50 ||
+            (time_screen_saver != 0 && time_screen_saver + (SCREENSAVER_TIMEOUT*1000) < millis())) {
             state = STATE_SCREEN_SAVER;
         }
 #endif
