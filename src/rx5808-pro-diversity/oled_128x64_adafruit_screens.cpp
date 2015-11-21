@@ -185,10 +185,18 @@ void screens::seekMode(uint8_t state) {
     display.display();
 }
 
+char scan_position = 3;
+
 void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, uint8_t rssi_seek_threshold, bool locked) {
     // display refresh handler
-    if(channelIndex != last_channel) // only updated on changes
+    if(channel != last_channel) // only updated on changes
     {
+        if(channel > last_channel) {
+            scan_position = 3;
+        }
+        else {
+            scan_position = -1;
+        }
         display.setTextColor(WHITE,BLACK);
         display.setCursor(36,12);
         // show current used channel of bank
@@ -239,6 +247,9 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK) //
     { // SEEK MODE
+
+        // Show Scan Position
+        display.fillRect((channel*3)+4+scan_position,display.height()-12-14,1,14,BLACK);
 
         rssi_scaled=map(rssi_seek_threshold, 1, 100, 1, 14);
 
