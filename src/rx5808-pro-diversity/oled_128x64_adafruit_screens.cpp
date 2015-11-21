@@ -301,6 +301,9 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     {
         display.fillRect((channel*3)+4,display.height()-12-30,3,30-rssi_scaled,BLACK);
         display.fillRect((channel*3)+4,hight,3,rssi_scaled,WHITE);
+        // Show Scan Position
+        display.fillRect((channel*3)+4+3,display.height()-12-30,1,30,BLACK);
+
     }
     if(!in_setup) {
         if (rssi > RSSI_SEEK_TRESHOLD) {
