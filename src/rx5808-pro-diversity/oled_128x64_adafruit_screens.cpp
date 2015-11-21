@@ -55,6 +55,14 @@ char screens::begin(const char *call_sign) {
     // Set the address of your OLED Display.
     // 128x64 ONLY!!
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D or 0x3C (for the 128x64)
+#ifdef USE_FLIP_SCREEN
+    flip();
+#endif
+
+#ifdef USE_BOOT_LOGO
+    display.display(); // show splash screen
+    delay(3000);
+#endif
     // init done
     reset();
 
@@ -74,7 +82,7 @@ char screens::begin(const char *call_sign) {
 #ifdef USE_DIVERSITY
     display.print(PSTR2("Diversity:"));
     display.display();
-    delay(500);
+    delay(250);
     display.setCursor(display.width()-6*8,8*2+4);
     if(isDiversity()) {
         display.print(PSTR2(" ENABLED"));
@@ -87,7 +95,7 @@ char screens::begin(const char *call_sign) {
     display.setTextSize(2);
     display.print(call_sign);
     display.display();
-    delay(2000);
+    delay(1250);
     return 0; // no errors
 }
 
@@ -99,7 +107,7 @@ void screens::reset() {
 }
 
 void screens::flip() {
-    display.setRotation(3);
+    display.setRotation(2);
 }
 
 void screens::drawTitleBox(const char *title) {
@@ -177,10 +185,18 @@ void screens::seekMode(uint8_t state) {
     display.display();
 }
 
+char scan_position = 3;
+
 void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, uint8_t rssi_seek_threshold, bool locked) {
     // display refresh handler
-    if(channelIndex != last_channel) // only updated on changes
+    if(channel != last_channel) // only updated on changes
     {
+        if(channel > last_channel) {
+            scan_position = 3;
+        }
+        else {
+            scan_position = -1;
+        }
         display.setTextColor(WHITE,BLACK);
         display.setCursor(36,12);
         // show current used channel of bank
@@ -231,6 +247,9 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK) //
     { // SEEK MODE
+
+        // Show Scan Position
+        display.fillRect((channel*3)+4+scan_position,display.height()-12-14,1,14,BLACK);
 
         rssi_scaled=map(rssi_seek_threshold, 1, 100, 1, 14);
 
@@ -293,6 +312,9 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     {
         display.fillRect((channel*3)+4,display.height()-12-30,3,30-rssi_scaled,BLACK);
         display.fillRect((channel*3)+4,hight,3,rssi_scaled,WHITE);
+        // Show Scan Position
+        display.fillRect((channel*3)+4+3,display.height()-12-30,1,30,BLACK);
+
     }
     if(!in_setup) {
         if (rssi > RSSI_SEEK_TRESHOLD) {

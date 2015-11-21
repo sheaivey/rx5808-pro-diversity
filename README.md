@@ -7,6 +7,13 @@ The code is also now backward compatible with the original rx5808-pro schematic 
 
 This project originated [here](https://code.google.com/p/rx5808-pro/) and has been modified to include diversity receiver menu.
 
+## Donations Welcome!
+**Help fund more research and development into these great open source projects.**
+
+[![Donations](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GE83PG4KBZ5NJ)
+
+Donations help show the developer your appreciation for all their hard work. A little goes a long way whether it is used for new hardware samples or better test equipment, you can be sure it will be put to good use.
+
 ## Table of Contents
 1. [Features](#features)
 2. [Usage](#usage)

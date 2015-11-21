@@ -29,8 +29,8 @@ SOFTWARE.
 
 // Choose the display you will be using
 // you will also have to uncomment the includes in the main project.
-#define TVOUT_SCREENS
-//#define OLED_128x64_ADAFRUIT_SCREENS
+//#define TVOUT_SCREENS
+#define OLED_128x64_ADAFRUIT_SCREENS
 
 // u8glib has performance issues.
 //#define OLED_128x64_U8G_SCREENS
@@ -40,8 +40,10 @@ SOFTWARE.
 #define CALL_SIGN "CALL SIGN"
 
 // Feature Togglels
-//#define DEBUG
 #define USE_DIVERSITY
+#define USE_IR_EMITTER
+//#define USE_FLIP_SCREEN
+//#define USE_BOOT_LOGO
 
 
 #define spiDataPin 10
@@ -88,7 +90,7 @@ SOFTWARE.
 #define RSSI_READS 50
 // RSSI default raw range
 #define RSSI_MIN_VAL 90
-#define RSSI_MAX_VAL 300
+#define RSSI_MAX_VAL 220
 // 75% threshold, when channel is printed in spectrum
 #define RSSI_SEEK_FOUND 75
 // 80% under max value for RSSI
@@ -107,6 +109,9 @@ SOFTWARE.
 #define STATE_SAVE 6
 #define STATE_RSSI_SETUP 7
 #define STATE_SCREEN_SAVER 8
+
+// Seconds to wait before force entering screensaver
+#define SCREENSAVER_TIMEOUT 30
 
 #define START_STATE STATE_SEEK
 #define MAX_STATE STATE_MANUAL
