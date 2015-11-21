@@ -740,16 +740,18 @@ void loop()
                     EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L,(rssi_max_a & 0xff));
                     EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,(rssi_max_a >> 8));
 
-
 #ifdef USE_DIVERSITY
-                    rssi_min_b=rssi_setup_min_b;
-                    rssi_max_b=rssi_setup_max_b;
-                    // save 16 bit
-                    EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,(rssi_min_b & 0xff));
-                    EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,(rssi_min_b >> 8));
-                    // save 16 bit
-                    EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,(rssi_max_b & 0xff));
-                    EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,(rssi_max_b >> 8));
+
+                    if(isDiversity()) { // only calibrate RSSI B when diversity is detected.
+                        rssi_min_b=rssi_setup_min_b;
+                        rssi_max_b=rssi_setup_max_b;
+                        // save 16 bit
+                        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,(rssi_min_b & 0xff));
+                        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,(rssi_min_b >> 8));
+                        // save 16 bit
+                        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,(rssi_max_b & 0xff));
+                        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,(rssi_max_b >> 8));
+                    }
 #endif
                     state=EEPROM.read(EEPROM_ADR_STATE);
                     beep(1000);
