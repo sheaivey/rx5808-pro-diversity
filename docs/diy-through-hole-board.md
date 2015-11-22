@@ -1,4 +1,4 @@
-#T-Box v1.1 rev 1
+#T-Box v1.1 rev 2
 Throughhole version of PCB using an Atmega328P chip.
 
 #Source Code
@@ -39,10 +39,10 @@ to
 - 1x OLED 128x64 display I2C (5v tollerant) Pin order must be VCC GND SCL SDA
 
 
-![alt text](img/t-box%20v1.1%20r1%20front.png)
-![alt text](img/t-box%20v1.1%20r1%20back.png)
+![alt text](img/t-box%20v1.1%20r2%20front.png)
+![alt text](img/t-box%20v1.1%20r2%20back.png)
 
-Board available at [OSHPark](https://oshpark.com/shared_projects/lhnlCQW3)
+Board available at [OSHPark](https://oshpark.com/shared_projects/U8csRbMR)
 
 #T-Box v1.0 rev 4
 Throughhole version of PCB using an Arduino Pro Mini
