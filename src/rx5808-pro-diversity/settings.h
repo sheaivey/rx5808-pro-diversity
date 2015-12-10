@@ -39,9 +39,13 @@ SOFTWARE.
 // Up to 10 letters
 #define CALL_SIGN "CALL SIGN"
 
-// Feature Togglels
+// Feature Toggles
 #define USE_DIVERSITY
-#define USE_IR_EMITTER
+#define USE_DIVERSITY3
+#ifdef USE_DIVERSITY3
+  #define USE_DIVERSITY
+#endif
+//#define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 //#define USE_BOOT_LOGO
 
@@ -69,6 +73,12 @@ SOFTWARE.
     // this pervents rapid switching.
     // 1 to 10 is a good range. 1 being fast switching, 10 being slow 100ms to switch.
     #define DIVERSITY_MAX_CHECKS 5
+
+  #ifdef USE_DIVERSITY3
+    #define receiverC_led A2
+    #define rssiPinC A3
+    #define useReceiverC 3
+  #endif
 #endif
 
 // this two are minimum required
@@ -137,6 +147,14 @@ SOFTWARE.
     #define EEPROM_ADR_RSSI_MAX_B_H 10
 
     #define isDiversity() (analogRead(rssiPinB) >= 5)
+
+  #ifdef USE_DIVERSITY3
+    #define EEPROM_ADR_RSSI_MIN_C_L 11
+    #define EEPROM_ADR_RSSI_MIN_C_H 12
+    #define EEPROM_ADR_RSSI_MAX_C_L 13
+    #define EEPROM_ADR_RSSI_MAX_C_H 14
+    #define isDiversity3() (analogRead(rssiPinC) >= 5)
+  #endif
 #endif
 
 #define EEPROM_ADR_BEEP 11
