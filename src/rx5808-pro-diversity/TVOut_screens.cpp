@@ -338,10 +338,32 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
 // not used in TVOut ... yet
 }
 
+void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssiA, uint8_t rssiB, uint8_t rssiC) {
+// not used in TVOut ... yet
+}
+
+
 #ifdef USE_DIVERSITY
 void screens::diversity(uint8_t diversity_mode) {
     reset();
     drawTitleBox(PSTR("DIVERSITY"));
+  #ifdef USE_DIVERSITY3
+    TV.printPGM(10, 5+1*MENU_Y_SIZE, PSTR("Auto"));
+    TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Rx A"));
+    TV.printPGM(60, 5+1*MENU_Y_SIZE, PSTR("Rx B"));
+    TV.printPGM(60, 5+2*MENU_Y_SIZE, PSTR("Rx C"));
+    // RSSI Strength
+    TV.draw_line(0,3+3*MENU_Y_SIZE, TV_X_MAX, 3+3*MENU_Y_SIZE, WHITE);
+    TV.printPGM(10, 6+3*MENU_Y_SIZE, PSTR("A:"));
+    TV.draw_line(0,3+4*MENU_Y_SIZE, TV_X_MAX, 3+4*MENU_Y_SIZE, WHITE);
+    TV.printPGM(10, 6+4*MENU_Y_SIZE, PSTR("B:"));
+    TV.draw_line(0,3+5*MENU_Y_SIZE, TV_X_MAX, 3+5*MENU_Y_SIZE, WHITE);
+    TV.printPGM(10, 6+5*MENU_Y_SIZE, PSTR("C:"));
+    
+    TV.draw_rect((diversity_mode<2 ? 0 : 50),3+(diversity_mode+1-(diversity_mode<2 ? 0 : 2))*MENU_Y_SIZE,50,12,  WHITE, INVERT);
+
+  #else
+
     TV.printPGM(10, 5+1*MENU_Y_SIZE, PSTR("Auto"));
     TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Receiver A"));
     TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("Receiver B"));
@@ -352,7 +374,9 @@ void screens::diversity(uint8_t diversity_mode) {
     TV.printPGM(10, 6+5*MENU_Y_SIZE, PSTR("B:"));
 
     TV.draw_rect(0,3+(diversity_mode+1)*MENU_Y_SIZE,127,12,  WHITE, INVERT);
+  #endif
 }
+
 void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB){
     #define RSSI_BAR_SIZE 100
     uint8_t rssi_scaled=map(rssiA, 1, 100, 1, RSSI_BAR_SIZE);
@@ -367,7 +391,29 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
     TV.draw_rect(25+rssi_scaled, 6+5*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
     //  draw new bar
     TV.draw_rect(25, 6+5*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, (active_receiver==useReceiverB ? WHITE:BLACK));
+}
 
+void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB, uint8_t rssiC){
+    #define RSSI_BAR_SIZE 100
+    uint8_t rssi_scaled=map(rssiA, 1, 100, 1, RSSI_BAR_SIZE);
+    // clear last bar
+    TV.draw_rect(25+rssi_scaled, 6+3*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
+    //  draw new bar
+    TV.draw_rect(25, 6+3*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, (active_receiver==useReceiverA ? WHITE:BLACK));
+
+    // read rssi B
+    rssi_scaled=map(rssiB, 1, 100, 1, RSSI_BAR_SIZE);
+    // clear last bar
+    TV.draw_rect(25+rssi_scaled, 6+4*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
+    //  draw new bar
+    TV.draw_rect(25, 6+4*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, (active_receiver==useReceiverB ? WHITE:BLACK));
+
+    // read rssi C
+    rssi_scaled=map(rssiC, 1, 100, 1, RSSI_BAR_SIZE);
+    // clear last bar
+    TV.draw_rect(25+rssi_scaled, 6+5*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
+    //  draw new bar
+    TV.draw_rect(25, 6+5*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, (active_receiver==useReceiverC ? WHITE:BLACK));
 }
 #endif
 

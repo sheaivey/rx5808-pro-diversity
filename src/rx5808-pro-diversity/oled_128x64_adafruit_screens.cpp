@@ -28,10 +28,10 @@ SOFTWARE.
 
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
 #include "screens.h" // function headers
-#include <Adafruit_SSD1306.h>
-#include <Adafruit_GFX.h>
-#include <Wire.h>
-#include <SPI.h>
+//#include <Adafruit_SSD1306.h>
+//#include <Adafruit_GFX.h>
+//#include <Wire.h>
+//#include <SPI.h>
 
 // New version of PSTR that uses a temp buffer and returns char *
 // by Shea Ivey
@@ -356,7 +356,7 @@ void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency, const 
 }
 void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency, const char *call_sign) {
     reset();
-    display.setTextSize(6);
+    display.setTextSize(5); //was 6
     display.setTextColor(WHITE);
     display.setCursor(0,0);
     display.print(channelName, HEX);
@@ -364,13 +364,42 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
     display.setCursor(70,0);
     display.print(call_sign);
     display.setTextSize(2);
-    display.setCursor(70,28);
+    display.setCursor(70,20); //was 70,28
     display.setTextColor(WHITE);
     display.print(channelFrequency);
     display.setTextSize(1);
 #ifdef USE_DIVERSITY
-    if(isDiversity()) {
-        display.setCursor(70,18);
+    if(isDiversity3()) {
+        display.setCursor(70,10);
+        switch(diversity_mode) {
+            case useReceiverAuto:
+                display.print(PSTR2("AUTO"));
+                break;
+            case useReceiverA:
+                display.print(PSTR2("ANTENNA A"));
+                break;
+            case useReceiverB:
+                display.print(PSTR2("ANTENNA B"));
+                break;
+            case useReceiverC:
+                display.print(PSTR2("ANTENNA C"));
+                break;
+        }
+        display.setTextColor(BLACK,WHITE);
+        display.fillRect(0, display.height()-27, 7, 9, WHITE);
+        display.setCursor(1,display.height()-26);
+        display.print("A");
+        display.setTextColor(BLACK,WHITE);
+        display.fillRect(0, display.height()-18, 7, 9, WHITE);
+        display.setCursor(1,display.height()-17);
+        display.print("B");
+        display.setTextColor(BLACK,WHITE);
+        display.fillRect(0, display.height()-9, 7, 9, WHITE);
+        display.setCursor(1,display.height()-8);
+        display.print("C");
+    }
+    else if(isDiversity()) {
+        display.setCursor(70,10); //was 70,18
         switch(diversity_mode) {
             case useReceiverAuto:
                 display.print(PSTR2("AUTO"));
@@ -383,12 +412,12 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
                 break;
         }
         display.setTextColor(BLACK,WHITE);
-        display.fillRect(0, display.height()-19, 7, 9, WHITE);
-        display.setCursor(1,display.height()-18);
+        display.fillRect(0, display.height()-23, 7, 9, WHITE);  //was height-19
+        display.setCursor(1,display.height()-22);               //was height-18
         display.print("A");
         display.setTextColor(BLACK,WHITE);
-        display.fillRect(0, display.height()-9, 7, 9, WHITE);
-        display.setCursor(1,display.height()-8);
+        display.fillRect(0, display.height()-13, 7, 9, WHITE);  //was height-9
+        display.setCursor(1,display.height()-12);               //was height-8
         display.print("B");
     }
 #endif
@@ -403,8 +432,48 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
 }
 void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssiA, uint8_t rssiB, uint8_t rssiC) {
 #ifdef USE_DIVERSITY
- // TODO handle USE_DIVERSITY3 - using rssiC
-    if(isDiversity()) {
+    if(isDiversity3()) {
+        // read rssi A
+        #define RSSI_BAR_SIZE 119
+        uint8_t rssi_scaled=map(rssiA, 1, 100, 3, RSSI_BAR_SIZE);
+        display.fillRect(7 + rssi_scaled, display.height()-27, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
+        if(active_receiver == useReceiverA)
+        {
+            display.fillRect(7, display.height()-27, rssi_scaled, 9, WHITE);
+        }
+        else
+        {
+            display.fillRect(7, display.height()-27, (RSSI_BAR_SIZE), 9, BLACK);
+            display.drawRect(7, display.height()-27, rssi_scaled, 9, WHITE);
+        }
+
+        // read rssi B
+        rssi_scaled=map(rssiB, 1, 100, 3, RSSI_BAR_SIZE);
+        display.fillRect(7 + rssi_scaled, display.height()-18, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
+        if(active_receiver == useReceiverB)
+        {
+            display.fillRect(7, display.height()-18, rssi_scaled, 9, WHITE);
+        }
+        else
+        {
+            display.fillRect(7, display.height()-18, (RSSI_BAR_SIZE), 9, BLACK);
+            display.drawRect(7, display.height()-18, rssi_scaled, 9, WHITE);
+        }
+        
+        // read rssi C
+        rssi_scaled=map(rssiC, 1, 100, 3, RSSI_BAR_SIZE);
+        display.fillRect(7 + rssi_scaled, display.height()-9, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
+        if(active_receiver == useReceiverC)
+        {
+            display.fillRect(7, display.height()-19, rssi_scaled, 9, WHITE);
+        }
+        else
+        {
+            display.fillRect(7, display.height()-9, (RSSI_BAR_SIZE), 9, BLACK);
+            display.drawRect(7, display.height()-9, rssi_scaled, 9, WHITE);
+        }
+    }
+    else if(isDiversity()) {
         // read rssi A
         #define RSSI_BAR_SIZE 119
         uint8_t rssi_scaled=map(rssiA, 1, 100, 3, RSSI_BAR_SIZE);
@@ -434,6 +503,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
     }
     else {
         display.setTextColor(BLACK);
+        display.fillRect(0, display.height()-27, 110, 9, BLACK);
         display.fillRect(0, display.height()-19, 25, 19, WHITE);
         display.setCursor(1,display.height()-13);
         display.print(PSTR2("RSSI"));
@@ -444,6 +514,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
     }
 #else
     display.setTextColor(BLACK);
+    display.fillRect(0, display.height()-27, 110, 9, BLACK);
     display.fillRect(0, display.height()-19, 25, 19, WHITE);
     display.setCursor(1,display.height()-13);
     display.print(PSTR2("RSSI"));

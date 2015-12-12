@@ -31,9 +31,22 @@ SOFTWARE.
 // you will also have to uncomment the includes in the main project.
 //#define TVOUT_SCREENS
 #define OLED_128x64_ADAFRUIT_SCREENS
-
 // u8glib has performance issues.
 //#define OLED_128x64_U8G_SCREENS
+
+#ifdef TVOUT_SCREENS
+    #include "TVout.h"
+    #include "fontALL.h"
+#endif
+#ifdef OLED_128x64_ADAFRUIT_SCREENS
+    #include <Adafruit_SSD1306.h>
+    #include <Adafruit_GFX.h>
+    #include <Wire.h>
+    #include <SPI.h>
+#endif
+#ifdef OLED_128x64_U8G_SCREENS
+    #include <U8glib.h>
+#endif
 
 // this will be displayed on the screensaver.
 // Up to 10 letters
@@ -147,6 +160,7 @@ SOFTWARE.
     #define EEPROM_ADR_RSSI_MAX_B_H 10
 
     #define isDiversity() (analogRead(rssiPinB) >= 5)
+    #define isDiversity3() false
 
   #ifdef USE_DIVERSITY3
     #define EEPROM_ADR_RSSI_MIN_C_L 11
@@ -157,8 +171,8 @@ SOFTWARE.
   #endif
 #endif
 
-#define EEPROM_ADR_BEEP 11
-#define EEPROM_ADR_ORDERBY 12
-#define EEPROM_ADR_CALLSIGN 20
+#define EEPROM_ADR_BEEP 15
+#define EEPROM_ADR_ORDERBY 16
+#define EEPROM_ADR_CALLSIGN 24
 
 #endif // file_defined

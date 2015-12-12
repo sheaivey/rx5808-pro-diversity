@@ -36,12 +36,12 @@ SOFTWARE.
 #include <EEPROM.h>
 
 #include "settings.h"
-
+/*
 // uncomment depending on the display you are using.
 // this is an issue with the arduino preprocessor
 #ifdef TVOUT_SCREENS
-//    #include "TVout.h"
-//    #include "fontALL.h"
+    #include "TVout.h"
+    #include "fontALL.h"
 #endif
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
     #include <Adafruit_SSD1306.h>
@@ -49,10 +49,10 @@ SOFTWARE.
     #include <Wire.h>
     #include <SPI.h>
 #endif
-#ifdef OLED_128x64_U8G_SCREENS
+//#ifdef OLED_128x64_U8G_SCREENS
 //    #include <U8glib.h>
-#endif
-
+//#endif
+*/
 #include "screens.h"
 screens drawScreen;
 
@@ -584,13 +584,21 @@ void loop()
             else if(digitalRead(buttonDown) == LOW) {
                 menu_id++;
             }
-
+  #ifdef USE_DIVERSITY3
             if(menu_id > useReceiverC) {
                 menu_id = 0;
             }
             if(menu_id < 0) {
                 menu_id = useReceiverC;
             }
+  #else
+            if(menu_id > useReceiverB) {
+                menu_id = 0;
+            }
+            if(menu_id < 0) {
+                menu_id = useReceiverB;
+            }        
+  #endif
             beep(50); // beep & debounce
             delay(KEY_DEBOUNCE); // debounce
         }
