@@ -407,13 +407,14 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
     TV.draw_rect(25+rssi_scaled, 6+4*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
     //  draw new bar
     TV.draw_rect(25, 6+4*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, (active_receiver==useReceiverB ? WHITE:BLACK));
-
+  #ifdef USE_DIVERSITY3
     // read rssi C
     rssi_scaled=map(rssiC, 1, 100, 1, RSSI_BAR_SIZE);
     // clear last bar
     TV.draw_rect(25+rssi_scaled, 6+5*MENU_Y_SIZE, RSSI_BAR_SIZE-rssi_scaled, 8 , BLACK, BLACK);
     //  draw new bar
     TV.draw_rect(25, 6+5*MENU_Y_SIZE, rssi_scaled, 8 , WHITE, (active_receiver==useReceiverC ? WHITE:BLACK));
+  #endif
 }
 #endif
 

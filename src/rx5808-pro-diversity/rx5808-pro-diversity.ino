@@ -32,27 +32,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+// NOTE - goto settings.h to select a number of options, like screen type, IR emitter selection etc //
+//
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 
 #include "settings.h"
-/*
-// uncomment depending on the display you are using.
-// this is an issue with the arduino preprocessor
-#ifdef TVOUT_SCREENS
-    #include "TVout.h"
-    #include "fontALL.h"
-#endif
-#ifdef OLED_128x64_ADAFRUIT_SCREENS
-    #include <Adafruit_SSD1306.h>
-    #include <Adafruit_GFX.h>
-    #include <Wire.h>
-    #include <SPI.h>
-#endif
-//#ifdef OLED_128x64_U8G_SCREENS
-//    #include <U8glib.h>
-//#endif
-*/
 #include "screens.h"
 screens drawScreen;
 

@@ -28,7 +28,6 @@ SOFTWARE.
 #define settings_h
 
 // Choose the display you will be using
-// you will also have to uncomment the includes in the main project.
 //#define TVOUT_SCREENS
 #define OLED_128x64_ADAFRUIT_SCREENS
 // u8glib has performance issues.
@@ -54,7 +53,7 @@ SOFTWARE.
 
 // Feature Toggles
 #define USE_DIVERSITY
-#define USE_DIVERSITY3
+#define USE_DIVERSITY3   // select this for 3 receiver input support (use this along with USE_DIVERSITY)
 #ifdef USE_DIVERSITY3
   #define USE_DIVERSITY
 #endif
