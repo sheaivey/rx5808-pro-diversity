@@ -95,7 +95,7 @@ char screens::begin(const char *call_sign) {
     display.setTextSize(2);
     display.print(call_sign);
     display.display();
-    delay(1250);
+    delay(3550);
     return 0; // no errors
 }
 
@@ -414,12 +414,12 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
                 break;
         }
         display.setTextColor(BLACK,WHITE);
-        display.fillRect(0, display.height()-23, 7, 9, WHITE);  //was height-19
-        display.setCursor(1,display.height()-22);               //was height-18
+        display.fillRect(0, display.height()-19, 7, 9, WHITE);
+        display.setCursor(1,display.height()-18);              
         display.print("A");
         display.setTextColor(BLACK,WHITE);
-        display.fillRect(0, display.height()-13, 7, 9, WHITE);  //was height-9
-        display.setCursor(1,display.height()-12);               //was height-8
+        display.fillRect(0, display.height()-9, 7, 9, WHITE);
+        display.setCursor(1,display.height()-8);              
         display.print("B");
 //    }
   #endif
@@ -469,7 +469,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
         display.fillRect(7 + rssi_scaled, display.height()-9, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
         if(active_receiver == useReceiverC)
         {
-            display.fillRect(7, display.height()-19, rssi_scaled, 9, WHITE);
+            display.fillRect(7, display.height()-9, rssi_scaled, 9, WHITE);
         }
         else
         {
