@@ -92,10 +92,10 @@ void screens::mainMenu(uint8_t menu_id) {
     TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Band Scanner"));
     TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("Manual Mode"));
 #ifdef USE_DIVERSITY
-    if( isDiversity() )
-    {
+//    if( isDiversity() )
+//    {
         TV.printPGM(10, 5+4*MENU_Y_SIZE, PSTR("Diversity"));
-    }
+//    }
 #endif
     TV.printPGM(10, 5+5*MENU_Y_SIZE, PSTR("Setup Menu"));
     // selection by inverted box

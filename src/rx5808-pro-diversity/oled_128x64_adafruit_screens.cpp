@@ -84,12 +84,12 @@ char screens::begin(const char *call_sign) {
     display.display();
     delay(250);
     display.setCursor(display.width()-6*8,8*2+4);
-    if(isDiversity()) {
+//    if(isDiversity()) {
         display.print(PSTR2(" ENABLED"));
-    }
-    else {
-        display.print(PSTR2("DISABLED"));
-    }
+//    }
+//    else {
+//        display.print(PSTR2("DISABLED"));
+//    }
 #endif
     display.setCursor(((display.width() - (strlen(call_sign)*12)) / 2),8*4+4);
     display.setTextSize(2);
@@ -139,12 +139,12 @@ void screens::mainMenu(uint8_t menu_id) {
     display.print(PSTR2("MANUAL MODE"));
 
 #ifdef USE_DIVERSITY
-    if(isDiversity())
-    {
+//    if(isDiversity())
+//    {
         display.setTextColor(menu_id == 3 ? BLACK : WHITE);
         display.setCursor(5,10*3+13);
         display.print(PSTR2("DIVERSITY"));
-    }
+//    }
 #endif
     display.setTextColor(menu_id == 4 ? BLACK : WHITE);
     display.setCursor(5,10*4+13);
@@ -370,7 +370,7 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
     display.setTextSize(1);
 #ifdef USE_DIVERSITY
   #ifdef USE_DIVERSITY3
-    if(isDiversity3()) {
+//    if(isDiversity3()) {
         display.setCursor(70,10);
         switch(diversity_mode) {
             case useReceiverAuto:
@@ -398,9 +398,9 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
         display.fillRect(0, display.height()-9, 7, 9, WHITE);
         display.setCursor(1,display.height()-8);
         display.print("C");
-    }
+//    }
   #else
-    if(isDiversity()) {
+//    if(isDiversity()) {
         display.setCursor(70,10); //was 70,18
         switch(diversity_mode) {
             case useReceiverAuto:
@@ -421,7 +421,7 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
         display.fillRect(0, display.height()-13, 7, 9, WHITE);  //was height-9
         display.setCursor(1,display.height()-12);               //was height-8
         display.print("B");
-    }
+//    }
   #endif
 #endif
     display.display();
@@ -436,7 +436,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
 void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssiA, uint8_t rssiB, uint8_t rssiC) {
 #ifdef USE_DIVERSITY
   #ifdef USE_DIVERSITY3
-    if(isDiversity3()) {
+//    if(isDiversity3()) {
         // read rssi A
         #define RSSI_BAR_SIZE 119
         uint8_t rssi_scaled=map(rssiA, 1, 100, 3, RSSI_BAR_SIZE);
@@ -476,20 +476,20 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
             display.fillRect(7, display.height()-9, (RSSI_BAR_SIZE), 9, BLACK);
             display.drawRect(7, display.height()-9, rssi_scaled, 9, WHITE);
         }
-    }
-    else {
-        display.setTextColor(BLACK);
-        display.fillRect(0, display.height()-27, 110, 9, BLACK);
-        display.fillRect(0, display.height()-19, 25, 19, WHITE);
-        display.setCursor(1,display.height()-13);
-        display.print(PSTR2("RSSI"));
-        #define RSSI_BAR_SIZE 101
-        uint8_t rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-        display.fillRect(25 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 19, BLACK);
-        display.fillRect(25, display.height()-19, rssi_scaled, 19, WHITE);
-    }
+//    }
+//    else {
+//        display.setTextColor(BLACK);
+//        display.fillRect(0, display.height()-27, 110, 9, BLACK);
+//        display.fillRect(0, display.height()-19, 25, 19, WHITE);
+//        display.setCursor(1,display.height()-13);
+//        display.print(PSTR2("RSSI"));
+//        #define RSSI_BAR_SIZE 101
+//        uint8_t rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
+//        display.fillRect(25 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 19, BLACK);
+//        display.fillRect(25, display.height()-19, rssi_scaled, 19, WHITE);
+//    }
   #else
-    if(isDiversity()) {
+//    if(isDiversity()) {
         // read rssi A
         #define RSSI_BAR_SIZE 119
         uint8_t rssi_scaled=map(rssiA, 1, 100, 3, RSSI_BAR_SIZE);
@@ -516,20 +516,20 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
             display.fillRect(7, display.height()-9, (RSSI_BAR_SIZE), 9, BLACK);
             display.drawRect(7, display.height()-9, rssi_scaled, 9, WHITE);
         }
-    }
-    else {
-        display.setTextColor(BLACK);
-        display.fillRect(0, display.height()-27, 110, 9, BLACK);
-        display.fillRect(0, display.height()-19, 25, 19, WHITE);
-        display.setCursor(1,display.height()-13);
-        display.print(PSTR2("RSSI"));
-        #define RSSI_BAR_SIZE 101
-        uint8_t rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-        display.fillRect(25 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 19, BLACK);
-        display.fillRect(25, display.height()-19, rssi_scaled, 19, WHITE);
-    }
+//    }
+//    else {
+//        display.setTextColor(BLACK);
+//        display.fillRect(0, display.height()-27, 110, 9, BLACK);
+//        display.fillRect(0, display.height()-19, 25, 19, WHITE);
+//        display.setCursor(1,display.height()-13);
+//        display.print(PSTR2("RSSI"));
+//        #define RSSI_BAR_SIZE 101
+//        uint8_t rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
+//        display.fillRect(25 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 19, BLACK);
+//        display.fillRect(25, display.height()-19, rssi_scaled, 19, WHITE);
+//    }
   #endif
-#else
+#else   //(ifdef DIVERSITY)
     display.setTextColor(BLACK);
     display.fillRect(0, display.height()-27, 110, 9, BLACK);
     display.fillRect(0, display.height()-19, 25, 19, WHITE);
@@ -547,7 +547,8 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
         display.print(PSTR2("LOW SIGNAL"));
     }
 #ifdef USE_DIVERSITY
-    else if(isDiversity()) {
+//    else if(isDiversity()) {
+    else {
         display.drawLine(50,display.height()-10,110,display.height()-10,BLACK);
     }
 #endif

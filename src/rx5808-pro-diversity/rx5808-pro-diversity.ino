@@ -318,13 +318,13 @@ void loop()
                 break;
             #ifdef USE_DIVERSITY
                 case 3: // Diversity
-                    if(isDiversity()) {
+//                    if(isDiversity()) {
                         state=STATE_DIVERSITY;
-                    }
-                    else {
-                        menu_id++;
-                        state=STATE_SETUP_MENU;
-                    }
+//                    }
+//                    else {
+//                        menu_id++;
+//                        state=STATE_SETUP_MENU;
+//                    }
                 break;
             #else
                 case 3: // Skip
@@ -365,8 +365,10 @@ void loop()
                 /*********************/
                 if(digitalRead(buttonUp) == LOW) {
                     menu_id--;
-#ifdef USE_DIVERSITY
-                    if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
+//#ifdef USE_DIVERSITY
+#ifndef USE_DIVERSITY
+//                    if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
+                    if(menu_id == 3) { // make sure we back up two menu slots.
                         menu_id--;
                     }
 #endif
@@ -516,7 +518,7 @@ void loop()
 #ifdef USE_DIVERSITY
         drawScreen.screenSaver(diversity_mode, pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
 #else
-        drawScreen.screenSaver(pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex));
+        drawScreen.screenSaver(pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
 #endif
         do{
             rssi = readRSSI();
