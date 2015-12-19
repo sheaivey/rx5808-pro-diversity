@@ -1119,7 +1119,7 @@ uint16_t readRSSI(char receiver)
                         receiver=active_receiver;
                       }
                     }
-                else          //C highest
+                else if (rssiC>rssiA && rssiC>rssiB) //C highest
                   if (receiver==useReceiverC && diversity_check_count>0)
                   {
                     diversity_check_count--;
