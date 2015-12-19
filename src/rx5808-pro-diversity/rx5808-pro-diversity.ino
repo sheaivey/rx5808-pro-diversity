@@ -1080,14 +1080,14 @@ uint16_t readRSSI(char receiver)
 //diversity_check_count stars at 0 and increases if current rx is lower than another by DIVERSITY_CUTOVER
 //when diversity_check_count>=DIVERSITY_MAX_CHECKS the rx with highest RSSI is selected
                 if (rssiA>rssiB && rssiA>rssiC) //A highest
-                  if (receiver==useReceiverA && diversity_check_count>0)
+                  if (active_receiver==useReceiverA && diversity_check_count>0)
                   {
                     diversity_check_count--;
                   }
                   else
                     if (diversity_check_count < DIVERSITY_MAX_CHECKS && 
-                        ((receiver==useReceiverB && ((int)((((float)rssiA - (float)rssiB) / (float)rssiB) * 100.0) >= DIVERSITY_CUTOVER)) ||
-                        (receiver==useReceiverC && ((int)((((float)rssiA - (float)rssiC) / (float)rssiC) * 100.0) >= DIVERSITY_CUTOVER))))
+                        ((active_receiver==useReceiverB && ((int)((((float)rssiA - (float)rssiB) / (float)rssiB) * 100.0) >= DIVERSITY_CUTOVER)) ||
+                        (active_receiver==useReceiverC && ((int)((((float)rssiA - (float)rssiC) / (float)rssiC) * 100.0) >= DIVERSITY_CUTOVER))))
                     {
                       diversity_check_count++;
                       if(diversity_check_count >= DIVERSITY_MAX_CHECKS)
@@ -1100,14 +1100,14 @@ uint16_t readRSSI(char receiver)
                       }
                     }
                 else if (rssiB>rssiA && rssiB>rssiC) //B highest
-                  if (receiver==useReceiverB && diversity_check_count>0)
+                  if (active_receiver==useReceiverB && diversity_check_count>0)
                   {
                     diversity_check_count--;
                   }
                   else
                     if (diversity_check_count < DIVERSITY_MAX_CHECKS && 
-                        ((receiver==useReceiverA && ((int)((((float)rssiB - (float)rssiA) / (float)rssiA) * 100.0) >= DIVERSITY_CUTOVER)) ||
-                        (receiver==useReceiverC && ((int)((((float)rssiB - (float)rssiC) / (float)rssiC) * 100.0) >= DIVERSITY_CUTOVER))))
+                        ((active_receiver==useReceiverA && ((int)((((float)rssiB - (float)rssiA) / (float)rssiA) * 100.0) >= DIVERSITY_CUTOVER)) ||
+                        (active_receiver==useReceiverC && ((int)((((float)rssiB - (float)rssiC) / (float)rssiC) * 100.0) >= DIVERSITY_CUTOVER))))
                     {
                       diversity_check_count++;
                       if(diversity_check_count >= DIVERSITY_MAX_CHECKS)
@@ -1120,14 +1120,14 @@ uint16_t readRSSI(char receiver)
                       }
                     }
                 else if (rssiC>rssiA && rssiC>rssiB) //C highest
-                  if (receiver==useReceiverC && diversity_check_count>0)
+                  if (active_receiver==useReceiverC && diversity_check_count>0)
                   {
                     diversity_check_count--;
                   }
                   else
                     if (diversity_check_count < DIVERSITY_MAX_CHECKS && 
-                        ((receiver==useReceiverA && ((int)((((float)rssiC - (float)rssiA) / (float)rssiA) * 100.0) >= DIVERSITY_CUTOVER)) ||
-                        (receiver==useReceiverB && ((int)((((float)rssiC - (float)rssiB) / (float)rssiB) * 100.0) >= DIVERSITY_CUTOVER))))
+                        ((active_receiver==useReceiverA && ((int)((((float)rssiC - (float)rssiA) / (float)rssiA) * 100.0) >= DIVERSITY_CUTOVER)) ||
+                        (active_receiver==useReceiverB && ((int)((((float)rssiC - (float)rssiB) / (float)rssiB) * 100.0) >= DIVERSITY_CUTOVER))))
                     {
                       diversity_check_count++;
                       if(diversity_check_count >= DIVERSITY_MAX_CHECKS)
