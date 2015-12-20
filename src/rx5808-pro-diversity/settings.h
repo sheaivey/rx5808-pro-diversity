@@ -55,8 +55,8 @@ SOFTWARE.
 #define USE_DIVERSITY
 #define NUM_RXS 3
 //following must include a pin ID of the rssi input & receiver video switch output for each receiver
-#define SET_RSSI_PINS         uint8_t rssi_pins[NUM_RXS]={A6,A7,A3}
-#define SET_RECEIVER_LED_PINS uint8_t receiverLEDPins[NUM_RXS]={A0,A1,A2}
+#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3}
+#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2}
 
 //#define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
@@ -135,7 +135,7 @@ SOFTWARE.
 #define STATE_SCREEN_SAVER 8
 
 // Seconds to wait before force entering screensaver
-#define SCREENSAVER_TIMEOUT 30
+#define SCREENSAVER_TIMEOUT 10
 
 #define START_STATE STATE_SEEK
 #define MAX_STATE STATE_MANUAL

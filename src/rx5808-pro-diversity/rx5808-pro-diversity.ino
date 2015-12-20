@@ -75,6 +75,9 @@ const uint8_t channelList[] PROGMEM = {
   19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9, 25, 5, 35, 10, 26, 4, 11, 27, 3, 36, 12, 28, 2, 13, 29, 37, 1, 14, 30, 0, 15, 31, 38, 20, 21, 39, 22, 23
 };
 
+SET_RSSI_PINS;
+SET_RECEIVER_LED_PINS;
+
 char channel = 0;
 uint8_t channelIndex = 0;
 uint8_t rssi = 0;
@@ -117,8 +120,7 @@ char call_sign[10];
 bool settings_beeps = true;
 bool settings_orderby_channel = true;
 
-SET_RSSI_PINS;
-SET_RECEIVER_LED_PINS;
+
 
 // SETUP ----------------------------------------------------------------------------
 void setup()
@@ -138,8 +140,8 @@ void setup()
     // optional control
     pinMode(buttonDown, INPUT);
     digitalWrite(buttonDown, INPUT_PULLUP);
-//    pinMode(buttonSave, INPUT);
-//    digitalWrite(buttonSave, INPUT_PULLUP);
+    pinMode(buttonSave, INPUT);
+    digitalWrite(buttonSave, INPUT_PULLUP);
 
     //Receiver switching setup
     for (uint8_t i=0; i<NUM_RXS; i++){
@@ -223,6 +225,7 @@ void setup()
     // Used to Transmit IR Payloads
     Serial.begin(9600);
 #endif
+
 }
 
 // LOOP ----------------------------------------------------------------------------
@@ -490,7 +493,7 @@ void loop()
 
 #ifdef USE_DIVERSITY
             for (uint8_t i=0; i<NUM_RXS; i++){
-                rssi_measurements[i] = readRSSI(i);
+                rssi_measurements[i] = readRSSI(i+1);
             }
             drawScreen.updateScreenSaver(active_receiver, rssi, rssi_measurements);
 #else
@@ -517,7 +520,7 @@ void loop()
             {
                 //delay(10); // timeout delay
                 for (uint8_t i=0; i<NUM_RXS; i++){
-                    rssi_measurements[i] = readRSSI(i);
+                    rssi_measurements[i] = readRSSI(i+1);
                 }
                 drawScreen.updateDiversity(active_receiver, rssi_measurements);
             }
@@ -925,8 +928,8 @@ uint16_t readRSSI(char receiver)
 {
 #endif
     uint16_t rssi = 0;
-    uint8_t rssi_measurements[NUM_RXS];
-    uint8_t rssi_hi=0;
+    uint16_t rssi_measurements[NUM_RXS];
+    uint16_t rssi_hi=0;
     bool receiver_changed=false;  
     for (uint8_t i = 0; i < NUM_RXS; i++) 
     {
@@ -936,7 +939,7 @@ uint16_t readRSSI(char receiver)
     {
         for (uint8_t i = 0; i < NUM_RXS; i++) 
         {
-            rssi_measurements[i] += analogRead(rssi_pins[i]);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//****************TODO 
+            rssi_measurements[i] += analogRead(rssi_pins[i]);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL); 
         }
     }
     for (uint8_t i = 0; i < NUM_RXS; i++) 
@@ -965,45 +968,54 @@ uint16_t readRSSI(char receiver)
         rssi_measurements[i]=rssi_measurements[i]-rssi_min[i]; // set zero point (value 0...160)
         rssi_measurements[i] = map(rssi_measurements[i], 0, rssi_max[i]-rssi_min[i] , 1, 100);   // scale from 1..100%
     }
-    
-    if (diversity_mode==useReceiverAuto) {
-        // select receiver
-        for (uint8_t i=0;i<NUM_RXS;i++)
-        {
-            if((int)abs((float)(((float)rssi_measurements[i] - (float)rssi_measurements[active_receiver-1]) / (float)rssi_measurements[active_receiver-1]) * 100.0) >= DIVERSITY_CUTOVER)
+#ifdef USE_DIVERSITY
+    if(receiver == -1) // no receiver was chosen using diversity
+    {
+        if (diversity_mode==useReceiverAuto) {
+            // select receiver
+            for (uint8_t i=0;i<NUM_RXS;i++)
             {
-                if(rssi_measurements[i] > rssi_measurements[active_receiver-1] && diversity_check_count[i] > 0)
+                if((int)abs((float)(((float)rssi_measurements[i] - (float)rssi_measurements[active_receiver-1]) / (float)rssi_measurements[active_receiver-1]) * 100.0) >= DIVERSITY_CUTOVER)
                 {
-                    diversity_check_count[i]--;
-                }
-                if(rssi_measurements[i] < rssi_measurements[active_receiver-1] && diversity_check_count[i] < DIVERSITY_MAX_CHECKS)
-                {
-                    diversity_check_count[i]++;
-                }
-                // have we reached the maximum number of checks to switch receivers?
-                // if so find receiver with highest rssi (only check those which have reached max num of checks)
-                if(diversity_check_count[i] >= DIVERSITY_MAX_CHECKS) {
-                    if (rssi_measurements[i] > rssi_hi) {
-                        rssi_hi=rssi_measurements[i];
-                        receiver=i;
-                        receiver_changed=true;
+                    if(rssi_measurements[i] > rssi_measurements[active_receiver-1] && diversity_check_count[i] < DIVERSITY_MAX_CHECKS)
+                    {
+                        diversity_check_count[i]++;
+                    }
+                    if(rssi_measurements[i] < rssi_measurements[active_receiver-1] && diversity_check_count[i] >0)
+                    {
+                        diversity_check_count[i]--;
+                    }
+                    // have we reached the maximum number of checks to switch receivers?
+                    // if so find receiver with highest rssi (only check those which have reached max num of checks)
+                    if(diversity_check_count[i] >= DIVERSITY_MAX_CHECKS) {
+                        if (rssi_measurements[i] > rssi_hi) {
+                            rssi_hi=rssi_measurements[i];
+                            receiver=i+1;
+                            receiver_changed=true;
+                        }
                     }
                 }
             }
+            if (receiver_changed) {
+                for (uint8_t i=0;i<NUM_RXS;i++) { diversity_check_count[i]=0; }
+            } 
+            else {
+                receiver=active_receiver;
+            }
         }
-        if (receiver_changed) {
-            for (uint8_t i=0;i<NUM_RXS;i++) { diversity_check_count[i]=0; }
-        } 
-        else {
-            receiver=active_receiver;
+        else if (diversity_mode<=NUM_RXS) 
+        {
+            receiver=diversity_mode;
         }
+        else
+        {
+            receiver=useReceiverA;
+        }
+        // set the antenna LED and switch the video
+        setReceiver(receiver);
     }
-    else if (diversity_mode<=NUM_RXS) 
-        receiver=diversity_mode;
-    else
-        receiver=useReceiverA;
-    // set the antenna LED and switch the video
-    setReceiver(receiver);
+#endif    
+
     rssi=rssi_measurements[receiver-1];
     if(state==STATE_RSSI_SETUP) {
         rssi = rssi_measurements[useReceiverA-1];

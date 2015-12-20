@@ -479,7 +479,7 @@ void screens::diversity(uint8_t diversity_mode) {
 }
 
 void screens::updateDiversity(char active_receiver, uint8_t rssi_measurements[]){
-    #define RSSI_BAR_SIZE 54
+    #define RSSI_BAR_SIZE 44
     for (uint8_t i=0; i<NUM_RXS; i++){
         uint8_t rssi_scaled=map(rssi_measurements[i], 1, 100, 1, RSSI_BAR_SIZE);
         display.fillRect(70+i*7, display.height()-9-RSSI_BAR_SIZE, 7, (RSSI_BAR_SIZE-rssi_scaled), BLACK);
