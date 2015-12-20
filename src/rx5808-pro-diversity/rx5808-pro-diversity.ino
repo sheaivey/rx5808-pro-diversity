@@ -82,7 +82,7 @@ uint8_t rssi_scaled = 0;
 uint8_t active_receiver = useReceiverA;
 #ifdef USE_DIVERSITY
 uint8_t diversity_mode = useReceiverAuto;
-char diversity_check_count = 0;
+char diversity_check_count[NUM_RXS];
 #endif
 uint8_t rssi_seek_threshold = RSSI_SEEK_TRESHOLD;
 uint8_t hight = 0;
@@ -105,29 +105,20 @@ uint8_t last_dip_band=255;
 uint8_t scan_start=0;
 uint8_t first_tune=1;
 uint8_t force_menu_redraw=0;
-uint16_t rssi_best=0; // used for band scaner
-uint16_t rssi_min_a=0;
-uint16_t rssi_max_a=0;
-uint16_t rssi_setup_min_a=0;
-uint16_t rssi_setup_max_a=0;
-#ifdef USE_DIVERSITY
-uint16_t rssi_min_b=0;
-uint16_t rssi_max_b=0;
-uint16_t rssi_setup_min_b=0;
-uint16_t rssi_setup_max_b=0;
-#endif
-#ifdef USE_DIVERSITY3
-uint16_t rssi_min_c=0;
-uint16_t rssi_max_c=0;
-uint16_t rssi_setup_min_c=0;
-uint16_t rssi_setup_max_c=0;
-#endif
+uint16_t rssi_best=0; // used for band scanner
+uint16_t rssi_min[NUM_RXS];
+uint16_t rssi_max[NUM_RXS];
+uint16_t rssi_setup_min[NUM_RXS];
+uint16_t rssi_setup_max[NUM_RXS];
 uint16_t rssi_seek_found=0;
 uint16_t rssi_setup_run=0;
 
 char call_sign[10];
 bool settings_beeps = true;
 bool settings_orderby_channel = true;
+
+SET_RSSI_PINS;
+SET_RECEIVER_LED_PINS;
 
 // SETUP ----------------------------------------------------------------------------
 void setup()
@@ -147,22 +138,27 @@ void setup()
     // optional control
     pinMode(buttonDown, INPUT);
     digitalWrite(buttonDown, INPUT_PULLUP);
-    pinMode(buttonSave, INPUT);
-    digitalWrite(buttonSave, INPUT_PULLUP);
-    //Receiver Setup
-    pinMode(receiverA_led,OUTPUT);
-#ifdef USE_DIVERSITY
-    pinMode(receiverB_led,OUTPUT);
-#endif
-#ifdef USE_DIVERSITY3
-    pinMode(receiverC_led,OUTPUT);
-#endif
-    setReceiver(useReceiverA);
+//    pinMode(buttonSave, INPUT);
+//    digitalWrite(buttonSave, INPUT_PULLUP);
+
+    //Receiver switching setup
+    for (uint8_t i=0; i<NUM_RXS; i++){
+      pinMode(receiverLEDPins[i],OUTPUT);
+    }
+    setReceiver(useReceiverA); 
+    
     // SPI pins for RX control
     pinMode (slaveSelectPin, OUTPUT);
     pinMode (spiDataPin, OUTPUT);
-	pinMode (spiClockPin, OUTPUT);
+	  pinMode (spiClockPin, OUTPUT);
 
+    for (uint8_t i = 0;i < NUM_RXS; i++){
+        rssi_min[i]=0;
+        rssi_max[i]=0;
+        rssi_setup_min[i]=0;
+        rssi_setup_max[i]=0;
+        diversity_check_count[i]=0;
+    }
     // use values only of EEprom is not 255 = unsaved
     uint8_t eeprom_check = EEPROM.read(EEPROM_ADR_STATE);
     if(eeprom_check == 255) // unused
@@ -172,12 +168,6 @@ void setup()
         EEPROM.write(EEPROM_ADR_TUNE,CHANNEL_MIN_INDEX);
         EEPROM.write(EEPROM_ADR_BEEP,settings_beeps);
         EEPROM.write(EEPROM_ADR_ORDERBY,settings_orderby_channel);
-        // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_A_L,lowByte(RSSI_MIN_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_A_H,highByte(RSSI_MIN_VAL));
-        // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L,lowByte(RSSI_MAX_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,highByte(RSSI_MAX_VAL));
 
         // save default call sign
         strcpy(call_sign, CALL_SIGN); // load callsign
@@ -185,26 +175,15 @@ void setup()
             EEPROM.write(EEPROM_ADR_CALLSIGN+i,call_sign[i]);
         }
 
-
-
-#ifdef USE_DIVERSITY
-        // diversity
         EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
-        // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,lowByte(RSSI_MIN_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,highByte(RSSI_MIN_VAL));
-        // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,lowByte(RSSI_MAX_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,highByte(RSSI_MAX_VAL));
-#endif
-#ifdef USE_DIVERSITY3
-         // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_C_L,lowByte(RSSI_MIN_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_C_H,highByte(RSSI_MIN_VAL));
-        // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_C_L,lowByte(RSSI_MAX_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_C_H,highByte(RSSI_MAX_VAL));
-#endif
+        for(uint8_t i=0; i<NUM_RXS; i++){
+            // save 16 bit
+            EEPROM.write(EEPROM_ADR_RSSI_MIN+i*4,lowByte(RSSI_MIN_VAL));
+            EEPROM.write(EEPROM_ADR_RSSI_MIN+1+i*4,highByte(RSSI_MIN_VAL));
+            // save 16 bit
+            EEPROM.write(EEPROM_ADR_RSSI_MAX+i*4,lowByte(RSSI_MAX_VAL));
+            EEPROM.write(EEPROM_ADR_RSSI_MAX+1+i*4,highByte(RSSI_MAX_VAL));
+        }
     }
 
     // read last setting from eeprom
@@ -217,17 +196,12 @@ void setup()
     for(uint8_t i = 0;i<sizeof(call_sign);i++) {
         call_sign[i] = EEPROM.read(EEPROM_ADR_CALLSIGN+i);
     }
-
-    rssi_min_a=((EEPROM.read(EEPROM_ADR_RSSI_MIN_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_A_L)));
-    rssi_max_a=((EEPROM.read(EEPROM_ADR_RSSI_MAX_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_A_L)));
+    for(uint8_t i=0; i<NUM_RXS; i++){
+      rssi_min[i]=((EEPROM.read(EEPROM_ADR_RSSI_MIN+1+i*4)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN+i*4)));
+      rssi_max[i]=((EEPROM.read(EEPROM_ADR_RSSI_MAX+1+i*4)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX+i*4)));
+    }
 #ifdef USE_DIVERSITY
     diversity_mode = EEPROM.read(EEPROM_ADR_DIVERSITY);
-    rssi_min_b=((EEPROM.read(EEPROM_ADR_RSSI_MIN_B_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_B_L)));
-    rssi_max_b=((EEPROM.read(EEPROM_ADR_RSSI_MAX_B_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_B_L)));
-#endif
-#ifdef USE_DIVERSITY3
-    rssi_min_c=((EEPROM.read(EEPROM_ADR_RSSI_MIN_C_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_C_L)));
-    rssi_max_c=((EEPROM.read(EEPROM_ADR_RSSI_MAX_C_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_C_L)));
 #endif
     force_menu_redraw=1;
 
@@ -259,6 +233,7 @@ void loop()
     /*******************/
     uint8_t in_menu;
     uint8_t in_menu_time_out;
+    uint8_t rssi_measurements[NUM_RXS];
 
     if (digitalRead(buttonMode) == LOW) // key pressed ?
     {
@@ -425,23 +400,13 @@ void loop()
                 // draw selected
                 if(state==STATE_RSSI_SETUP)
                 {
-                    // prepare new setup
-                    rssi_min_a=0;
-                    rssi_max_a=400; // set to max range
-                    rssi_setup_min_a=400;
-                    rssi_setup_max_a=0;
-#ifdef USE_DIVERSITY
-                    rssi_min_b=0;
-                    rssi_max_b=400; // set to max range
-                    rssi_setup_min_b=400;
-                    rssi_setup_max_b=0;
-#endif
-#ifdef USE_DIVERSITY3
-                    rssi_min_c=0;
-                    rssi_max_c=400; // set to max range
-                    rssi_setup_min_c=400;
-                    rssi_setup_max_c=0;
-#endif
+                    for (uint8_t i=0; i<NUM_RXS; i++){
+                      // prepare new setup
+                      rssi_min[i]=0;
+                      rssi_max[i]=400; // set to max range
+                      rssi_setup_min[i]=400;
+                      rssi_setup_max[i]=0;
+                    }
                     rssi_setup_run=RSSI_SETUP_RUN;
                 }
 
@@ -524,11 +489,10 @@ void loop()
             rssi = readRSSI();
 
 #ifdef USE_DIVERSITY
-  #ifdef USE_DIVERSITY3
-            drawScreen.updateScreenSaver(active_receiver, rssi, readRSSI(useReceiverA), readRSSI(useReceiverB), readRSSI(useReceiverC));
-  #else
-            drawScreen.updateScreenSaver(active_receiver, rssi, readRSSI(useReceiverA), readRSSI(useReceiverB));
-  #endif
+            for (uint8_t i=0; i<NUM_RXS; i++){
+                rssi_measurements[i] = readRSSI(i);
+            }
+            drawScreen.updateScreenSaver(active_receiver, rssi, rssi_measurements);
 #else
             drawScreen.updateScreenSaver(rssi);
 #endif
@@ -552,12 +516,10 @@ void loop()
             do
             {
                 //delay(10); // timeout delay
-                readRSSI();
-                #ifdef USE_DIVERSITY3
-                    drawScreen.updateDiversity(active_receiver, readRSSI(useReceiverA), readRSSI(useReceiverB), readRSSI(useReceiverC));
-                #else
-                    drawScreen.updateDiversity(active_receiver, readRSSI(useReceiverA), readRSSI(useReceiverB));
-                #endif
+                for (uint8_t i=0; i<NUM_RXS; i++){
+                    rssi_measurements[i] = readRSSI(i);
+                }
+                drawScreen.updateDiversity(active_receiver, rssi_measurements);
             }
             while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next mode or time out
 
@@ -571,21 +533,14 @@ void loop()
             else if(digitalRead(buttonDown) == LOW) {
                 menu_id++;
             }
-  #ifdef USE_DIVERSITY3
-            if(menu_id > useReceiverC) {
+  
+            if(menu_id > NUM_RXS) {
                 menu_id = 0;
             }
             if(menu_id < 0) {
-                menu_id = useReceiverC;
+                menu_id = NUM_RXS;
             }
-  #else
-            if(menu_id > useReceiverB) {
-                menu_id = 0;
-            }
-            if(menu_id < 0) {
-                menu_id = useReceiverB;
-            }        
-  #endif
+ 
             beep(50); // beep & debounce
             delay(KEY_DEBOUNCE); // debounce
         }
@@ -747,7 +702,7 @@ void loop()
         uint8_t bestChannelName = pgm_read_byte_near(channelNames + channelIndex);
         uint16_t bestChannelFrequency = pgm_read_word_near(channelFreqTable + channelIndex);
 
-        drawScreen.updateBandScanMode((state == STATE_RSSI_SETUP), channel, rssi, bestChannelName, bestChannelFrequency, rssi_setup_min_a, rssi_setup_max_a);
+        drawScreen.updateBandScanMode((state == STATE_RSSI_SETUP), channel, rssi, bestChannelName, bestChannelFrequency, rssi_setup_min[useReceiverA-1], rssi_setup_max[useReceiverA-1]);
 
         // next channel
         if (channel < CHANNEL_MAX)
@@ -762,40 +717,16 @@ void loop()
                 if(!rssi_setup_run--)
                 {
                     // setup done
-                    rssi_min_a=rssi_setup_min_a;
-                    rssi_max_a=rssi_setup_max_a;
-                    // save 16 bit
-                    EEPROM.write(EEPROM_ADR_RSSI_MIN_A_L,(rssi_min_a & 0xff));
-                    EEPROM.write(EEPROM_ADR_RSSI_MIN_A_H,(rssi_min_a >> 8));
-                    // save 16 bit
-                    EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L,(rssi_max_a & 0xff));
-                    EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,(rssi_max_a >> 8));
-
-#ifdef USE_DIVERSITY
-                    if(isDiversity()) { // only calibrate RSSI B when diversity is detected.
-                        rssi_min_b=rssi_setup_min_b;
-                        rssi_max_b=rssi_setup_max_b;
+                    for (uint8_t i=0; i<NUM_RXS; i++){
+                        rssi_min[i]=rssi_setup_min[i];
+                        rssi_max[i]=rssi_setup_max[i];
                         // save 16 bit
-                        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,(rssi_min_b & 0xff));
-                        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,(rssi_min_b >> 8));
+                        EEPROM.write(EEPROM_ADR_RSSI_MIN+i*4,(rssi_min[i] & 0xff));
+                        EEPROM.write(EEPROM_ADR_RSSI_MIN+1+i*4,(rssi_min[i] >> 8));
                         // save 16 bit
-                        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,(rssi_max_b & 0xff));
-                        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,(rssi_max_b >> 8));
+                        EEPROM.write(EEPROM_ADR_RSSI_MAX+i*4,(rssi_max[i] & 0xff));
+                        EEPROM.write(EEPROM_ADR_RSSI_MAX+1+i*4,(rssi_max[i] >> 8));
                     }
-#endif
-#ifdef USE_DIVERSITY3
-                    if(isDiversity3()) { // only calibrate RSSI C when diversity3 is detected.
-                        rssi_min_c=rssi_setup_min_c;
-                        rssi_max_c=rssi_setup_max_c;
-                        // save 16 bit
-                        EEPROM.write(EEPROM_ADR_RSSI_MIN_C_L,(rssi_min_c & 0xff));
-                        EEPROM.write(EEPROM_ADR_RSSI_MIN_C_H,(rssi_min_c >> 8));
-                        // save 16 bit
-                        EEPROM.write(EEPROM_ADR_RSSI_MAX_C_L,(rssi_max_c & 0xff));
-                        EEPROM.write(EEPROM_ADR_RSSI_MAX_C_H,(rssi_max_c >> 8));
-                    }
-#endif
-
                     state=EEPROM.read(EEPROM_ADR_STATE);
                     beep(1000);
                 }
@@ -880,7 +811,7 @@ void loop()
                 }
                 else { // change current letter in place
                     call_sign[editing]++;
-                    call_sign[editing] > '}' ? call_sign[editing] = ' ' : false; // loop to oter end
+                    call_sign[editing] > '}' ? call_sign[editing] = ' ' : false; // loop to other end
                 }
 
             }
@@ -896,7 +827,7 @@ void loop()
                 }
                 else { // change current letter in place
                     call_sign[editing]--;
-                    call_sign[editing] < ' ' ? call_sign[editing] = '}' : false; // loop to oter end
+                    call_sign[editing] < ' ' ? call_sign[editing] = '}' : false; // loop to other end
                 }
             }
 
@@ -994,242 +925,102 @@ uint16_t readRSSI(char receiver)
 {
 #endif
     uint16_t rssi = 0;
-    uint16_t rssiA = 0;
-
-#ifdef USE_DIVERSITY
-    uint16_t rssiB = 0;
-#endif
-#ifdef USE_DIVERSITY3
-    uint16_t rssiC = 0;
-#endif
-    for (uint8_t i = 0; i < RSSI_READS; i++)
+    uint8_t rssi_measurements[NUM_RXS];
+    uint8_t rssi_hi=0;
+    bool receiver_changed=false;  
+    for (uint8_t i = 0; i < NUM_RXS; i++) 
     {
-        rssiA += analogRead(rssiPinA);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
-
-#ifdef USE_DIVERSITY
-        rssiB += analogRead(rssiPinB);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
-#endif
-#ifdef USE_DIVERSITY3
-        rssiC += analogRead(rssiPinC);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
-#endif
+        rssi_measurements[i] = 0;
     }
-    rssiA = rssiA/RSSI_READS; // average of RSSI_READS readings
-
-#ifdef USE_DIVERSITY
-    rssiB = rssiB/RSSI_READS; // average of RSSI_READS readings
-#endif
-#ifdef USE_DIVERSITY3
-    rssiC = rssiC/RSSI_READS; // average of RSSI_READS readings
-#endif
+    for (uint8_t j = 0; j < RSSI_READS; j++)
+    {
+        for (uint8_t i = 0; i < NUM_RXS; i++) 
+        {
+            rssi_measurements[i] += analogRead(rssi_pins[i]);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//****************TODO 
+        }
+    }
+    for (uint8_t i = 0; i < NUM_RXS; i++) 
+    {
+        rssi_measurements[i] = rssi_measurements[i]/RSSI_READS; // average of RSSI_READS readings
+    }
     // special case for RSSI setup
     if(state==STATE_RSSI_SETUP)
     { // RSSI setup
-        if(rssiA < rssi_setup_min_a)
+        for (uint8_t i = 0; i < NUM_RXS; i++) 
         {
-            rssi_setup_min_a=rssiA;
+            if(rssi_measurements[i] < rssi_setup_min[i])
+            {
+                rssi_setup_min[i]=rssi_measurements[i];
+            }
+            if(rssi_measurements[i] > rssi_setup_max[i])
+            {
+                rssi_setup_max[i]=rssi_measurements[i];
+            }
         }
-        if(rssiA > rssi_setup_max_a)
-        {
-            rssi_setup_max_a=rssiA;
-        }
-
-#ifdef USE_DIVERSITY
-        if(rssiB < rssi_setup_min_b)
-        {
-            rssi_setup_min_b=rssiB;
-        }
-        if(rssiB > rssi_setup_max_b)
-        {
-            rssi_setup_max_b=rssiB;
-        }
-#endif
-#ifdef USE_DIVERSITY3
-        if(rssiC < rssi_setup_min_c)
-        {
-            rssi_setup_min_c=rssiC;
-        }
-        if(rssiC > rssi_setup_max_c)
-        {
-            rssi_setup_max_c=rssiC;
-        }
-#endif
     }
 
-
-    rssiA = constrain(rssiA, rssi_min_a, rssi_max_a);    //original 90---250
-    rssiA=rssiA-rssi_min_a; // set zero point (value 0...160)
-    rssiA = map(rssiA, 0, rssi_max_a-rssi_min_a , 1, 100);   // scale from 1..100%
-#ifdef USE_DIVERSITY
-    rssiB = constrain(rssiB, rssi_min_b, rssi_max_b);    //original 90---250
-    rssiB=rssiB-rssi_min_b; // set zero point (value 0...160)
-    rssiB = map(rssiB, 0, rssi_max_b-rssi_min_b , 1, 100);   // scale from 1..100%
- #ifdef USE_DIVERSITY3
-    rssiC = constrain(rssiC, rssi_min_c, rssi_max_c);    //original 90---250
-    rssiC=rssiC-rssi_min_c; // set zero point (value 0...160)
-    rssiC = map(rssiC, 0, rssi_max_c-rssi_min_c , 1, 100);   // scale from 1..100%
- #endif
-      
-    if(receiver == -1) // no receiver was chosen using diversity
+    for (uint8_t i = 0;i<NUM_RXS;i++)
     {
-        switch(diversity_mode)
+        rssi_measurements[i] = constrain(rssi_measurements[i], rssi_min[i], rssi_max[i]);    //original 90---250
+        rssi_measurements[i]=rssi_measurements[i]-rssi_min[i]; // set zero point (value 0...160)
+        rssi_measurements[i] = map(rssi_measurements[i], 0, rssi_max[i]-rssi_min[i] , 1, 100);   // scale from 1..100%
+    }
+    
+    if (diversity_mode==useReceiverAuto) {
+        // select receiver
+        for (uint8_t i=0;i<NUM_RXS;i++)
         {
-            case useReceiverAuto:
-                // select receiver
- #ifdef USE_DIVERSITY3
-//changed to accomodate 3 rxs:
-//diversity_check_count stars at 0 and increases if current rx is lower than another by DIVERSITY_CUTOVER
-//when diversity_check_count>=DIVERSITY_MAX_CHECKS the rx with highest RSSI is selected
-                if (rssiA>rssiB && rssiA>rssiC) //A highest
-                  if (active_receiver==useReceiverA && diversity_check_count>0)
-                  {
-                    diversity_check_count--;
-                  }
-                  else
-                    if (diversity_check_count < DIVERSITY_MAX_CHECKS && 
-                        ((active_receiver==useReceiverB && ((int)((((float)rssiA - (float)rssiB) / (float)rssiB) * 100.0) >= DIVERSITY_CUTOVER)) ||
-                        (active_receiver==useReceiverC && ((int)((((float)rssiA - (float)rssiC) / (float)rssiC) * 100.0) >= DIVERSITY_CUTOVER))))
-                    {
-                      diversity_check_count++;
-                      if(diversity_check_count >= DIVERSITY_MAX_CHECKS)
-                      {
-                        receiver= useReceiverA;
-                      }
-                      else
-                      {
-                        receiver=active_receiver;
-                      }
-                    }
-                else if (rssiB>rssiA && rssiB>rssiC) //B highest
-                  if (active_receiver==useReceiverB && diversity_check_count>0)
-                  {
-                    diversity_check_count--;
-                  }
-                  else
-                    if (diversity_check_count < DIVERSITY_MAX_CHECKS && 
-                        ((active_receiver==useReceiverA && ((int)((((float)rssiB - (float)rssiA) / (float)rssiA) * 100.0) >= DIVERSITY_CUTOVER)) ||
-                        (active_receiver==useReceiverC && ((int)((((float)rssiB - (float)rssiC) / (float)rssiC) * 100.0) >= DIVERSITY_CUTOVER))))
-                    {
-                      diversity_check_count++;
-                      if(diversity_check_count >= DIVERSITY_MAX_CHECKS)
-                      {
-                        receiver= useReceiverB;
-                      }
-                      else
-                      {
-                        receiver=active_receiver;
-                      }
-                    }
-                else if (rssiC>rssiA && rssiC>rssiB) //C highest
-                  if (active_receiver==useReceiverC && diversity_check_count>0)
-                  {
-                    diversity_check_count--;
-                  }
-                  else
-                    if (diversity_check_count < DIVERSITY_MAX_CHECKS && 
-                        ((active_receiver==useReceiverA && ((int)((((float)rssiC - (float)rssiA) / (float)rssiA) * 100.0) >= DIVERSITY_CUTOVER)) ||
-                        (active_receiver==useReceiverB && ((int)((((float)rssiC - (float)rssiB) / (float)rssiB) * 100.0) >= DIVERSITY_CUTOVER))))
-                    {
-                      diversity_check_count++;
-                      if(diversity_check_count >= DIVERSITY_MAX_CHECKS)
-                      {
-                        receiver= useReceiverC;
-                      }
-                      else
-                      {
-                        receiver=active_receiver;
-                      }
-                    }
-                break;
- #else
-                if((int)abs((float)(((float)rssiA - (float)rssiB) / (float)rssiB) * 100.0) >= DIVERSITY_CUTOVER)
+            if((int)abs((float)(((float)rssi_measurements[i] - (float)rssi_measurements[active_receiver-1]) / (float)rssi_measurements[active_receiver-1]) * 100.0) >= DIVERSITY_CUTOVER)
+            {
+                if(rssi_measurements[i] > rssi_measurements[active_receiver-1] && diversity_check_count[i] > 0)
                 {
-                    if(rssiA > rssiB && diversity_check_count > 0)
-                    {
-                        diversity_check_count--;
-                    }
-                    if(rssiA < rssiB && diversity_check_count < DIVERSITY_MAX_CHECKS)
-                    {
-                        diversity_check_count++;
-                    }
-                    // have we reached the maximum number of checks to switch receivers?
-                    if(diversity_check_count == 0 || diversity_check_count >= DIVERSITY_MAX_CHECKS) {
-                        receiver=(diversity_check_count == 0) ? useReceiverA : useReceiverB;
-                    }
-                    else {
-                        receiver=active_receiver;
+                    diversity_check_count[i]--;
+                }
+                if(rssi_measurements[i] < rssi_measurements[active_receiver-1] && diversity_check_count[i] < DIVERSITY_MAX_CHECKS)
+                {
+                    diversity_check_count[i]++;
+                }
+                // have we reached the maximum number of checks to switch receivers?
+                // if so find receiver with highest rssi (only check those which have reached max num of checks)
+                if(diversity_check_count[i] >= DIVERSITY_MAX_CHECKS) {
+                    if (rssi_measurements[i] > rssi_hi) {
+                        rssi_hi=rssi_measurements[i];
+                        receiver=i;
+                        receiver_changed=true;
                     }
                 }
-                else {
-                    receiver=active_receiver;
-                }
-                break;
-  #endif
-  #ifdef USE_DIVERSITY3
-            case useReceiverC:
-                receiver=useReceiverC;
-                break;
-  #endif              
-            case useReceiverB:
-                receiver=useReceiverB;
-                break;
-            case useReceiverA:
-            default:
-                receiver=useReceiverA;
+            }
         }
-        // set the antenna LED and switch the video
-        setReceiver(receiver);
+        if (receiver_changed) {
+            for (uint8_t i=0;i<NUM_RXS;i++) { diversity_check_count[i]=0; }
+        } 
+        else {
+            receiver=active_receiver;
+        }
     }
-#endif
-
-#ifdef USE_DIVERSITY
-    if(receiver == useReceiverA || state==STATE_RSSI_SETUP)
-    {
-#endif
-        rssi = rssiA;
-#ifdef USE_DIVERSITY
+    else if (diversity_mode<=NUM_RXS) 
+        receiver=diversity_mode;
+    else
+        receiver=useReceiverA;
+    // set the antenna LED and switch the video
+    setReceiver(receiver);
+    rssi=rssi_measurements[receiver-1];
+    if(state==STATE_RSSI_SETUP) {
+        rssi = rssi_measurements[useReceiverA-1];
     }
-  #ifdef USE_DIVERSITY3
-    else if(receiver == useReceiverC){
-        rssi = rssiC;
-    }
-  #endif
-    else {
-        rssi = rssiB;
-    }
-#endif
     return (rssi);
 }
 
 void setReceiver(uint8_t receiver) {
 #ifdef USE_DIVERSITY
-    if(receiver == useReceiverA)
-    {
-        digitalWrite(receiverB_led, LOW);
-        digitalWrite(receiverA_led, HIGH);  
-  #ifdef USE_DIVERSITY3
-        digitalWrite(receiverC_led, LOW);
-
+    for (uint8_t i=0; i<NUM_RXS; i++){
+        if (receiver!=i+1)
+            digitalWrite(receiverLEDPins[i], LOW);
     }
-    else if(receiver == useReceiverC)
-    {
-        digitalWrite(receiverA_led, LOW);
-        digitalWrite(receiverB_led, LOW);  
-        digitalWrite(receiverC_led, HIGH);
-  #endif
-    }
-    else
-    {
-  #ifdef USE_DIVERSITY3
-        digitalWrite(receiverC_led, LOW);
-  #endif
-        digitalWrite(receiverA_led, LOW);
-        digitalWrite(receiverB_led, HIGH);
-    }
-#else
-    digitalWrite(receiverA_led, HIGH);
-#endif
-
+    digitalWrite(receiverLEDPins[receiver-1], HIGH);
+  
     active_receiver = receiver;
+#endif
 }
 
 

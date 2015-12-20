@@ -53,10 +53,11 @@ SOFTWARE.
 
 // Feature Toggles
 #define USE_DIVERSITY
-#define USE_DIVERSITY3   // select this for 3 receiver input support (use this along with USE_DIVERSITY)
-#ifdef USE_DIVERSITY3
-  #define USE_DIVERSITY
-#endif
+#define NUM_RXS 3
+//following must include a pin ID of the rssi input & receiver video switch output for each receiver
+#define SET_RSSI_PINS         uint8_t rssi_pins[NUM_RXS]={A6,A7,A3}
+#define SET_RECEIVER_LED_PINS uint8_t receiverLEDPins[NUM_RXS]={A0,A1,A2}
+
 //#define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 //#define USE_BOOT_LOGO
@@ -67,17 +68,18 @@ SOFTWARE.
 #define spiClockPin 12
 
 // Receiver PINS
-#define receiverA_led A0
-#define rssiPinA A6
+//#define receiverA_led A0
+//#define rssiPinA A6
 
 #define useReceiverA 1
 
+
 #ifdef USE_DIVERSITY
     // Diversity
-    #define receiverB_led A1
-    #define rssiPinB A7
-    #define useReceiverAuto 0
-    #define useReceiverB 2
+//    #define receiverB_led A1
+//    #define rssiPinB A7
+#define useReceiverAuto 0    
+//    #define useReceiverB 2
     // rssi strenth should be 2% greater than other receiver before switch.
     // this pervents flicker when rssi values are close and delays diversity checks counter.
     #define DIVERSITY_CUTOVER 2
@@ -87,9 +89,9 @@ SOFTWARE.
     #define DIVERSITY_MAX_CHECKS 5
 
   #ifdef USE_DIVERSITY3
-    #define receiverC_led A2
-    #define rssiPinC A3
-    #define useReceiverC 3
+//    #define receiverC_led A2
+//    #define rssiPinC A3
+//    #define useReceiverC 3
   #endif
 #endif
 
@@ -147,31 +149,25 @@ SOFTWARE.
 
 #define EEPROM_ADR_STATE 0
 #define EEPROM_ADR_TUNE 1
-#define EEPROM_ADR_RSSI_MIN_A_L 2
-#define EEPROM_ADR_RSSI_MIN_A_H 3
-#define EEPROM_ADR_RSSI_MAX_A_L 4
-#define EEPROM_ADR_RSSI_MAX_A_H 5
+#define EEPROM_ADR_BEEP 2
+#define EEPROM_ADR_ORDERBY 3
+#define EEPROM_ADR_DIVERSITY 4
+
+#define EEPROM_ADR_RSSI_MIN 5
+#define EEPROM_ADR_RSSI_MIN 6
+#define EEPROM_ADR_RSSI_MAX 7
+#define EEPROM_ADR_RSSI_MAX 8
+
+
+#define EEPROM_ADR_CALLSIGN 30
 #ifdef USE_DIVERSITY
-    #define EEPROM_ADR_DIVERSITY 6
-    #define EEPROM_ADR_RSSI_MIN_B_L 7
-    #define EEPROM_ADR_RSSI_MIN_B_H 8
-    #define EEPROM_ADR_RSSI_MAX_B_L 9
-    #define EEPROM_ADR_RSSI_MAX_B_H 10
-
-    #define isDiversity() (analogRead(rssiPinB) >= 5)
+    #define isDiversity() (analogRead(rssiPinB) >= 5) 
     #define isDiversity3() false
-
+    
   #ifdef USE_DIVERSITY3
-    #define EEPROM_ADR_RSSI_MIN_C_L 11
-    #define EEPROM_ADR_RSSI_MIN_C_H 12
-    #define EEPROM_ADR_RSSI_MAX_C_L 13
-    #define EEPROM_ADR_RSSI_MAX_C_H 14
     #define isDiversity3() (analogRead(rssiPinC) >= 5)
   #endif
 #endif
 
-#define EEPROM_ADR_BEEP 15
-#define EEPROM_ADR_ORDERBY 16
-#define EEPROM_ADR_CALLSIGN 24
 
 #endif // file_defined
