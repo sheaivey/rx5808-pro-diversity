@@ -722,7 +722,7 @@ void loop()
                     // setup done
                     for (uint8_t i=0; i<NUM_RXS; i++){
                         rssi_min[i]=rssi_setup_min[i];
-                        rssi_max[i]=rssi_setup_max[i];
+                        rssi_max[i]=rssi_setup_min[i] + (int)((1.0+(float)(RSSI_ADDITIONAL_HEADROOM/100.0))*(float)(rssi_setup_max[i]-rssi_setup_min[i]));
                         // save 16 bit
                         EEPROM.write(EEPROM_ADR_RSSI_MIN+i*4,(rssi_min[i] & 0xff));
                         EEPROM.write(EEPROM_ADR_RSSI_MIN+1+i*4,(rssi_min[i] >> 8));

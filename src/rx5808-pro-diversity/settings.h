@@ -121,6 +121,8 @@ SOFTWARE.
 #define RSSI_SEEK_TRESHOLD 80
 // scan loops for setup run
 #define RSSI_SETUP_RUN 3
+//Additional % overhead included following calibration
+#define RSSI_ADDITIONAL_HEADROOM 10
 
 #define STATE_SEEK_FOUND 0
 #define STATE_SEEK 1
