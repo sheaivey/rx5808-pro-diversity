@@ -36,80 +36,79 @@ SOFTWARE.
 #ifdef TVOUT_SCREENS
     #include "TVout.h"
     #include "fontALL.h"
+	#define MAX_RXS 2
 #endif
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
     #include <Adafruit_SSD1306.h>
     #include <Adafruit_GFX.h>
     #include <Wire.h>
     #include <SPI.h>
+	#define MAX_RXS 6
 #endif
 #ifdef OLED_128x64_U8G_SCREENS
     #include <U8glib.h>
+	#define MAX_RXS 1
 #endif
 
-// this will be displayed on the screensaver.
+
 // Up to 10 letters
 #define CALL_SIGN "CALL SIGN"
+// Include if call sign to be displayed on the screensaver (reduces max number of receivers)
+#define DISPLAY_CALL_SIGN 1
+
 
 // Feature Toggles
-#define USE_DIVERSITY
-#define NUM_RXS 3
-//following must include a pin ID of the rssi input & receiver video switch output for each receiver
-#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3}
-#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2}
-
 //#define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 //#define USE_BOOT_LOGO
+#define NUM_RXS 7
+
+#if (NUM_RXS >= MAX_RXS)
+ #undef NUM_RXS
+ #define NUM_RXS MAX_RXS
+ #ifdef DISPLAY_CALL_SIGN
+  #ifdef OLED_128x64_ADAFRUIT_SCREENS
+   #undef NUM_RXS 
+   #define NUM_RXS (MAX_RXS-1)
+  #endif
+ #endif
+#endif
 
 
+//RSSI pins - The following must include a pin ID of the rssi input & receiver video switch output for each receiver
+#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3,A6,A7,A3,A6}
+//SPI Pins
 #define spiDataPin 10
 #define slaveSelectPin 11
 #define spiClockPin 12
 
-// Receiver PINS
-//#define receiverA_led A0
-//#define rssiPinA A6
+// Receiver Pins - The following must include a pin ID of the receiver video switch output for each receiver
+#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2,A0,A1,A2,A0}
+// Auto & Rx A constants
+#define useReceiverAuto NUM_RXS
+#define useReceiverA 0
 
-#define useReceiverA 1
-
-
-#ifdef USE_DIVERSITY
-    // Diversity
-//    #define receiverB_led A1
-//    #define rssiPinB A7
-#define useReceiverAuto 0    
-//    #define useReceiverB 2
-    // rssi strenth should be 2% greater than other receiver before switch.
-    // this pervents flicker when rssi values are close and delays diversity checks counter.
-    #define DIVERSITY_CUTOVER 2
-    // number of checks a receiver needs to win over the other to switch receivers.
-    // this pervents rapid switching.
-    // 1 to 10 is a good range. 1 being fast switching, 10 being slow 100ms to switch.
-    #define DIVERSITY_MAX_CHECKS 5
-
-  #ifdef USE_DIVERSITY3
-//    #define receiverC_led A2
-//    #define rssiPinC A3
-//    #define useReceiverC 3
-  #endif
-#endif
-
-// this two are minimum required
+//Button pins
+// These two are minimum buttons required
 #define buttonUp 2
 #define buttonMode 3
-// optional comfort buttons
+// Optional comfort buttons
 #define buttonDown 4
 #define buttonSave 5
 // Buzzer
 #define buzzer 6
 
-// key debounce delay in ms
-// NOTE: good values are in the range of 100-200ms
-// shorter values will make it more reactive, but may lead to double trigger
-#define KEY_DEBOUNCE 200
-
+//LED pin
 #define led 13
+
+
+// rssi strength should be 2% greater than other receiver before switch -
+// this prevents flicker when RSSI values are close and delays diversity checks counter.
+#define DIVERSITY_CUTOVER 2
+// number of checks a receiver needs to win over the other to switch receivers -  this prevents rapid switching.
+// 1 to 10 is a good range. 1 being fast switching, 10 being slow 100ms to switch.
+#define DIVERSITY_MAX_CHECKS 5
+
 // number of analog rssi reads to average for the current check.
 #define RSSI_READS 50
 // RSSI default raw range
@@ -124,28 +123,32 @@ SOFTWARE.
 //Additional % overhead included following calibration
 #define RSSI_ADDITIONAL_HEADROOM 10
 
-#define STATE_SEEK_FOUND 0
-#define STATE_SEEK 1
-#define STATE_SCAN 2
-#define STATE_MANUAL 3
-#ifdef USE_DIVERSITY
-    #define STATE_DIVERSITY 4
-#endif
-#define STATE_SETUP_MENU 5
-#define STATE_SAVE 6
-#define STATE_RSSI_SETUP 7
-#define STATE_SCREEN_SAVER 8
+
+// Key debounce delay in ms
+// shorter values will make it more reactive, but may lead to double trigger
+// NOTE: good values are in the range of 100-200ms
+#define KEY_DEBOUNCE 200
+
 
 // Seconds to wait before force entering screensaver
 #define SCREENSAVER_TIMEOUT 10
 
+
+#define STATE_SEEK_FOUND 0
+#define STATE_SEEK 1
+#define STATE_SCAN 2
+#define STATE_MANUAL 3
+#define STATE_DIVERSITY 4
+#define STATE_SETUP_MENU 5
+#define STATE_SAVE 6
+#define STATE_RSSI_SETUP 7
+#define STATE_SCREEN_SAVER 8
 #define START_STATE STATE_SEEK
-#define MAX_STATE STATE_MANUAL
+//#define MAX_STATE STATE_MANUAL  - Dont think this is used anymore
 
 #define CHANNEL_BAND_SIZE 8
 #define CHANNEL_MIN_INDEX 0
 #define CHANNEL_MAX_INDEX 39
-
 #define CHANNEL_MAX 39
 #define CHANNEL_MIN 0
 
@@ -154,22 +157,10 @@ SOFTWARE.
 #define EEPROM_ADR_BEEP 2
 #define EEPROM_ADR_ORDERBY 3
 #define EEPROM_ADR_DIVERSITY 4
-
 #define EEPROM_ADR_RSSI_MIN 5
 #define EEPROM_ADR_RSSI_MIN 6
 #define EEPROM_ADR_RSSI_MAX 7
 #define EEPROM_ADR_RSSI_MAX 8
-
-
 #define EEPROM_ADR_CALLSIGN 30
-#ifdef USE_DIVERSITY
-    #define isDiversity() (analogRead(rssiPinB) >= 5) 
-    #define isDiversity3() false
-    
-  #ifdef USE_DIVERSITY3
-    #define isDiversity3() (analogRead(rssiPinC) >= 5)
-  #endif
-#endif
-
 
 #endif // file_defined

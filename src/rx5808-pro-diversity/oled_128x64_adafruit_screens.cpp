@@ -79,17 +79,14 @@ char screens::begin(const char *call_sign) {
     display.setCursor(0,8*2+4);
 
     display.display();
-#ifdef USE_DIVERSITY
     display.print(PSTR2("Diversity:"));
     display.display();
     delay(250);
     display.setCursor(display.width()-6*8,8*2+4);
-//    if(isDiversity()) {
+#if (NUM_RXS>1)
         display.print(PSTR2(" ENABLED"));
-//    }
-//    else {
-//        display.print(PSTR2("DISABLED"));
-//    }
+#else
+        display.print(PSTR2("DISABLED"));
 #endif
     display.setCursor(((display.width() - (strlen(call_sign)*12)) / 2),8*4+4);
     display.setTextSize(2);
@@ -138,13 +135,10 @@ void screens::mainMenu(uint8_t menu_id) {
     display.setCursor(5,10*2+13);
     display.print(PSTR2("MANUAL MODE"));
 
-#ifdef USE_DIVERSITY
-//    if(isDiversity())
-//    {
+#if (NUM_RXS>1)
         display.setTextColor(menu_id == 3 ? BLACK : WHITE);
         display.setCursor(5,10*3+13);
         display.print(PSTR2("DIVERSITY"));
-//    }
 #endif
     display.setTextColor(menu_id == 4 ? BLACK : WHITE);
     display.setCursor(5,10*4+13);
@@ -361,21 +355,23 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
     display.setCursor(0,0);
     display.print(channelName, HEX);
     display.setTextSize(1);
-//    display.setCursor(70,0);
-//    display.print(call_sign);
     display.setTextSize(2);
     display.setCursor(0,42); 
     display.setTextColor(WHITE);
     display.print(channelFrequency);
     display.setTextSize(1);
-#ifdef USE_DIVERSITY
+#ifdef DISPLAY_CALL_SIGN
+    display.setCursor(62,display.height()-8);
+    display.print(call_sign);
+#endif
+#if (NUM_RXS>1)
     display.setCursor(62,0);
-    if (diversity_mode==0) {
+    if (diversity_mode==useReceiverAuto) {
         display.print(PSTR2("AUTO"));
     }
     else if (diversity_mode<8){
         display.print(PSTR2("ANTENNA "));
-        display.print((char)(((uint8_t)'A')+diversity_mode-1));         
+        display.print((char)(((uint8_t)'A')+diversity_mode));         
     }
     for (uint8_t i=0; i<NUM_RXS; i++) {
         display.setTextColor(BLACK,WHITE);
@@ -384,9 +380,6 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
         display.print((char)(((uint8_t)'A')+i));
     }
 #else
-    display.setTextColor(WHITE)
-    display.setCursor(62,display.height()-8);
-    display.print(call_sign);
     display.setTextColor(BLACK);
     display.fillRect(62, 2, 7, 33, WHITE);
     display.setCursor(63,3);
@@ -406,13 +399,13 @@ void screens::updateScreenSaver(uint8_t rssi) {
 }
 
 void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi_measurements[]) {
-#ifdef USE_DIVERSITY
+#if (NUM_RXS>1)
     // read rssi
-    #define RSSI_BAR_SIZE 58
+#define RSSI_BAR_SIZE 58
     for (uint8_t i=0; i<NUM_RXS; i++) {
         uint8_t rssi_scaled=map(rssi_measurements[i], 1, 100, 3, RSSI_BAR_SIZE);
         display.fillRect(69 + rssi_scaled, 10+i*8, (RSSI_BAR_SIZE-rssi_scaled), 8, BLACK);
-        if(active_receiver == (i+1))
+        if(active_receiver == i)
         {
             display.fillRect(69, 10+i*8, rssi_scaled, 8, WHITE);
         }
@@ -423,7 +416,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
         }
     }
 #else
-    #define RSSI_BAR_SIZE 58
+#define RSSI_BAR_SIZE 58
     uint8_t rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
     display.fillRect(69 + rssi_scaled, 10, (RSSI_BAR_SIZE-rssi_scaled), 19, BLACK);
     display.fillRect(69, 10, rssi_scaled, 19, WHITE);
@@ -436,30 +429,24 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
         display.setCursor(81,18);
         display.print(PSTR2("SIGNAL"));
     }
-//#ifdef USE_DIVERSITY
-//    else if(isDiversity()) {
-//    else {
-//        display.drawLine(50,display.height()-10,110,display.height()-10,BLACK);
-//    }
-//#endif
     display.display();
 }
 
-#ifdef USE_DIVERSITY
+#if (NUM_RXS>1)
 void screens::diversity(uint8_t diversity_mode) {
     reset();
     drawTitleBox(PSTR2("DIVERSITY"));
     //highlight selected
-    display.setTextColor(diversity_mode == 0 ? BLACK : WHITE);
-    if (diversity_mode == 0)
+    display.setTextColor(diversity_mode == useReceiverAuto ? BLACK : WHITE);
+    if (diversity_mode == useReceiverAuto)
         display.fillRect(0, 12, 34, 10, WHITE);
     display.setCursor(5,13);
     display.print(PSTR2("AUTO"));
     uint8_t x=5;
     uint8_t y=23;
     for (uint8_t i=0; i<NUM_RXS; i++) {
-        display.setTextColor(diversity_mode == i+1 ? BLACK : WHITE);
-        if (diversity_mode == i+1)
+        display.setTextColor(diversity_mode == i ? BLACK : WHITE);
+        if (diversity_mode == i)
             display.fillRect(x-5, y-1, 30, 10, WHITE);
         display.setCursor(x,y);
         display.print(PSTR2("RX "));
@@ -479,11 +466,11 @@ void screens::diversity(uint8_t diversity_mode) {
 }
 
 void screens::updateDiversity(char active_receiver, uint8_t rssi_measurements[]){
-    #define RSSI_BAR_SIZE 44
+#define RSSI_BAR_SIZE 44
     for (uint8_t i=0; i<NUM_RXS; i++){
         uint8_t rssi_scaled=map(rssi_measurements[i], 1, 100, 1, RSSI_BAR_SIZE);
         display.fillRect(70+i*7, display.height()-9-RSSI_BAR_SIZE, 7, (RSSI_BAR_SIZE-rssi_scaled), BLACK);
-        if(active_receiver==i+1)
+        if(active_receiver==i)
         {
             display.fillRect(70+i*7, display.height()-9-rssi_scaled, 7, rssi_scaled, WHITE);
         }

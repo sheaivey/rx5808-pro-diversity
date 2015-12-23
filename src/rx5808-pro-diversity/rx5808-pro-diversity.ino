@@ -83,10 +83,10 @@ uint8_t channelIndex = 0;
 uint8_t rssi = 0;
 uint8_t rssi_scaled = 0;
 uint8_t active_receiver = useReceiverA;
-#ifdef USE_DIVERSITY
+//#ifdef USE_DIVERSITY
 uint8_t diversity_mode = useReceiverAuto;
 char diversity_check_count[NUM_RXS];
-#endif
+//#endif
 uint8_t rssi_seek_threshold = RSSI_SEEK_TRESHOLD;
 uint8_t hight = 0;
 uint8_t state = START_STATE;
@@ -202,9 +202,9 @@ void setup()
       rssi_min[i]=((EEPROM.read(EEPROM_ADR_RSSI_MIN+1+i*4)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN+i*4)));
       rssi_max[i]=((EEPROM.read(EEPROM_ADR_RSSI_MAX+1+i*4)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX+i*4)));
     }
-#ifdef USE_DIVERSITY
+//#ifdef USE_DIVERSITY
     diversity_mode = EEPROM.read(EEPROM_ADR_DIVERSITY);
-#endif
+//#endif
     force_menu_redraw=1;
 
     // tune to first channel
@@ -294,20 +294,14 @@ void loop()
                 case 2: // manual mode
                     state=STATE_MANUAL;
                 break;
-            #ifdef USE_DIVERSITY
+#if (NUM_RXS>1)
                 case 3: // Diversity
-//                    if(isDiversity()) {
                         state=STATE_DIVERSITY;
-//                    }
-//                    else {
-//                        menu_id++;
-//                        state=STATE_SETUP_MENU;
-//                    }
                 break;
-            #else
+#else
                 case 3: // Skip
                     menu_id++;
-            #endif
+#endif
                 case 4: // Setup Menu
                     state=STATE_SETUP_MENU;
                 break;
@@ -343,9 +337,7 @@ void loop()
                 /*********************/
                 if(digitalRead(buttonUp) == LOW) {
                     menu_id--;
-//#ifdef USE_DIVERSITY
-#ifndef USE_DIVERSITY
-//                    if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
+#if (NUM_RXS<2)
                     if(menu_id == 3) { // make sure we back up two menu slots.
                         menu_id--;
                     }
@@ -442,11 +434,11 @@ void loop()
                 }
                 state_last_used=state;
             break;
-#ifdef USE_DIVERSITY
+//#ifdef USE_DIVERSITY
             case STATE_DIVERSITY:
                 // diversity menu is below this is just a place holder.
             break;
-#endif
+//#endif
             case STATE_SETUP_MENU:
 
             break;
@@ -459,9 +451,9 @@ void loop()
                 for(uint8_t i = 0;i<sizeof(call_sign);i++) {
                     EEPROM.write(EEPROM_ADR_CALLSIGN+i,call_sign[i]);
                 }
-#ifdef USE_DIVERSITY
+//#ifdef USE_DIVERSITY
                 EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
-#endif
+//#endif
                 drawScreen.save(state_last_used, channelIndex, pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
                 for (uint8_t loop=0;loop<5;loop++)
                 {
@@ -483,7 +475,7 @@ void loop()
     /*************************************/
 #ifndef TVOUT_SCREENS
     if(state == STATE_SCREEN_SAVER) {
-#ifdef USE_DIVERSITY
+#if (NUM_RXS>1)
         drawScreen.screenSaver(diversity_mode, pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
 #else
         drawScreen.screenSaver(pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
@@ -491,9 +483,9 @@ void loop()
         do{
             rssi = readRSSI();
 
-#ifdef USE_DIVERSITY
+#if (NUM_RXS>1)
             for (uint8_t i=0; i<NUM_RXS; i++){
-                rssi_measurements[i] = readRSSI(i+1);
+                rssi_measurements[i] = readRSSI(i);
             }
             drawScreen.updateScreenSaver(active_receiver, rssi, rssi_measurements);
 #else
@@ -508,7 +500,7 @@ void loop()
     }
 #endif
 
-#ifdef USE_DIVERSITY
+#if (NUM_RXS>1)
     if(state == STATE_DIVERSITY) {
         // simple menu
         char menu_id=diversity_mode;
@@ -520,7 +512,7 @@ void loop()
             {
                 //delay(10); // timeout delay
                 for (uint8_t i=0; i<NUM_RXS; i++){
-                    rssi_measurements[i] = readRSSI(i+1);
+                    rssi_measurements[i] = readRSSI(i);
                 }
                 drawScreen.updateDiversity(active_receiver, rssi_measurements);
             }
@@ -705,7 +697,7 @@ void loop()
         uint8_t bestChannelName = pgm_read_byte_near(channelNames + channelIndex);
         uint16_t bestChannelFrequency = pgm_read_word_near(channelFreqTable + channelIndex);
 
-        drawScreen.updateBandScanMode((state == STATE_RSSI_SETUP), channel, rssi, bestChannelName, bestChannelFrequency, rssi_setup_min[useReceiverA-1], rssi_setup_max[useReceiverA-1]);
+        drawScreen.updateBandScanMode((state == STATE_RSSI_SETUP), channel, rssi, bestChannelName, bestChannelFrequency, rssi_setup_min[useReceiverA], rssi_setup_max[useReceiverA]);
 
         // next channel
         if (channel < CHANNEL_MAX)
@@ -921,12 +913,12 @@ void wait_rssi_ready()
 
 uint16_t readRSSI()
 {
-#ifdef USE_DIVERSITY
+//#ifdef USE_DIVERSITY
     return readRSSI(-1);
 }
 uint16_t readRSSI(char receiver)
 {
-#endif
+//#endif
     uint16_t rssi = 0;
     uint16_t rssi_measurements[NUM_RXS];
     uint16_t rssi_hi=0;
@@ -968,20 +960,20 @@ uint16_t readRSSI(char receiver)
         rssi_measurements[i]=rssi_measurements[i]-rssi_min[i]; // set zero point (value 0...160)
         rssi_measurements[i] = map(rssi_measurements[i], 0, rssi_max[i]-rssi_min[i] , 1, 100);   // scale from 1..100%
     }
-#ifdef USE_DIVERSITY
-    if(receiver == -1) // no receiver was chosen using diversity
+//#ifdef USE_DIVERSITY
+    if(receiver == -1) // no receiver was chosen & we're using diversity
     {
         if (diversity_mode==useReceiverAuto) {
             // select receiver
             for (uint8_t i=0;i<NUM_RXS;i++)
             {
-                if((int)abs((float)(((float)rssi_measurements[i] - (float)rssi_measurements[active_receiver-1]) / (float)rssi_measurements[active_receiver-1]) * 100.0) >= DIVERSITY_CUTOVER)
+                if((int)abs((float)(((float)rssi_measurements[i] - (float)rssi_measurements[active_receiver]) / (float)rssi_measurements[active_receiver]) * 100.0) >= DIVERSITY_CUTOVER)
                 {
-                    if(rssi_measurements[i] > rssi_measurements[active_receiver-1] && diversity_check_count[i] < DIVERSITY_MAX_CHECKS)
+                    if(rssi_measurements[i] > rssi_measurements[active_receiver] && diversity_check_count[i] < DIVERSITY_MAX_CHECKS)
                     {
                         diversity_check_count[i]++;
                     }
-                    if(rssi_measurements[i] < rssi_measurements[active_receiver-1] && diversity_check_count[i] >0)
+                    if(rssi_measurements[i] < rssi_measurements[active_receiver] && diversity_check_count[i] >0)
                     {
                         diversity_check_count[i]--;
                     }
@@ -990,7 +982,7 @@ uint16_t readRSSI(char receiver)
                     if(diversity_check_count[i] >= DIVERSITY_MAX_CHECKS) {
                         if (rssi_measurements[i] > rssi_hi) {
                             rssi_hi=rssi_measurements[i];
-                            receiver=i+1;
+                            receiver=i;
                             receiver_changed=true;
                         }
                     }
@@ -1007,32 +999,32 @@ uint16_t readRSSI(char receiver)
         {
             receiver=diversity_mode;
         }
-        else
+        else		//default to rx A
         {
             receiver=useReceiverA;
         }
         // set the antenna LED and switch the video
         setReceiver(receiver);
     }
-#endif    
+//#endif    
 
-    rssi=rssi_measurements[receiver-1];
+    rssi=rssi_measurements[receiver];
     if(state==STATE_RSSI_SETUP) {
-        rssi = rssi_measurements[useReceiverA-1];
+        rssi = rssi_measurements[useReceiverA];
     }
     return (rssi);
 }
 
 void setReceiver(uint8_t receiver) {
-#ifdef USE_DIVERSITY
+//#ifdef USE_DIVERSITY
     for (uint8_t i=0; i<NUM_RXS; i++){
-        if (receiver!=i+1)
+        if (receiver!=i)
             digitalWrite(receiverLEDPins[i], LOW);
     }
-    digitalWrite(receiverLEDPins[receiver-1], HIGH);
+    digitalWrite(receiverLEDPins[receiver], HIGH);
   
     active_receiver = receiver;
-#endif
+//#endif
 }
 
 
