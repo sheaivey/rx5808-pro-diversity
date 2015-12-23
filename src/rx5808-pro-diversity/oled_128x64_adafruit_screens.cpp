@@ -375,8 +375,8 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
     }
     for (uint8_t i=0; i<NUM_RXS; i++) {
         display.setTextColor(BLACK,WHITE);
-        display.fillRect(62, 10+i*8, 7, 9, WHITE);
-        display.setCursor(63, 10+i*8);
+        display.fillRect(62, 11+i*8, 7, 9, WHITE);
+        display.setCursor(63, 11+i*8);
         display.print((char)(((uint8_t)'A')+i));
     }
 #else
@@ -391,6 +391,14 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
     display.setCursor(63,27);
     display.print(PSTR2("I"));
 #endif
+    // tick marks
+    #define RSSI_BAR_SIZE 58
+    display.drawLine(69, 11, 69, 9, WHITE);
+    display.drawLine(69+((float)RSSI_BAR_SIZE*0.25), 11, 69+((float)RSSI_BAR_SIZE*0.25), 9, WHITE);
+    display.drawLine(69+((float)RSSI_BAR_SIZE*0.5), 11, 69+((float)RSSI_BAR_SIZE*0.5), 9, WHITE);
+    display.drawLine(69+((float)RSSI_BAR_SIZE*0.75), 11, 69+((float)RSSI_BAR_SIZE*0.75), 9, WHITE);
+    display.drawLine(69+RSSI_BAR_SIZE, 11, 69+RSSI_BAR_SIZE, 9, WHITE);
+    
     display.display();
 }
 
@@ -404,21 +412,21 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
 #define RSSI_BAR_SIZE 58
     for (uint8_t i=0; i<NUM_RXS; i++) {
         uint8_t rssi_scaled=map(rssi_measurements[i], 1, 100, 3, RSSI_BAR_SIZE);
-        display.fillRect(69 + rssi_scaled, 10+i*8, (RSSI_BAR_SIZE-rssi_scaled), 8, BLACK);
+        display.fillRect(69 + rssi_scaled, 11+i*8, (RSSI_BAR_SIZE-rssi_scaled), 8, BLACK);
         if(active_receiver == i)
         {
-            display.fillRect(69, 10+i*8, rssi_scaled, 8, WHITE);
+            display.fillRect(69, 11+i*8, rssi_scaled, 8, WHITE);
         }
         else
         {
-            display.fillRect(69, 10+i*8, (RSSI_BAR_SIZE), 8, BLACK);
-            display.drawRect(69, 10+i*8, rssi_scaled, 8, WHITE);
+            display.fillRect(69, 11+i*8, (RSSI_BAR_SIZE), 8, BLACK);
+            display.drawRect(69, 11+i*8, rssi_scaled, 8, WHITE);
         }
     }
 #else
 #define RSSI_BAR_SIZE 58
     uint8_t rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
-    display.fillRect(69 + rssi_scaled, 10, (RSSI_BAR_SIZE-rssi_scaled), 19, BLACK);
+    display.fillRect(69 + rssi_scaled, 11, (RSSI_BAR_SIZE-rssi_scaled), 19, BLACK);
     display.fillRect(69, 10, rssi_scaled, 19, WHITE);
 #endif
     if(rssi < 20)
