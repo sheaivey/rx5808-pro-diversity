@@ -39,6 +39,7 @@ SOFTWARE.
 char PSTR2_BUFFER[30]; // adjust size depending on need.
 char *PSTRtoBuffer_P(PGM_P str) { uint8_t c='\0', i=0; for(; (c = pgm_read_byte(str)) && i < sizeof(PSTR2_BUFFER); str++, i++) PSTR2_BUFFER[i]=c;PSTR2_BUFFER[i]=c; return PSTR2_BUFFER;}
 
+#define INVERT INVERSE
 #define OLED_RESET 4
 Adafruit_SSD1306 display(OLED_RESET);
 
