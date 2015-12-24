@@ -208,6 +208,10 @@ void setup()
     // read last setting from eeprom
     state=EEPROM.read(EEPROM_ADR_STATE);
     channelIndex=EEPROM.read(EEPROM_ADR_TUNE);
+    // set the channel as soon as we can
+    // faster boot up times :)
+    setChannelModule(channelIndex);
+
     settings_beeps=EEPROM.read(EEPROM_ADR_BEEP);
     settings_orderby_channel=EEPROM.read(EEPROM_ADR_ORDERBY);
 
