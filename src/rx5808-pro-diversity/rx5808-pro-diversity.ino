@@ -903,7 +903,7 @@ void wait_rssi_ready()
     uint16_t tune_time = millis()-time_of_tune;
     // module need >20ms to tune.
     // 25 ms will do a 40 channel scan in 1 second.
-    #define MIN_TUNE_TIME 25
+    #define MIN_TUNE_TIME 35  // found with the 5880 modules that 30mS is needed to get a stable reading, therefore have set this to 35 (25 was not long enough)
     if(tune_time < MIN_TUNE_TIME)
     {
         // wait until tune time is full filled
@@ -936,7 +936,7 @@ uint16_t readRSSI(char receiver)
     }
     for (uint8_t i = 0; i < NUM_RXS; i++) 
     {
-        rssi_measurements[i] = rssi_measurements[i]/RSSI_READS; // average of RSSI_READS readings
+        rssi_measurements[i] = rssi_measurements[i]/RSSI_READS; // average of RSSI_READS readings 
     }
     // special case for RSSI setup
     if(state==STATE_RSSI_SETUP)
@@ -948,7 +948,7 @@ uint16_t readRSSI(char receiver)
                 rssi_setup_min[i]=rssi_measurements[i];
             }
             if(rssi_measurements[i] > rssi_setup_max[i])
-            {
+            {      
                 rssi_setup_max[i]=rssi_measurements[i];
             }
         }
