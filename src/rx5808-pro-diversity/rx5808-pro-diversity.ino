@@ -211,6 +211,7 @@ void setup()
     // set the channel as soon as we can
     // faster boot up times :)
     setChannelModule(channelIndex);
+    last_channel_index=channelIndex;
 
     settings_beeps=EEPROM.read(EEPROM_ADR_BEEP);
     settings_orderby_channel=EEPROM.read(EEPROM_ADR_ORDERBY);
