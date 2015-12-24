@@ -345,6 +345,23 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     last_channel = channel;
 }
 
+void screens::showCalibrationResults(uint16_t rssi_setup_min[],uint16_t rssi_setup_max[]) {
+    display.fillRect(1, 12, display.width()-2, display.height()-13, BLACK);
+    display.setTextColor(WHITE,BLACK); 
+
+    for (uint8_t i=0; i<NUM_RXS; i++){
+         display.setCursor(2,12+i*8);
+         display.print(PSTR2("Rx  Min:    Max:"));
+         display.setCursor(14,12+i*8);
+         display.print((char)(((uint8_t)'A')+i)); 
+         display.setCursor(52,12+i*8);
+         display.print(rssi_setup_min[i], DEC);
+         display.setCursor(100,12+i*8);
+         display.print(rssi_setup_max[i], DEC);        
+    }
+    display.display();
+}
+
 void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency, const char *call_sign) {
     screenSaver(-1, channelName, channelFrequency, call_sign);
 }
@@ -416,12 +433,17 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
         if(active_receiver == i)
         {
             display.fillRect(69, 11+i*8, rssi_scaled, 8, WHITE);
+//            display.setTextColor(BLACK);
         }
         else
         {
             display.fillRect(69, 11+i*8, (RSSI_BAR_SIZE), 8, BLACK);
             display.drawRect(69, 11+i*8, rssi_scaled, 8, WHITE);
+//            display.setTextColor(WHITE);
         }
+//        display.setCursor(71,11+i*8);
+//        display.print(rssi_measurements[i]);
+
     }
 #else
 #define RSSI_BAR_SIZE 58
@@ -432,11 +454,11 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
     if(rssi < 20)
     {
         display.setTextColor((millis()%250 < 125) ? WHITE : BLACK, BLACK);
-        display.setCursor(90,10);
+        display.setCursor(90,11);
         display.print(PSTR2("LOW"));
-        display.setCursor(81,18);
+        display.setCursor(81,19);
         display.print(PSTR2("SIGNAL"));
-    }
+    }    
     display.display();
 }
 

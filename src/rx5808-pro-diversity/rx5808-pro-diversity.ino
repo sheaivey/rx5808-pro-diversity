@@ -722,8 +722,10 @@ void loop()
                         EEPROM.write(EEPROM_ADR_RSSI_MAX+i*4,(rssi_max[i] & 0xff));
                         EEPROM.write(EEPROM_ADR_RSSI_MAX+1+i*4,(rssi_max[i] >> 8));
                     }
-                    state=EEPROM.read(EEPROM_ADR_STATE);
+                    drawScreen.showCalibrationResults(rssi_setup_min, rssi_setup_max);          
                     beep(1000);
+                    delay(CALIBRATION_RESULTS_TIME*1000);
+                    state=EEPROM.read(EEPROM_ADR_STATE);
                 }
             }
         }

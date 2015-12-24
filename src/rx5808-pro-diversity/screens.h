@@ -60,7 +60,8 @@ class screens
         // BAND SCAN
         void bandScanMode(uint8_t state);
         void updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, uint8_t channelName, uint16_t channelFrequency, uint16_t rssi_setup_min_a, uint16_t rssi_setup_max_a);
-
+        void showCalibrationResults(uint16_t rssi_setup_min[],uint16_t rssi_setup_max[]);
+        
         // SCREEN SAVER
         void screenSaver(uint8_t channelName, uint16_t channelFrequency, const char *call_sign);
         void screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency, const char *call_sign);

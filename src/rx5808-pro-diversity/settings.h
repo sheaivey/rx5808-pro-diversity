@@ -61,7 +61,7 @@ SOFTWARE.
 //#define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 //#define USE_BOOT_LOGO
-#define NUM_RXS 7
+#define NUM_RXS 3
 
 #if (NUM_RXS >= MAX_RXS)
  #undef NUM_RXS
@@ -76,14 +76,14 @@ SOFTWARE.
 
 
 //RSSI pins - The following must include a pin ID of the rssi input & receiver video switch output for each receiver
-#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3,A6,A7,A3,A6}
+#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3}
 //SPI Pins
 #define spiDataPin 10
 #define slaveSelectPin 11
 #define spiClockPin 12
 
 // Receiver Pins - The following must include a pin ID of the receiver video switch output for each receiver
-#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2,A0,A1,A2,A0}
+#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2}
 // Auto & Rx A constants
 #define useReceiverAuto NUM_RXS
 #define useReceiverA 0
@@ -121,7 +121,7 @@ SOFTWARE.
 // scan loops for setup run
 #define RSSI_SETUP_RUN 3
 //Additional % overhead included following calibration
-#define RSSI_ADDITIONAL_HEADROOM 10
+#define RSSI_ADDITIONAL_HEADROOM 50
 
 
 // Key debounce delay in ms
@@ -129,9 +129,11 @@ SOFTWARE.
 // NOTE: good values are in the range of 100-200ms
 #define KEY_DEBOUNCE 200
 
-
 // Seconds to wait before force entering screensaver
 #define SCREENSAVER_TIMEOUT 10
+
+// Seconds to display calibration results for
+#define CALIBRATION_RESULTS_TIME 10
 
 
 #define STATE_SEEK_FOUND 0
