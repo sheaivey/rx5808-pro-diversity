@@ -247,6 +247,14 @@ void setup()
     // Used to Transmit IR Payloads
     Serial.begin(9600);
 #endif
+
+#ifdef USE_DIVERSITY
+    // make sure we use receiver A when diveristy is unplugged.
+    if(!isDiversity()) {
+        diversity_mode = useReceiverA;
+    }
+#endif
+
 }
 
 // LOOP ----------------------------------------------------------------------------
