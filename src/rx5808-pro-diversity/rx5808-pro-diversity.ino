@@ -1095,7 +1095,7 @@ void sendIRPayload() {
     delay(100);
     beep(100);
     uint8_t check_sum = 2;
-    Serial.write(2); // start of payload
+    Serial.write(2); // start of payload STX
     check_sum += channelIndex;
     Serial.write(channelIndex); // send channel
     for(uint8_t i=0; i < 10;i++) {
@@ -1105,7 +1105,7 @@ void sendIRPayload() {
         check_sum += (char)call_sign[i];
         Serial.write(call_sign[i]); // send char of call_sign
     }
-    Serial.write(3);  // end of payload
+    Serial.write(3);  // end of payload ETX
     Serial.write(check_sum); // send ceck_sum for payload validation
 }
 #endif
