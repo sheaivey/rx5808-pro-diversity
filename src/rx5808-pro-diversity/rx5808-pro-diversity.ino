@@ -130,8 +130,10 @@ void setup()
     pinMode(led, OUTPUT); // status pin for TV mode errors
     digitalWrite(led, HIGH);
     // buzzer
+#ifdef buzzer
     pinMode(buzzer, OUTPUT); // Feedback buzzer (active buzzer, not passive piezo)
     digitalWrite(buzzer, HIGH);
+#endif
     // minimum control pins
     pinMode(buttonUp, INPUT);
     digitalWrite(buttonUp, INPUT_PULLUP);
@@ -140,8 +142,10 @@ void setup()
     // optional control
     pinMode(buttonDown, INPUT);
     digitalWrite(buttonDown, INPUT_PULLUP);
+#ifdef buttonSave
     pinMode(buttonSave, INPUT);
     digitalWrite(buttonSave, INPUT_PULLUP);
+#endif
 
     //Receiver switching setup
     for (uint8_t i=0; i<NUM_RXS; i++){
@@ -371,10 +375,12 @@ void loop()
     /*     Save buttom     */
     /***********************/
     // hardware save buttom support (if no display is used)
+#ifdef buttonSave
     if(digitalRead(buttonSave) == LOW)
     {
         state=STATE_SAVE;
     }
+#endif
     /***************************************/
     /*   Draw screen if mode has changed   */
     /***************************************/
@@ -875,12 +881,16 @@ void loop()
 void beep(uint16_t time)
 {
     digitalWrite(led, HIGH);
+#ifdef buzzer
     if(settings_beeps){
         digitalWrite(buzzer, LOW); // activate beep
     }
+#endif
     delay(time/2);
     digitalWrite(led, LOW);
+#ifdef buzzer
     digitalWrite(buzzer, HIGH);
+#endif
 }
 
 uint8_t channel_from_index(uint8_t channelIndex)

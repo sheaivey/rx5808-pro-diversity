@@ -76,14 +76,14 @@ SOFTWARE.
 
 
 //RSSI pins - The following must include a pin ID of the rssi input & receiver video switch output for each receiver
-#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3}
+#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A7,A6,A3,A2}
 //SPI Pins
 #define spiDataPin 10
 #define slaveSelectPin 11
 #define spiClockPin 12
 
 // Receiver Pins - The following must include a pin ID of the receiver video switch output for each receiver
-#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2}
+#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {6,7,8,9}
 // Auto & Rx A constants
 #define useReceiverAuto NUM_RXS
 #define useReceiverA 0
@@ -92,11 +92,11 @@ SOFTWARE.
 // These two are minimum buttons required
 #define buttonUp 2
 #define buttonMode 3
-// Optional comfort buttons
+// Optional comfort buttons - comment out if not using
 #define buttonDown 4
-#define buttonSave 5
-// Buzzer
-#define buzzer 6
+//#define buttonSave 5
+// Buzzer - comment out if not using
+//#define buzzer 5
 
 //LED pin
 #define led 13
