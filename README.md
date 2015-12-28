@@ -59,9 +59,9 @@ Donations help show the developer your appreciation for all their hard work. A l
     5. **Save & Exit**
 
 ####Initial Setup
-When powering on for the first time it is best to calibrate your RSSI. To do this follow these steps below. (You can repeat this process as many times as needed for best results.)
+When powering on for the first time it is best to calibrate your RSSI modules. No two modules have the same RSSI min and max readings. To calibrate follow these steps below. You can repeat this process as many times as needed.
 
-1. Power on your receiver and transmitter and place them about 10 to 20 feet apart from one another. (If you are using directional antennas make sure they are pointed at your transmitter for best results.)
+1. Power on your receiver and transmitter and place them about 5 to 20 feet apart from one another. (For best results remove antennas to calibrate each module on a level playing field.)
 2. Next navigate to the "Setup Menu".
 3. Next navigate to "Calibrate RSSI".
 4. Now that you are in the RSSI calibration screen, the receiver will scan all channels 3 times getting the min and max RSSI strength.
