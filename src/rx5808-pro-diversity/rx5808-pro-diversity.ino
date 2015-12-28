@@ -96,8 +96,8 @@ uint8_t rssi = 0;
 uint8_t rssi_scaled = 0;
 uint8_t active_receiver = useReceiverA;
 #ifdef USE_DIVERSITY
-uint8_t diversity_mode = useReceiverAuto;
-char diversity_check_count = 0;
+    uint8_t diversity_mode = useReceiverAuto;
+    char diversity_check_count = 0; // used to decide when to change antennas.
 #endif
 uint8_t rssi_seek_threshold = RSSI_SEEK_TRESHOLD;
 uint8_t hight = 0;
@@ -119,20 +119,19 @@ uint8_t last_dip_channel=255;
 uint8_t last_dip_band=255;
 uint8_t scan_start=0;
 uint8_t first_tune=1;
-uint8_t force_menu_redraw=0;
+boolean force_menu_redraw=0;
 uint16_t rssi_best=0; // used for band scaner
 uint16_t rssi_min_a=0;
 uint16_t rssi_max_a=0;
 uint16_t rssi_setup_min_a=0;
 uint16_t rssi_setup_max_a=0;
 #ifdef USE_DIVERSITY
-uint16_t rssi_min_b=0;
-uint16_t rssi_max_b=0;
-uint16_t rssi_setup_min_b=0;
-uint16_t rssi_setup_max_b=0;
+    uint16_t rssi_min_b=0;
+    uint16_t rssi_max_b=0;
+    uint16_t rssi_setup_min_b=0;
+    uint16_t rssi_setup_max_b=0;
 #endif
-uint16_t rssi_seek_found=0;
-uint16_t rssi_setup_run=0;
+uint8_t rssi_setup_run=0;
 
 char call_sign[10];
 bool settings_beeps = true;
@@ -230,11 +229,6 @@ void setup()
 #endif
     force_menu_redraw=1;
 
-    // tune to first channel
-
-    // Setup Done - LED ON
-    digitalWrite(led, HIGH);
-
     // Init Display
     if (drawScreen.begin(call_sign) > 0) {
         // on Error flicker LED
@@ -250,11 +244,13 @@ void setup()
 #endif
 
 #ifdef USE_DIVERSITY
-    // make sure we use receiver A when diveristy is unplugged.
+    // make sure we use receiver Auto when diveristy is unplugged.
     if(!isDiversity()) {
-        diversity_mode = useReceiverA;
+        diversity_mode = useReceiverAuto;
     }
 #endif
+    // Setup Done - Turn Status LED off.
+    digitalWrite(led, LOW);
 
 }
 
