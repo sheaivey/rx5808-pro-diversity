@@ -1000,14 +1000,9 @@ uint16_t readRSSI(char receiver)
 #endif
     }
 
-
-    rssiA = constrain(rssiA, rssi_min_a, rssi_max_a);    //original 90---250
-    rssiA=rssiA-rssi_min_a; // set zero point (value 0...160)
-    rssiA = map(rssiA, 0, rssi_max_a-rssi_min_a , 1, 100);   // scale from 1..100%
+    rssiA = map(rssiA, rssi_min_a, rssi_max_a , 1, 100);   // scale from 1..100%
 #ifdef USE_DIVERSITY
-    rssiB = constrain(rssiB, rssi_min_b, rssi_max_b);    //original 90---250
-    rssiB=rssiB-rssi_min_b; // set zero point (value 0...160)
-    rssiB = map(rssiB, 0, rssi_max_b-rssi_min_b , 1, 100);   // scale from 1..100%
+    rssiB = map(rssiB, rssi_min_b, rssi_max_b , 1, 100);   // scale from 1..100%
     if(receiver == -1) // no receiver was chosen using diversity
     {
         switch(diversity_mode)
@@ -1059,7 +1054,7 @@ uint16_t readRSSI(char receiver)
         rssi = rssiB;
     }
 #endif
-    return (rssi);
+    return constrain(rssi,1,100); // clip values to only be within this range.
 }
 
 void setReceiver(uint8_t receiver) {
