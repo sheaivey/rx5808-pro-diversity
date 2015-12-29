@@ -121,15 +121,15 @@ uint8_t scan_start=0;
 uint8_t first_tune=1;
 boolean force_menu_redraw=0;
 uint16_t rssi_best=0; // used for band scaner
-uint16_t rssi_min_a=0;
-uint16_t rssi_max_a=0;
-uint16_t rssi_setup_min_a=0;
-uint16_t rssi_setup_max_a=0;
+uint16_t rssi_min_a=RSSI_MIN_VAL;
+uint16_t rssi_max_a=RSSI_MAX_VAL;
+uint16_t rssi_setup_min_a=RSSI_MIN_VAL;
+uint16_t rssi_setup_max_a=RSSI_MAX_VAL;
 #ifdef USE_DIVERSITY
-    uint16_t rssi_min_b=0;
-    uint16_t rssi_max_b=0;
-    uint16_t rssi_setup_min_b=0;
-    uint16_t rssi_setup_max_b=0;
+    uint16_t rssi_min_b=RSSI_MIN_VAL;
+    uint16_t rssi_max_b=RSSI_MAX_VAL;
+    uint16_t rssi_setup_min_b=RSSI_MIN_VAL;
+    uint16_t rssi_setup_max_b=RSSI_MAX_VAL;
 #endif
 uint8_t rssi_setup_run=0;
 
@@ -427,15 +427,15 @@ void loop()
                 if(state==STATE_RSSI_SETUP)
                 {
                     // prepare new setup
-                    rssi_min_a=0;
-                    rssi_max_a=400; // set to max range
-                    rssi_setup_min_a=400;
-                    rssi_setup_max_a=0;
+                    rssi_min_a=50;
+                    rssi_max_a=300; // set to max range
+                    rssi_setup_min_a=RSSI_MAX_VAL;
+                    rssi_setup_max_a=RSSI_MIN_VAL;
 #ifdef USE_DIVERSITY
-                    rssi_min_b=0;
-                    rssi_max_b=400; // set to max range
-                    rssi_setup_min_b=400;
-                    rssi_setup_max_b=0;
+                    rssi_min_b=50;
+                    rssi_max_b=300; // set to max range
+                    rssi_setup_min_b=RSSI_MAX_VAL;
+                    rssi_setup_max_b=RSSI_MIN_VAL;
 #endif
                     rssi_setup_run=RSSI_SETUP_RUN;
                 }
@@ -957,11 +957,11 @@ uint16_t readRSSI()
 uint16_t readRSSI(char receiver)
 {
 #endif
-    uint16_t rssi = 0;
-    uint16_t rssiA = 0;
+    int rssi = 0;
+    int rssiA = 0;
 
 #ifdef USE_DIVERSITY
-    uint16_t rssiB = 0;
+    int rssiB = 0;
 #endif
     for (uint8_t i = 0; i < RSSI_READS; i++)
     {
@@ -1000,14 +1000,9 @@ uint16_t readRSSI(char receiver)
 #endif
     }
 
-
-    rssiA = constrain(rssiA, rssi_min_a, rssi_max_a);    //original 90---250
-    rssiA=rssiA-rssi_min_a; // set zero point (value 0...160)
-    rssiA = map(rssiA, 0, rssi_max_a-rssi_min_a , 1, 100);   // scale from 1..100%
+    rssiA = map(rssiA, rssi_min_a, rssi_max_a , 1, 100);   // scale from 1..100%
 #ifdef USE_DIVERSITY
-    rssiB = constrain(rssiB, rssi_min_b, rssi_max_b);    //original 90---250
-    rssiB=rssiB-rssi_min_b; // set zero point (value 0...160)
-    rssiB = map(rssiB, 0, rssi_max_b-rssi_min_b , 1, 100);   // scale from 1..100%
+    rssiB = map(rssiB, rssi_min_b, rssi_max_b , 1, 100);   // scale from 1..100%
     if(receiver == -1) // no receiver was chosen using diversity
     {
         switch(diversity_mode)
@@ -1059,7 +1054,7 @@ uint16_t readRSSI(char receiver)
         rssi = rssiB;
     }
 #endif
-    return (rssi);
+    return constrain(rssi,1,100); // clip values to only be within this range.
 }
 
 void setReceiver(uint8_t receiver) {
