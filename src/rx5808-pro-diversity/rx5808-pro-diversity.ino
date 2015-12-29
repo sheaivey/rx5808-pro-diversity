@@ -121,15 +121,15 @@ uint8_t scan_start=0;
 uint8_t first_tune=1;
 boolean force_menu_redraw=0;
 uint16_t rssi_best=0; // used for band scaner
-uint16_t rssi_min_a=0;
-uint16_t rssi_max_a=0;
-uint16_t rssi_setup_min_a=0;
-uint16_t rssi_setup_max_a=0;
+uint16_t rssi_min_a=RSSI_MIN_VAL;
+uint16_t rssi_max_a=RSSI_MAX_VAL;
+uint16_t rssi_setup_min_a=RSSI_MIN_VAL;
+uint16_t rssi_setup_max_a=RSSI_MAX_VAL;
 #ifdef USE_DIVERSITY
-    uint16_t rssi_min_b=0;
-    uint16_t rssi_max_b=0;
-    uint16_t rssi_setup_min_b=0;
-    uint16_t rssi_setup_max_b=0;
+    uint16_t rssi_min_b=RSSI_MIN_VAL;
+    uint16_t rssi_max_b=RSSI_MAX_VAL;
+    uint16_t rssi_setup_min_b=RSSI_MIN_VAL;
+    uint16_t rssi_setup_max_b=RSSI_MAX_VAL;
 #endif
 uint8_t rssi_setup_run=0;
 
@@ -427,15 +427,15 @@ void loop()
                 if(state==STATE_RSSI_SETUP)
                 {
                     // prepare new setup
-                    rssi_min_a=0;
-                    rssi_max_a=400; // set to max range
-                    rssi_setup_min_a=400;
-                    rssi_setup_max_a=0;
+                    rssi_min_a=50;
+                    rssi_max_a=300; // set to max range
+                    rssi_setup_min_a=RSSI_MAX_VAL;
+                    rssi_setup_max_a=RSSI_MIN_VAL;
 #ifdef USE_DIVERSITY
-                    rssi_min_b=0;
-                    rssi_max_b=400; // set to max range
-                    rssi_setup_min_b=400;
-                    rssi_setup_max_b=0;
+                    rssi_min_b=50;
+                    rssi_max_b=300; // set to max range
+                    rssi_setup_min_b=RSSI_MAX_VAL;
+                    rssi_setup_max_b=RSSI_MIN_VAL;
 #endif
                     rssi_setup_run=RSSI_SETUP_RUN;
                 }
