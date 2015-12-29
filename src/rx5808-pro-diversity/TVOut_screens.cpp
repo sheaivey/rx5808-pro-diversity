@@ -30,7 +30,7 @@ SOFTWARE.
 
 #ifdef TVOUT_SCREENS
 #include "screens.h" // function headers
-#include <arduino.h>
+#include <Arduino.h>
 
 
 #include <TVout.h>
