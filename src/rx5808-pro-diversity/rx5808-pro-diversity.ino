@@ -957,11 +957,11 @@ uint16_t readRSSI()
 uint16_t readRSSI(char receiver)
 {
 #endif
-    uint16_t rssi = 0;
-    uint16_t rssiA = 0;
+    int rssi = 0;
+    int rssiA = 0;
 
 #ifdef USE_DIVERSITY
-    uint16_t rssiB = 0;
+    int rssiB = 0;
 #endif
     for (uint8_t i = 0; i < RSSI_READS; i++)
     {
