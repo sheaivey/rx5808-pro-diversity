@@ -61,6 +61,12 @@ SOFTWARE.
 //#define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 //#define USE_BOOT_LOGO
+
+// Receiver Module version
+// used for tuning time
+//#define rx5808
+#define rx5880
+
 #define NUM_RXS 3
 
 #if (NUM_RXS >= MAX_RXS)
@@ -76,14 +82,14 @@ SOFTWARE.
 
 
 //RSSI pins - The following must include a pin ID of the rssi input & receiver video switch output for each receiver
-#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A7,A6,A3,A2}
+#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3} //{A7,A6,A3,A2}
 //SPI Pins
 #define spiDataPin 10
 #define slaveSelectPin 11
 #define spiClockPin 12
 
 // Receiver Pins - The following must include a pin ID of the receiver video switch output for each receiver
-#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {6,7,8,9}
+#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2}  //{6,7,8,9}
 // Auto & Rx A constants
 #define useReceiverAuto NUM_RXS
 #define useReceiverA 0
@@ -121,8 +127,18 @@ SOFTWARE.
 // scan loops for setup run
 #define RSSI_SETUP_RUN 3
 //Additional % overhead included following calibration
-#define RSSI_ADDITIONAL_HEADROOM 50
+#define RSSI_ADDITIONAL_HEADROOM 5
 
+#ifdef rx5808
+    // rx5808 module need >20ms to tune.
+    // 25 ms will do a 40 channel scan in 1 second.
+    #define MIN_TUNE_TIME 25
+#endif
+#ifdef rx5880
+    // rx5880 module needs >30ms to tune.
+    // 35 ms will do a 40 channel scan in 1.4 seconds.
+    #define MIN_TUNE_TIME 40
+#endif
 
 // Key debounce delay in ms
 // shorter values will make it more reactive, but may lead to double trigger
@@ -133,7 +149,7 @@ SOFTWARE.
 #define SCREENSAVER_TIMEOUT 10
 
 // Seconds to display calibration results for
-#define CALIBRATION_RESULTS_TIME 10
+#define CALIBRATION_RESULTS_TIME 15
 
 
 #define STATE_SEEK_FOUND 0

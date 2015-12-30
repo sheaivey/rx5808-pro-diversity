@@ -913,9 +913,6 @@ void wait_rssi_ready()
     // CHECK FOR MINIMUM DELAY
     // check if RSSI is stable after tune by checking the time
     uint16_t tune_time = millis()-time_of_tune;
-    // module need >20ms to tune.
-    // 25 ms will do a 40 channel scan in 1 second.
-    #define MIN_TUNE_TIME 35  // found with the 5880 modules that 30mS is needed to get a stable reading, therefore have set this to 35 (25 was not long enough)
     if(tune_time < MIN_TUNE_TIME)
     {
         // wait until tune time is full filled
@@ -931,9 +928,9 @@ uint16_t readRSSI()
 uint16_t readRSSI(char receiver)
 {
 //#endif
-    uint16_t rssi = 0;
-    uint16_t rssi_measurements[NUM_RXS];
-    uint16_t rssi_hi=0;
+    int rssi = 0;
+    int rssi_measurements[NUM_RXS];
+    int rssi_hi=0;
     bool receiver_changed=false;  
     for (uint8_t i = 0; i < NUM_RXS; i++) 
     {
@@ -968,9 +965,7 @@ uint16_t readRSSI(char receiver)
 
     for (uint8_t i = 0;i<NUM_RXS;i++)
     {
-        rssi_measurements[i] = constrain(rssi_measurements[i], rssi_min[i], rssi_max[i]);    //original 90---250
-        rssi_measurements[i]=rssi_measurements[i]-rssi_min[i]; // set zero point (value 0...160)
-        rssi_measurements[i] = map(rssi_measurements[i], 0, rssi_max[i]-rssi_min[i] , 1, 100);   // scale from 1..100%
+        rssi_measurements[i] = map(rssi_measurements[i], rssi_min[i], rssi_max[i], 1, 100);   // scale from 1..100% (this does not constrain 1 to 100)
     }
 //#ifdef USE_DIVERSITY
     if(receiver == -1) // no receiver was chosen & we're using diversity
@@ -1024,7 +1019,7 @@ uint16_t readRSSI(char receiver)
     if(state==STATE_RSSI_SETUP) {
         rssi = rssi_measurements[useReceiverA];
     }
-    return (rssi);
+    return constrain(rssi,1,100); // clip values to only be within this range.
 }
 
 void setReceiver(uint8_t receiver) {
