@@ -268,7 +268,7 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     // print channelname
 
     if(!in_setup) {
-        if (rssi > RSSI_SEEK_TRESHOLD) {
+        if (rssi > RSSI_SEEK_THRESHOLD) {
             if(best_rssi < rssi) {
                 best_rssi = rssi;
                 TV.print(22, SCANNER_LIST_Y_POS, channelName, HEX);

@@ -67,7 +67,8 @@ SOFTWARE.
 //#define rx5808
 #define rx5880
 
-#define NUM_RXS 3
+//#define NUM_RXS 3
+#define NUM_RXS 4
 
 #if (NUM_RXS >= MAX_RXS)
  #undef NUM_RXS
@@ -82,14 +83,18 @@ SOFTWARE.
 
 
 //RSSI pins - The following must include a pin ID of the rssi input & receiver video switch output for each receiver
-#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3} //{A7,A6,A3,A2}
+//#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3} 
+#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A2,A3,A6,A7} 
+
 //SPI Pins
 #define spiDataPin 10
 #define slaveSelectPin 11
 #define spiClockPin 12
 
 // Receiver Pins - The following must include a pin ID of the receiver video switch output for each receiver
-#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2}  //{6,7,8,9}
+//#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2}
+#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {9,8,7,6}
+
 // Auto & Rx A constants
 #define useReceiverAuto NUM_RXS
 #define useReceiverA 0
@@ -122,12 +127,12 @@ SOFTWARE.
 #define RSSI_MAX_VAL 220
 // 75% threshold, when channel is printed in spectrum
 #define RSSI_SEEK_FOUND 75
-// 80% under max value for RSSI
-#define RSSI_SEEK_TRESHOLD 80
 // scan loops for setup run
 #define RSSI_SETUP_RUN 3
 //Additional % overhead included following calibration
 #define RSSI_ADDITIONAL_HEADROOM 5
+// 80% under max value for RSSI
+#define RSSI_SEEK_THRESHOLD (80*100)/(100+RSSI_ADDITIONAL_HEADROOM)
 
 #ifdef rx5808
     // rx5808 module need >20ms to tune.

@@ -87,7 +87,7 @@ uint8_t active_receiver = useReceiverA;
 uint8_t diversity_mode = useReceiverAuto;
 char diversity_check_count[NUM_RXS];
 //#endif
-uint8_t rssi_seek_threshold = RSSI_SEEK_TRESHOLD;
+uint8_t rssi_seek_threshold = RSSI_SEEK_THRESHOLD;
 uint8_t hight = 0;
 uint8_t state = START_STATE;
 uint8_t state_last_used=START_STATE;
@@ -420,7 +420,7 @@ void loop()
                 drawScreen.bandScanMode(state);
             break;
             case STATE_SEEK: // seek mode
-                rssi_seek_threshold = RSSI_SEEK_TRESHOLD;
+                rssi_seek_threshold = RSSI_SEEK_THRESHOLD;
                 rssi_best=0;
                 force_seek=1;
             case STATE_MANUAL: // manual mode
@@ -608,7 +608,7 @@ void loop()
         { // SEEK MODE
 
             // recalculate rssi_seek_threshold
-            ((int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0)) > rssi_seek_threshold) ? (rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0))) : false;
+            ((int)((float)rssi_best * (float)(RSSI_SEEK_THRESHOLD/100.0)) > rssi_seek_threshold) ? (rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_THRESHOLD/100.0))) : false;
 
             if(!seek_found) // search if not found
             {
@@ -629,14 +629,14 @@ void loop()
                     if (channel > CHANNEL_MAX)
                     {
                         // calculate next pass new seek threshold
-                        rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0));
+                        rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_THRESHOLD/100.0));
                         channel=CHANNEL_MIN;
                         rssi_best = 0;
                     }
                     else if(channel < CHANNEL_MIN)
                     {
                         // calculate next pass new seek threshold
-                        rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_TRESHOLD/100.0));
+                        rssi_seek_threshold = (int)((float)rssi_best * (float)(RSSI_SEEK_THRESHOLD/100.0));
                         channel=CHANNEL_MAX;
                         rssi_best = 0;
                     }
@@ -692,7 +692,7 @@ void loop()
 
         if(state == STATE_SCAN)
         {
-            if (rssi > RSSI_SEEK_TRESHOLD)
+            if (rssi > RSSI_SEEK_THRESHOLD)
             {
                 if(rssi_best < rssi) {
                     rssi_best = rssi;
