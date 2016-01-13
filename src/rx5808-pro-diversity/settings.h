@@ -152,6 +152,9 @@ SOFTWARE.
     #define EEPROM_ADR_RSSI_MAX_B_L 9
     #define EEPROM_ADR_RSSI_MAX_B_H 10
 
+    // used to figure out if diversity module has been plugged in.
+    // When RSSI is plugged in the min value is around 90
+    // When RSSI is not plugged in the min value is 0
     #define isDiversity() (analogRead(rssiPinB) >= 5)
 #endif
 
