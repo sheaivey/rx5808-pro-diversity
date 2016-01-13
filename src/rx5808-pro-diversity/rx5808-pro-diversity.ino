@@ -743,6 +743,9 @@ void loop()
                     // setup done
                     rssi_min_a=rssi_setup_min_a;
                     rssi_max_a=rssi_setup_max_a;
+                    if(rssi_max_a < 125) { // user probably did not turn on the VTX during calibration
+                        rssi_max_a = RSSI_MAX_VAL;
+                    }
                     // save 16 bit
                     EEPROM.write(EEPROM_ADR_RSSI_MIN_A_L,(rssi_min_a & 0xff));
                     EEPROM.write(EEPROM_ADR_RSSI_MIN_A_H,(rssi_min_a >> 8));
@@ -755,6 +758,9 @@ void loop()
                     if(isDiversity()) { // only calibrate RSSI B when diversity is detected.
                         rssi_min_b=rssi_setup_min_b;
                         rssi_max_b=rssi_setup_max_b;
+                        if(rssi_max_b < 125) { // user probably did not turn on the VTX during calibration
+                            rssi_max_b = RSSI_MAX_VAL;
+                        }
                         // save 16 bit
                         EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,(rssi_min_b & 0xff));
                         EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,(rssi_min_b >> 8));
