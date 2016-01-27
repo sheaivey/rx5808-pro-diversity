@@ -68,8 +68,8 @@ SOFTWARE.
 #define rx5880
 
 // Choose the number of receiver modules (between 1 and MAX_RXS (6 for OLED))
-#define NUM_RXS 2
-//#define NUM_RXS 3
+//#define NUM_RXS 2
+#define NUM_RXS 3
 //#define NUM_RXS 4
 
 #if (NUM_RXS >= MAX_RXS)
@@ -84,19 +84,25 @@ SOFTWARE.
 #endif
 
 //RSSI pins - The following must include a pin ID of the rssi input & receiver video switch output for each receiver
-#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7} 
-//#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3} 
-//#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A2,A3,A6,A7} 
+//Receiver Pins - The following must include a pin ID of the receiver video switch output for each receiver
+#if (NUM_RXS == 2)
+  #define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7} 
+  #define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1}
+#elif (NUM_RXS == 3)
+  #define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3} 
+  #define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2}
+#elif (NUM_RXS == 4)
+  #define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A2,A3,A6,A7} 
+  #define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {9,8,7,6}
+#endif
 
 //SPI Pins
 #define spiDataPin 10
 #define slaveSelectPin 11
 #define spiClockPin 12
 
-// Receiver Pins - The following must include a pin ID of the receiver video switch output for each receiver
-#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1}
-//#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2}
-//#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {9,8,7,6}
+//
+//
 
 
 // Auto & Rx A constants
