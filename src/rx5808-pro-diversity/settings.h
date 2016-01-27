@@ -67,8 +67,10 @@ SOFTWARE.
 //#define rx5808
 #define rx5880
 
+// Choose the number of receiver modules (between 1 and MAX_RXS (6 for OLED))
+#define NUM_RXS 2
 //#define NUM_RXS 3
-#define NUM_RXS 4
+//#define NUM_RXS 4
 
 #if (NUM_RXS >= MAX_RXS)
  #undef NUM_RXS
@@ -81,10 +83,10 @@ SOFTWARE.
  #endif
 #endif
 
-
 //RSSI pins - The following must include a pin ID of the rssi input & receiver video switch output for each receiver
+#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7} 
 //#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A6,A7,A3} 
-#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A2,A3,A6,A7} 
+//#define SET_RSSI_PINS         const uint8_t rssi_pins[] = {A2,A3,A6,A7} 
 
 //SPI Pins
 #define spiDataPin 10
@@ -92,8 +94,10 @@ SOFTWARE.
 #define spiClockPin 12
 
 // Receiver Pins - The following must include a pin ID of the receiver video switch output for each receiver
+#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1}
 //#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {A0,A1,A2}
-#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {9,8,7,6}
+//#define SET_RECEIVER_LED_PINS const uint8_t receiverLEDPins[] = {9,8,7,6}
+
 
 // Auto & Rx A constants
 #define useReceiverAuto NUM_RXS
@@ -116,6 +120,7 @@ SOFTWARE.
 // rssi strength should be 2% greater than other receiver before switch -
 // this prevents flicker when RSSI values are close and delays diversity checks counter.
 #define DIVERSITY_CUTOVER 2
+
 // number of checks a receiver needs to win over the other to switch receivers -  this prevents rapid switching.
 // 1 to 10 is a good range. 1 being fast switching, 10 being slow 100ms to switch.
 #define DIVERSITY_MAX_CHECKS 5
@@ -142,7 +147,7 @@ SOFTWARE.
 #ifdef rx5880
     // rx5880 module needs >30ms to tune.
     // 35 ms will do a 40 channel scan in 1.4 seconds.
-    #define MIN_TUNE_TIME 40
+    #define MIN_TUNE_TIME 35
 #endif
 
 // Key debounce delay in ms
