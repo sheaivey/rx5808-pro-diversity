@@ -146,7 +146,11 @@ void setup()
     digitalWrite(led, HIGH);
     // buzzer
     pinMode(buzzer, OUTPUT); // Feedback buzzer (active buzzer, not passive piezo)
-    digitalWrite(buzzer, HIGH);
+#ifdef BUZZER_INVERTED
+    digitalWrite(buzzer, LOW);
+#else
+    digitalWrite(buzzer, HIGH); //TODO
+#endif
     // minimum control pins
     pinMode(buttonUp, INPUT);
     digitalWrite(buttonUp, INPUT_PULLUP);
@@ -920,12 +924,20 @@ void loop()
 void beep(uint16_t time)
 {
     digitalWrite(led, HIGH);
+#ifdef BUZZER_INVERTED
+    if(settings_beeps){
+        digitalWrite(buzzer, HIGH); // activate beep
+    }
+    delay(time/2);
+    digitalWrite(buzzer, LOW);
+#else
     if(settings_beeps){
         digitalWrite(buzzer, LOW); // activate beep
     }
     delay(time/2);
-    digitalWrite(led, LOW);
     digitalWrite(buzzer, HIGH);
+#endif
+    digitalWrite(led, LOW);
 }
 
 uint8_t channel_from_index(uint8_t channelIndex)
