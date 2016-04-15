@@ -13,9 +13,9 @@ No bootloader is nessissary with this board. Program the board using the SPI bre
 - 2x Blue LEDs 0805 [Mouser](http://www.mouser.com/Search/ProductDetail.aspx?R=LTST-C170KRKTvirtualkey57820000virtualkey859-LTST-C170KRKT)
 - 1x Red LED 0805 [Mouser](http://www.mouser.com/Search/ProductDetail.aspx?R=LTST-C170TBKTvirtualkey57820000virtualkey859-LTST-C170TBKT)
 - 1x [Navigation switch](https://www.sparkfun.com/products/8184) or [ebay](http://www.ebay.com/itm/231618098407?ul_noapp=true)
-- 2x SMA Connector [Mouser](http://www.mouser.com/Search/ProductDetail.aspx?R=132289virtualkey52330000virtualkey523-132289)
+- 2x SMA Connector [Mouser](http://www.mouser.com/search/ProductDetail.aspx?R=0virtualkey0virtualkey132322)
 - 1x 4066D SO14 digital switch chip SMD [Mouser](http://www.mouser.com/Search/ProductDetail.aspx?R=74LVC4066D%2c118virtualkey66800000virtualkey771-74LVC4066D-T)
-- 1x MEGA 328 TQFP [Mouser](http://www.mouser.com/Search/ProductDetail.aspx?R=ATMEGA328-AUvirtualkey55660000virtualkey556-ATMEGA328-AU)
+- 1x MEGA 328P TQFP [Mouser](http://www.mouser.com/search/ProductDetail.aspx?R=0virtualkey0virtualkeyATMEGA328P-AU)
 - 1x Active Buzzer (Optional)
 - 1x OLED 128x64 display I2C (5v tollerant) (Optional - If you don't want to do TV_Out)
 
