@@ -244,7 +244,7 @@ void setup()
     
 #ifdef ACTIVATE_EXTERNAL_SCREEN  
       digitalWrite(RXD, LOW);
-      delay(3500);
+      delay(4500);
       pinMode(RXD, OUTPUT);
       digitalWrite(RXD, LOW);
       delay(400);
