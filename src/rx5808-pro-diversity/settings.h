@@ -85,7 +85,11 @@ SOFTWARE.
 #define buzzer 6
 
 //activate if your buzzer is inverted compared to normal layout. 
-//#define BUZZER_INVERTED
+#define BUZZER_INVERTED
+
+//aktivate to switch on a externel display with a short impulse on rxd
+//#define ACTIVATE_EXTERNAL_SCREEN
+#define RXD 0
 
 // key debounce delay in ms
 // NOTE: good values are in the range of 100-200ms

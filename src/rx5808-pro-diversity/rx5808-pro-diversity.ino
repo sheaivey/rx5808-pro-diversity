@@ -241,6 +241,15 @@ void setup()
             delay(100);
         }
     }
+    
+#ifdef ACTIVATE_EXTERNAL_SCREEN  
+      digitalWrite(RXD, LOW);
+      delay(3500);
+      pinMode(RXD, OUTPUT);
+      digitalWrite(RXD, LOW);
+      delay(400);
+      pinMode(RXD, INPUT);
+#endif   
 
 #ifdef USE_IR_EMITTER
     // Used to Transmit IR Payloads
@@ -255,7 +264,6 @@ void setup()
 #endif
     // Setup Done - Turn Status LED off.
     digitalWrite(led, LOW);
-
 }
 
 // LOOP ----------------------------------------------------------------------------
