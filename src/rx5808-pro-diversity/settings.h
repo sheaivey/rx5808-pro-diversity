@@ -39,7 +39,7 @@ SOFTWARE.
 #define CALL_SIGN "CALL SIGN"
 
 // Feature Togglels
-//#define USE_DIVERSITY
+#define USE_DIVERSITY
 #define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 #define USE_BOOT_LOGO
@@ -85,7 +85,7 @@ SOFTWARE.
 #define buzzer 6
 
 //activate if your buzzer is inverted compared to normal layout. 
-#define BUZZER_INVERTED
+//#define BUZZER_INVERTED
 
 //aktivate to switch on a externel display with a short impulse on rxd
 //#define ACTIVATE_EXTERNAL_SCREEN
