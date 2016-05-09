@@ -233,6 +233,7 @@ void setup()
 #endif
     force_menu_redraw=1;
 
+    delay(200);
     // Init Display
     if (drawScreen.begin(call_sign) > 0) {
         // on Error flicker LED
@@ -244,7 +245,7 @@ void setup()
     
 #ifdef ACTIVATE_EXTERNAL_SCREEN  
       digitalWrite(RXD, LOW);
-      delay(4500);
+      delay(5000);
       pinMode(RXD, OUTPUT);
       digitalWrite(RXD, LOW);
       delay(400);
