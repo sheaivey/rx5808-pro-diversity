@@ -63,7 +63,7 @@ const uint16_t channelTable[] PROGMEM = {
   0x2903,    0x290C,    0x2916,    0x291F,    0x2989,    0x2992,    0x299C,    0x2A05,    // Band B
   0x2895,    0x288B,    0x2881,    0x2817,    0x2A0F,    0x2A19,    0x2A83,    0x2A8D,    // Band E
   0x2906,    0x2910,    0x291A,    0x2984,    0x298E,    0x2998,    0x2A02,    0x2A0C,    // Band F / Airwave
-  0x281D,    0x288F,    0x2902,    0x2914,    0x2978,    0x2999,    0x2A0C,    0x2A1E     // Band C / Immersion Raceband
+  0x281D,    0x288F,    0x2902,    0x2914,    0x2987,    0x2999,    0x2A0C,    0x2A1E     // Band C / Immersion Raceband
 };
 
 // Channels with their Mhz Values
@@ -146,7 +146,11 @@ void setup()
     digitalWrite(led, HIGH);
     // buzzer
     pinMode(buzzer, OUTPUT); // Feedback buzzer (active buzzer, not passive piezo)
-    digitalWrite(buzzer, HIGH);
+#ifdef BUZZER_INVERTED
+    digitalWrite(buzzer, LOW);
+#else
+    digitalWrite(buzzer, HIGH); //TODO
+#endif
     // minimum control pins
     pinMode(buttonUp, INPUT);
     digitalWrite(buttonUp, INPUT_PULLUP);
@@ -229,6 +233,7 @@ void setup()
 #endif
     force_menu_redraw=1;
 
+    delay(200);
     // Init Display
     if (drawScreen.begin(call_sign) > 0) {
         // on Error flicker LED
@@ -237,6 +242,15 @@ void setup()
             delay(100);
         }
     }
+    
+#ifdef ACTIVATE_EXTERNAL_SCREEN  
+      digitalWrite(RXD, LOW);
+      delay(5000);
+      pinMode(RXD, OUTPUT);
+      digitalWrite(RXD, LOW);
+      delay(400);
+      pinMode(RXD, INPUT);
+#endif   
 
 #ifdef USE_IR_EMITTER
     // Used to Transmit IR Payloads
@@ -251,7 +265,6 @@ void setup()
 #endif
     // Setup Done - Turn Status LED off.
     digitalWrite(led, LOW);
-
 }
 
 // LOOP ----------------------------------------------------------------------------
@@ -920,12 +933,20 @@ void loop()
 void beep(uint16_t time)
 {
     digitalWrite(led, HIGH);
+#ifdef BUZZER_INVERTED
+    if(settings_beeps){
+        digitalWrite(buzzer, HIGH); // activate beep
+    }
+    delay(time/2);
+    digitalWrite(buzzer, LOW);
+#else
     if(settings_beeps){
         digitalWrite(buzzer, LOW); // activate beep
     }
     delay(time/2);
-    digitalWrite(led, LOW);
     digitalWrite(buzzer, HIGH);
+#endif
+    digitalWrite(led, LOW);
 }
 
 uint8_t channel_from_index(uint8_t channelIndex)

@@ -31,7 +31,6 @@ SOFTWARE.
 // you will also have to uncomment the includes in the main project.
 //#define TVOUT_SCREENS
 #define OLED_128x64_ADAFRUIT_SCREENS
-
 // u8glib has performance issues.
 //#define OLED_128x64_U8G_SCREENS
 
@@ -84,6 +83,13 @@ SOFTWARE.
 #define buttonSave 5
 // Buzzer
 #define buzzer 6
+
+//activate if your buzzer is inverted compared to normal layout. 
+//#define BUZZER_INVERTED
+
+//aktivate to switch on a externel display with a short impulse on rxd
+//#define ACTIVATE_EXTERNAL_SCREEN
+#define RXD 0
 
 // key debounce delay in ms
 // NOTE: good values are in the range of 100-200ms
