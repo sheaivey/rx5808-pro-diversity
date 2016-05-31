@@ -32,6 +32,9 @@ SOFTWARE.
 //#define TVOUT_SCREENS
 #define OLED_128x64_ADAFRUIT_SCREENS
 
+// use the library from https://github.com/badzz/Adafruit_SH1106 before enabling
+#define SH1106
+
 // u8glib has performance issues.
 //#define OLED_128x64_U8G_SCREENS
 

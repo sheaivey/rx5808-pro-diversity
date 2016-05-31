@@ -44,7 +44,12 @@ SOFTWARE.
 //    #include <fontALL.h>
 #endif
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
-    #include <Adafruit_SSD1306.h>
+
+	#ifdef SH1106
+		#include <Adafruit_SH1106.h>
+	#else
+		#include <Adafruit_SSD1306.h>
+	#endif
     #include <Adafruit_GFX.h>
     #include <Wire.h>
     #include <SPI.h>
