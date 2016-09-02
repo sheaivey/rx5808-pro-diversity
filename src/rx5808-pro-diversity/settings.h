@@ -126,7 +126,7 @@ SOFTWARE.
 
 #define CHANNEL_BAND_SIZE 8
 #define CHANNEL_MIN_INDEX 0
-#define CHANNEL_MAX_INDEX 39
+#define CHANNEL_MAX_INDEX 47
 
 #ifdef rx5808
     // rx5808 module need >20ms to tune.
@@ -139,7 +139,7 @@ SOFTWARE.
     #define MIN_TUNE_TIME 35
 #endif
 
-#define CHANNEL_MAX 39
+#define CHANNEL_MAX 47
 #define CHANNEL_MIN 0
 
 #define EEPROM_ADR_STATE 0
