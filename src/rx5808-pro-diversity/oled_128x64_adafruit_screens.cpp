@@ -195,7 +195,11 @@ void screens::seekMode(uint8_t state) {
     display.drawLine(0, 36, display.width(), 36, WHITE);
     display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
     display.setCursor(2,display.height()-9);
+#ifdef USE_LBAND
     display.print(PSTR2("5362"));
+#else
+    display.print(PSTR2("5645"));
+#endif
     display.setCursor(55,display.height()-9);
     display.print(PSTR2("5800"));
     display.setCursor(display.width()-25,display.height()-9);
@@ -218,11 +222,15 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
         display.setTextColor(WHITE,BLACK);
         display.setCursor(36,12);
         // show current used channel of bank
+#ifdef USE_LBAND
         if(channelIndex > 39)
         {
             display.print(PSTR2("D/5.3    "));
         }
         else if(channelIndex > 31)
+#else
+	if(channelIndex > 31)
+#endif
         {
             display.print(PSTR2("C/Race   "));
         }
@@ -263,15 +271,24 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     display.fillRect(1, 33, rssi_scaled, 3, WHITE);
 
     rssi_scaled=map(rssi, 1, 100, 1, 14);
-    display.fillRect((channel*5/2)+4,display.height()-12-14,5/2,14-rssi_scaled,BLACK);
-    display.fillRect((channel*5/2)+4,(display.height()-12-rssi_scaled),5/2,rssi_scaled,WHITE);
+#ifdef USE_LBAND
+    display.fillRect((channel*3)+4,display.height()-12-14,5/2,14-rssi_scaled,BLACK);
+    display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),5/2,rssi_scaled,WHITE);
+#else
+    display.fillRect((channel*3)+4,display.height()-12-14,3,14-rssi_scaled,BLACK);
+    display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),3,rssi_scaled,WHITE);
+#endif    
     
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK) //
     { // SEEK MODE
        
         // Show Scan Position
+#ifdef USE_LBAND
         display.fillRect((channel*5/2)+4+scan_position,display.height()-12-14,1,14,BLACK);
+#else
+        display.fillRect((channel*3)+4+scan_position,display.height()-12-14,1,14,BLACK);
+#endif
 
         rssi_scaled=map(rssi_seek_threshold, 1, 100, 1, 14);
 
@@ -317,7 +334,11 @@ void screens::bandScanMode(uint8_t state) {
 
     display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
     display.setCursor(2,display.height()-9);
+#ifdef USE_LBAND
     display.print(PSTR2("5362"));
+#else
+    display.print(PSTR2("5645"));
+#endif
     display.setCursor(55,display.height()-9);
     display.print(PSTR2("5800"));
     display.setCursor(display.width()-25,display.height()-9);
@@ -332,10 +353,17 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     uint16_t hight = (display.height()-12-rssi_scaled);
     if(channel != last_channel) // only updated on changes
     {
-     	display.fillRect((channel*5/2)+4,display.height()-12-30,5/2,30-rssi_scaled,BLACK);
+#ifdef USE_LBAND
+        display.fillRect((channel*5/2)+4,display.height()-12-30,5/2,30-rssi_scaled,BLACK);
         display.fillRect((channel*5/2)+4,hight,5/2,rssi_scaled,WHITE);
         // Show Scan Position
-        display.fillRect((channel*5/2)+4+3,display.height()-12-30,1,30,BLACK);	
+        display.fillRect((channel*5/2)+4+3,display.height()-12-30,1,30,BLACK);
+#else
+        display.fillRect((channel*3)+4,display.height()-12-30,3,30-rssi_scaled,BLACK);
+        display.fillRect((channel*3)+4,hight,3,rssi_scaled,WHITE);
+        // Show Scan Position
+        display.fillRect((channel*3)+4+3,display.height()-12-30,1,30,BLACK);
+#endif
     }
     if(!in_setup) {
         if (rssi > RSSI_SEEK_TRESHOLD) {
@@ -624,12 +652,15 @@ void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency
     display.print(PSTR2("BAND:"));
     display.setCursor(38,8*2+4);
     // print band
-    
+#ifdef USE_LBAND
     if(channelIndex > 39)
     {
         display.print(PSTR2("D/5.3    "));
     }
     else if(channelIndex > 31)
+#else
+    if(channelIndex > 31)
+#endif
     {
         display.print(PSTR2("C/Race"));
     }
