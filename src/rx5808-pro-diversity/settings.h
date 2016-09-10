@@ -47,6 +47,9 @@ SOFTWARE.
 #define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 #define USE_BOOT_LOGO
+// Choose if you wish to use 8 additional Channels 
+// 5362 MHz 5399 MHz 5436 MHz 5473 MHz 5510 MHz 5547 MHz 5584 MHz 5621 MHz
+#define USE_LBAND
 
 // Receiver Module version
 // used for tuning time
@@ -126,7 +129,11 @@ SOFTWARE.
 
 #define CHANNEL_BAND_SIZE 8
 #define CHANNEL_MIN_INDEX 0
-#define CHANNEL_MAX_INDEX 39
+#ifdef USE_LBAND
+    #define CHANNEL_MAX_INDEX 47
+#else
+    #define CHANNEL_MAX_INDEX 39
+#endif
 
 #ifdef rx5808
     // rx5808 module need >20ms to tune.
@@ -139,7 +146,11 @@ SOFTWARE.
     #define MIN_TUNE_TIME 35
 #endif
 
-#define CHANNEL_MAX 39
+#ifdef USE_LBAND
+    #define CHANNEL_MAX 47
+#else
+    #define CHANNEL_MAX 39
+#endif
 #define CHANNEL_MIN 0
 
 #define EEPROM_ADR_STATE 0
