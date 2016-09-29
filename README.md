@@ -1,3 +1,5 @@
+Manufactured version of this project can be found at [La Forge FPV](www.laforgefpv.com)
+
 #Introduction
 The main goal of this project is to add diversity to an already amazing feature set. Please see the following video for a quick intro of the project.
 
@@ -127,7 +129,7 @@ Please follow [CONTRIBUTING.md](CONTRIBUTING.md) for standard practices regardin
 ####Recognition
 - SPI driver based on fs_skyrf_58g-main.c Written by Simon Chambers
 - TVOUT by Myles Metzel
-- Scanner by Johan Hermen
+- Scanner by Johann Hermen (der-Frickler.net)
 - Initial 2 Button version by Peter (pete1990)
 - Refactored and GUI reworked by Marko Hoepken
 - Universal version my Marko Hoepken
