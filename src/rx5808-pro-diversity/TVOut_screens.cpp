@@ -142,7 +142,15 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     if(channelIndex != last_channel) // only updated on changes
     {
         // show current used channel of bank
+#ifdef USE_LBAND
+        if(channelIndex > 39)
+        {
+            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("D/5.3    "));
+        }
+        else if(channelIndex > 31)
+#else
         if(channelIndex > 31)
+#endif
         {
             TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("C/Race   "));
         }
@@ -173,8 +181,13 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
         // clear last square
         TV.draw_rect(1, (TV_ROWS - TV_SCANNER_OFFSET + 8),125,SCANNER_MARKER_SIZE,  BLACK, BLACK);
         // draw next
+#ifdef USE_LBAND
+        TV.draw_rect((channel * 5/2)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+
+#else
         TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
 
+#endif
         // show frequence
         TV.print(50,TV_Y_OFFSET+3*TV_Y_GRID, channelFrequency);
     }
@@ -188,11 +201,21 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     // print bar for spectrum
 
     #define SCANNER_BAR_MINI_SIZE 14
+
     rssi_scaled=map(rssi, 1, 100, 1, SCANNER_BAR_MINI_SIZE);
+
+ 
+#ifdef USE_LBAND
     // clear last bar
+    TV.draw_rect((channel * 5/2)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
+    //  draw new bar
+    TV.draw_rect((channel * 5/2)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
+#else
+   // clear last bar
     TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
     //  draw new bar
     TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
+#endif
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK)
     { // SEEK MODE
@@ -265,7 +288,7 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
         TV.draw_rect(1, (TV_ROWS - TV_SCANNER_OFFSET + 8),125,SCANNER_MARKER_SIZE,  BLACK, BLACK);
 #ifdef USE_LBAND
         // draw next
-        TV.draw_rect((channel * 5)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+        TV.draw_rect((channel * 5/2)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
 #else
         // draw next
         TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
