@@ -396,6 +396,10 @@ void loop()
                     if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
                         menu_id--;
                     }
+#else 
+                    if(menu_id == 3) { // as we dont use diveristy make sure we back up two menu slots.
+                        menu_id--;
+                    }
 #endif
                 }
                 else if(digitalRead(buttonDown) == LOW) {
