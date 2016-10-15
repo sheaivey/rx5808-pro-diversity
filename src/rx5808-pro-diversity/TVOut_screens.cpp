@@ -50,7 +50,11 @@ SOFTWARE.
 #define SCANNER_LIST_Y_POS 16
 #define SCANNER_MARKER_SIZE 1
 
-#define MENU_Y_SIZE 15
+#ifdef USE_VOLTAGE_MONITORING
+    #define MENU_Y_SIZE 13
+#else
+    #define MENU_Y_SIZE 15
+#endif
 #define TV_Y_GRID 14
 #define TV_Y_OFFSET 3
 
@@ -407,6 +411,27 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
 }
 #endif
 
+#ifdef USE_VOLTAGE_MONITORING
+void screens::voltage(uint8_t menu_id, int voltage_calibration, uint8_t warning_voltage, uint8_t critical_voltage) {
+    reset();
+    drawTitleBox(PSTR("VOLTAGE ALARM"));
+    TV.printPGM(5, 5+1*MENU_Y_SIZE, PSTR("Warning"));
+    TV.print(5+(11*8), 5+1*MENU_Y_SIZE, (float)warning_voltage/10.0, 1);
+    TV.printPGM(5, 5+2*MENU_Y_SIZE, PSTR("Critical"));
+    TV.print(5+(11*8), 5+2*MENU_Y_SIZE, (float)critical_voltage/10.0, 1);
+    TV.printPGM(5, 5+3*MENU_Y_SIZE, PSTR("Calibrate"));
+    TV.print(5+(11*8), 5+3*MENU_Y_SIZE, voltage_calibration, 10);
+    TV.printPGM(5, 5+4*MENU_Y_SIZE, PSTR("Save"));
+
+    TV.draw_rect(0,3+(menu_id+1)*MENU_Y_SIZE,127,12,  WHITE, INVERT);
+}
+void screens::updateVoltage(int voltage){
+
+    TV.printPGM(5, 10+5*MENU_Y_SIZE, PSTR("Measured"));
+    TV.print(5+(11*8), 10+5*MENU_Y_SIZE, (float)voltage/10, 1);
+
+}
+#endif
 
 void screens::setupMenu(){
 }
@@ -448,9 +473,13 @@ void screens::updateSetupMenu(uint8_t menu_id,bool settings_beeps,bool settings_
 */
 
     TV.printPGM(5, 5+4*MENU_Y_SIZE, PSTR("CALIBRATE RSSI"));
+#ifdef USE_VOLTAGE_MONITORING
+    TV.printPGM(5, 5+5*MENU_Y_SIZE, PSTR("VOLTAGE ALARM"));
 
-
+    TV.printPGM(5, 5+6*MENU_Y_SIZE, PSTR("SAVE & EXIT"));
+#else
     TV.printPGM(5, 5+5*MENU_Y_SIZE, PSTR("SAVE & EXIT"));
+#endif
 
     TV.draw_rect(0,3+(menu_id+1)*MENU_Y_SIZE,127,12,  WHITE, INVERT);
 }

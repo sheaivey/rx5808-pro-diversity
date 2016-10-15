@@ -70,10 +70,10 @@ const uint16_t channelTable[] PROGMEM = {
   0x2906,    0x2910,    0x291A,    0x2984,    0x298E,    0x2998,    0x2A02,    0x2A0C,    // Band F / Airwave
 #ifdef USE_LBAND
   0x281D,    0x288F,    0x2902,    0x2914,    0x2987,    0x2999,    0x2A0C,    0x2A1E,    // Band C / Immersion Raceband
-  0x2609,    0x261C,    0x268E,    0x2701,    0x2713,    0x2786,    0x2798,    0x280B     // Band D / 5.3 
+  0x2609,    0x261C,    0x268E,    0x2701,    0x2713,    0x2786,    0x2798,    0x280B     // Band D / 5.3
 #else
   0x281D,    0x288F,    0x2902,    0x2914,    0x2987,    0x2999,    0x2A0C,    0x2A1E     // Band C / Immersion Raceband
-#endif  
+#endif
 };
 
 // Channels with their Mhz Values
@@ -85,10 +85,10 @@ const uint16_t channelFreqTable[] PROGMEM = {
   5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880, // Band F / Airwave
 #ifdef USE_LBAND
   5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917, // Band C / Immersion Raceband
-  5362, 5399, 5436, 5473, 5510, 5547, 5584, 5621  // Band D / 5.3 
+  5362, 5399, 5436, 5473, 5510, 5547, 5584, 5621  // Band D / 5.3
 #else
   5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917  // Band C / Immersion Raceband
-#endif  
+#endif
 };
 
 // do coding as simple hex value to save memory.
@@ -102,12 +102,12 @@ const uint8_t channelNames[] PROGMEM = {
   0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8  // BAND D / 5.3
 #else
   0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8  // Band C / Immersion Raceband
-#endif  
+#endif
 };
 
 // All Channels of the above List ordered by Mhz
 const uint8_t channelList[] PROGMEM = {
-#ifdef USE_LBAND	
+#ifdef USE_LBAND
   40, 41, 42, 43, 44, 45, 46, 47, 19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9, 25, 5, 35, 10, 26, 4, 11, 27, 3, 36, 12, 28, 2, 13, 29, 37, 1, 14, 30, 0, 15, 31, 38, 20, 21, 39, 22, 23
 #else
   19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9, 25, 5, 35, 10, 26, 4, 11, 27, 3, 36, 12, 28, 2, 13, 29, 37, 1, 14, 30, 0, 15, 31, 38, 20, 21, 39, 22, 23
@@ -156,6 +156,20 @@ uint16_t rssi_setup_max_a=RSSI_MAX_VAL;
     uint16_t rssi_setup_max_b=RSSI_MAX_VAL;
 #endif
 uint8_t rssi_setup_run=0;
+
+#ifdef USE_VOLTAGE_MONITORING
+int vbat_scale = VBAT_SCALE;
+uint8_t warning_voltage = WARNING_VOLTAGE;
+uint8_t critical_voltage = CRITICAL_VOLTAGE;
+unsigned long time_last_vbat_alarm = 0;
+
+#define VBAT_SMOOTH 8
+#define VBAT_PRESCALER 16
+uint8_t voltage_reading_index = 0;
+uint16_t voltages[VBAT_SMOOTH];
+uint16_t voltages_sum;
+uint16_t voltage;
+#endif
 
 char call_sign[10];
 bool settings_beeps = true;
@@ -226,6 +240,13 @@ void setup()
         EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,lowByte(RSSI_MAX_VAL));
         EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,highByte(RSSI_MAX_VAL));
 #endif
+
+#ifdef USE_VOLTAGE_MONITORING
+        EEPROM.write(EEPROM_ADR_VBAT_SCALE, vbat_scale);
+        EEPROM.write(EEPROM_ADR_VBAT_WARNING, warning_voltage);
+        EEPROM.write(EEPROM_ADR_VBAT_CRITICAL, critical_voltage);
+#endif
+
     }
 
     // read last setting from eeprom
@@ -273,10 +294,16 @@ void setup()
         diversity_mode = useReceiverAuto;
     }
 #endif
+#ifdef USE_VOLTAGE_MONITORING
+        vbat_scale = EEPROM.read(EEPROM_ADR_VBAT_SCALE);
+        warning_voltage = EEPROM.read(EEPROM_ADR_VBAT_WARNING);
+        critical_voltage = EEPROM.read(EEPROM_ADR_VBAT_CRITICAL);
+#endif
     // Setup Done - Turn Status LED off.
     digitalWrite(led, LOW);
 
 }
+
 
 // LOOP ----------------------------------------------------------------------------
 void loop()
@@ -502,6 +529,11 @@ void loop()
                 // diversity menu is below this is just a place holder.
             break;
 #endif
+#ifdef USE_VOLTAGE_MONITORING
+            case STATE_VOLTAGE:
+                // voltage menu below
+            break;
+#endif
             case STATE_SETUP_MENU:
 
             break;
@@ -516,6 +548,12 @@ void loop()
                 }
 #ifdef USE_DIVERSITY
                 EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
+#endif
+
+#ifdef USE_VOLTAGE_MONITORING
+                EEPROM.write(EEPROM_ADR_VBAT_SCALE, vbat_scale);
+                EEPROM.write(EEPROM_ADR_VBAT_WARNING, warning_voltage);
+                EEPROM.write(EEPROM_ADR_VBAT_CRITICAL, critical_voltage);
 #endif
                 drawScreen.save(state_last_used, channelIndex, pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
                 for (uint8_t loop=0;loop<5;loop++)
@@ -552,11 +590,95 @@ void loop()
             drawScreen.updateScreenSaver(rssi);
 #endif
 
+#ifdef USE_VOLTAGE_MONITORING
+            read_voltage();
+            check_voltage_alarm();
+#endif
         }
         while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next button press
         state=state_last_used;
         time_screen_saver=0;
         return;
+    }
+#endif
+#ifdef USE_VOLTAGE_MONITORING
+    if(state == STATE_VOLTAGE) {
+        // simple menu
+        char menu_id=0;
+        uint8_t in_voltage_menu=1;
+        int editing = -1;
+        do{
+            drawScreen.voltage(menu_id, vbat_scale, warning_voltage, critical_voltage);
+            do {
+                read_voltage();
+                drawScreen.updateVoltage(voltage);
+                delay(100); // timeout delay
+            }
+            while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next key press
+
+            if(digitalRead(buttonMode) == LOW){
+                if(editing > -1){
+                    // user is done editing
+                    editing = -1;
+                }
+                else if(menu_id < 3)
+                {
+                    editing = menu_id;
+                }
+                else if(menu_id == 3)
+                {
+                    in_menu = 0; // save & exit menu
+                    in_voltage_menu = 0; // save & exit menu
+                    state=STATE_SAVE;
+                    editing = -1;
+                }
+            } else if(digitalRead(buttonUp) == LOW) {
+                switch (editing) {
+                    case 0:
+                        warning_voltage--;
+                        break;
+                    case 1:
+                        critical_voltage--;
+                        break;
+                    case 2:
+                        vbat_scale--;
+                        break;
+                    default:
+                        menu_id--;
+                        break;
+                }
+            }
+            else if(digitalRead(buttonDown) == LOW) {
+                switch (editing) {
+                    case 0:
+                        warning_voltage++;
+                        break;
+                    case 1:
+                        critical_voltage++;
+                        break;
+                    case 2:
+                        vbat_scale++;
+                        break;
+                    default:
+                        menu_id++;
+                        break;
+                }
+            }
+
+            if(menu_id > 3) {
+                menu_id = 0;
+            }
+            if(menu_id < 0) {
+                menu_id = 3;
+            }
+            beep(50); // beep & debounce
+            //delay(KEY_DEBOUNCE); // debounce
+            do{
+                delay(150);// wait for button release
+            }
+            while(editing==-1 && (digitalRead(buttonMode) == LOW || digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW));
+        }
+        while(in_voltage_menu);
     }
 #endif
 
@@ -825,7 +947,7 @@ void loop()
         drawScreen.setupMenu();
         int editing = -1;
         do{
-            in_menu_time_out=50;
+            in_menu_time_out=80;
             drawScreen.updateSetupMenu(menu_id, settings_beeps, settings_orderby_channel, call_sign, editing);
             while(--in_menu_time_out && ((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH))) // wait for next key press or time out
             {
@@ -837,7 +959,7 @@ void loop()
                 break; // Timed out, Don't save...
             }
 
-            if(digitalRead(buttonMode) == LOW)        // channel UP
+            if(digitalRead(buttonMode) == LOW)        // modeButton
             {
                 // do something about the users selection
                 switch(menu_id) {
@@ -864,10 +986,19 @@ void loop()
                         }
                         state=STATE_RSSI_SETUP;
                         break;
+#ifdef USE_VOLTAGE_MONITORING
+                    case 4:// Change Voltage Settings
+                        in_menu = 0;
+                        state=STATE_VOLTAGE;
+                        break;
+                    case 5:
+#else
                     case 4:
+#endif
                         in_menu = 0; // save & exit menu
                         state=STATE_SAVE;
                         break;
+
                 }
             }
             else if(digitalRead(buttonUp) == LOW) {
@@ -901,11 +1032,11 @@ void loop()
                 }
             }
 
-            if(menu_id > 4) {
+            if(menu_id > SETUP_MENU_MAX_ITEMS) {
                 menu_id = 0;
             }
             if(menu_id < 0) {
-                menu_id = 4;
+                menu_id = SETUP_MENU_MAX_ITEMS;
             }
 
             beep(50); // beep & debounce
@@ -938,6 +1069,10 @@ void loop()
             beep(UP_BEEP);
         }
     }
+#ifdef USE_VOLTAGE_MONITORING
+    read_voltage();
+    check_voltage_alarm();
+#endif
 }
 
 /*###########################################################################*/
@@ -1254,3 +1389,48 @@ void SERIAL_ENABLE_HIGH()
   digitalWrite(slaveSelectPin, HIGH);
   delayMicroseconds(1);
 }
+
+
+#ifdef USE_VOLTAGE_MONITORING
+void read_voltage()
+{
+    uint16_t v = analogRead(VBAT_PIN);
+    voltages_sum += v;
+    voltages_sum -= voltages[voltage_reading_index];
+    voltages[voltage_reading_index++] = v;
+    voltage_reading_index %= VBAT_SMOOTH;
+#if VBAT_SMOOTH == VBAT_PRESCALER
+    voltage = voltages_sum / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+#elif VBAT_SMOOTH < VBAT_PRESCALER
+    voltage = (voltages_sum * (VBAT_PRESCALER/VBAT_SMOOTH)) / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+#else
+    voltage = ((voltages_sum /VBAT_SMOOTH) * VBAT_PRESCALER) / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+#endif
+}
+void check_voltage_alarm(){
+    /**********************************/
+    /*   Check voltage every second   */
+    /**********************************/
+    if((millis() - time_last_vbat_alarm) > 5000){
+#define LONG_BEEP 300
+#define SHORT_BEEP 200
+        time_last_vbat_alarm = millis();
+        if(voltage <= critical_voltage){
+            beep(LONG_BEEP);
+            beep(SHORT_BEEP);
+            delay(100);
+            beep(LONG_BEEP);
+            beep(SHORT_BEEP);
+            delay(100);
+            beep(LONG_BEEP);
+            beep(SHORT_BEEP);
+            delay(100);
+            beep(LONG_BEEP);
+            beep(SHORT_BEEP);
+        }else if(voltage <= warning_voltage){
+            beep(LONG_BEEP);
+            beep(SHORT_BEEP);
+        }
+    }
+}
+#endif

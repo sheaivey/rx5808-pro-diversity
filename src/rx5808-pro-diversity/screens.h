@@ -71,6 +71,10 @@ class screens
         void diversity(uint8_t diversity_mode);
         void updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB);
 
+        // VOLTAGE MENU
+        void voltage(uint8_t menu_id, int voltage_calibration, uint8_t warning_voltage, uint8_t critical_voltage);
+        void updateVoltage(int voltage);
+
         // SETUP MENU
         void setupMenu();
         void updateSetupMenu(uint8_t menu_id,bool settings_beeps,bool settings_orderby_channel, const char *call_sign, char editing);

@@ -47,7 +47,10 @@ SOFTWARE.
 #define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 #define USE_BOOT_LOGO
-// Choose if you wish to use 8 additional Channels 
+// you can use any of the arduino analog pins to measure the voltage of the battery
+// TODO: interface works only for TVOUT_SCREENS
+//#define USE_VOLTAGE_MONITORING
+// Choose if you wish to use 8 additional Channels
 // 5362 MHz 5399 MHz 5436 MHz 5473 MHz 5510 MHz 5547 MHz 5584 MHz 5621 MHz
 // Local laws may prohibit the use of these frequencies use at your own risk!
 //#define USE_LBAND
@@ -81,6 +84,35 @@ SOFTWARE.
     // this pervents rapid switching.
     // 1 to 10 is a good range. 1 being fast switching, 10 being slow 100ms to switch.
     #define DIVERSITY_MAX_CHECKS 5
+#endif
+
+#ifdef USE_VOLTAGE_MONITORING
+    // Voltage monitoring
+    // you can use any arduino analog input to measure battery voltage
+    // keep in mind that A4 and A5 is used by OLED and A6 and A7 are used for measuring RSSI
+    // use a voltage divider to lower the voltage to max 5V - values for max  13V (3s)
+    // You can use a 100nF capacitor near the arduino pin to smooth the voltage
+    //
+    //           R1 = 5.6k
+    //    BAT+ ----====----+----+---- ARDUINO ANALOG PIN
+    //                     |    |
+    //                     |    |  (optional)
+    //                     |    || 100n CAP
+    //                     |    |
+    //           R2 = 3.3k |    |
+    //    BAT- ----====----|----|
+
+    #ifdef TVOUT_SCREENS
+        #define VBAT_PIN A4
+    #else
+        #define VBAT_PIN A0
+    #endif
+
+    // these are default values
+    #define WARNING_VOLTAGE 108 // 3.6V per cell for 3S
+    #define CRITICAL_VOLTAGE 100 // 3.3V per cell for 3S
+    #define VBAT_SCALE 119
+    #define VBAT_OFFSET 0
 #endif
 
 // this two are minimum required
@@ -121,12 +153,18 @@ SOFTWARE.
 #define STATE_SAVE 6
 #define STATE_RSSI_SETUP 7
 #define STATE_SCREEN_SAVER 8
+#define STATE_VOLTAGE 9
 
 // Seconds to wait before force entering screensaver
 #define SCREENSAVER_TIMEOUT 30
 
 #define START_STATE STATE_SEEK
 #define MAX_STATE STATE_MANUAL
+#ifdef USE_VOLTAGE_MONITORING
+    #define SETUP_MENU_MAX_ITEMS 5
+#else
+    #define SETUP_MENU_MAX_ITEMS 4
+#endif
 
 #define CHANNEL_BAND_SIZE 8
 #define CHANNEL_MIN_INDEX 0
@@ -175,6 +213,13 @@ SOFTWARE.
 
 #define EEPROM_ADR_BEEP 11
 #define EEPROM_ADR_ORDERBY 12
+
+#ifdef USE_VOLTAGE_MONITORING
+    #define EEPROM_ADR_VBAT_SCALE 13
+    #define EEPROM_ADR_VBAT_WARNING 14
+    #define EEPROM_ADR_VBAT_CRITICAL 15
+#endif
+
 #define EEPROM_ADR_CALLSIGN 20
 
 #endif // file_defined
