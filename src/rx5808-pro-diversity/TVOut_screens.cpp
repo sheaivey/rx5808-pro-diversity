@@ -126,7 +126,11 @@ void screens::seekMode(uint8_t state) {
     TV.draw_line(0,5*TV_Y_GRID-4,TV_X_MAX,5*TV_Y_GRID-4,WHITE);
     // frame for tune graph
     TV.draw_rect(0,TV_ROWS - TV_SCANNER_OFFSET,TV_X_MAX,13,  WHITE); // lower frame
+#ifdef USE_LBAND
+    TV.print(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5362");
+#else
     TV.print(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5645");
+#endif
     TV.print(57, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5800");
     TV.print(111, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5945");
 
@@ -138,7 +142,15 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     if(channelIndex != last_channel) // only updated on changes
     {
         // show current used channel of bank
+#ifdef USE_LBAND
+        if(channelIndex > 39)
+        {
+            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("D/5.3    "));
+        }
+        else if(channelIndex > 31)
+#else
         if(channelIndex > 31)
+#endif
         {
             TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("C/Race   "));
         }
@@ -169,8 +181,13 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
         // clear last square
         TV.draw_rect(1, (TV_ROWS - TV_SCANNER_OFFSET + 8),125,SCANNER_MARKER_SIZE,  BLACK, BLACK);
         // draw next
+#ifdef USE_LBAND
+        TV.draw_rect((channel * 5/2)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+
+#else
         TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
 
+#endif
         // show frequence
         TV.print(50,TV_Y_OFFSET+3*TV_Y_GRID, channelFrequency);
     }
@@ -184,11 +201,21 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     // print bar for spectrum
 
     #define SCANNER_BAR_MINI_SIZE 14
+
     rssi_scaled=map(rssi, 1, 100, 1, SCANNER_BAR_MINI_SIZE);
+
+ 
+#ifdef USE_LBAND
     // clear last bar
+    TV.draw_rect((channel * 5/2)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
+    //  draw new bar
+    TV.draw_rect((channel * 5/2)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
+#else
+   // clear last bar
     TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
     //  draw new bar
     TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
+#endif
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK)
     { // SEEK MODE
@@ -242,7 +269,11 @@ void screens::bandScanMode(uint8_t state) {
     TV.draw_rect(0,1*TV_Y_GRID,TV_X_MAX,9,  WHITE); // list frame
     TV.draw_rect(0,TV_ROWS - TV_SCANNER_OFFSET,TV_X_MAX,13,  WHITE); // lower frame
     TV.select_font(font4x6);
+#ifdef USE_LBAND
+    TV.printPGM(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), PSTR("5362"));
+#else
     TV.printPGM(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), PSTR("5645"));
+#endif
     TV.printPGM(57, (TV_ROWS - TV_SCANNER_OFFSET + 2), PSTR("5800"));
     TV.printPGM(111, (TV_ROWS - TV_SCANNER_OFFSET + 2), PSTR("5945"));
 }
@@ -255,8 +286,13 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     {
         // clear last square
         TV.draw_rect(1, (TV_ROWS - TV_SCANNER_OFFSET + 8),125,SCANNER_MARKER_SIZE,  BLACK, BLACK);
+#ifdef USE_LBAND
+        // draw next
+        TV.draw_rect((channel * 5/2)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+#else
         // draw next
         TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+#endif
     }
     // print bar for spectrum
 
@@ -437,7 +473,11 @@ void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency
     }
     TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Band:"));
     // print band
-    if(channelIndex > 31)
+    if(channelIndex > 39)
+    {
+        TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("D/5.3    "));
+    }
+    else if(channelIndex > 31)
     {
         TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("C/Race   "));
     }
