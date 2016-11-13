@@ -26,6 +26,10 @@ SOFTWARE.
 
 #include "settings.h"
 
+#ifdef USE_CUSTOM_BOOT_LOGO
+  #include "Boot_Logo.h"
+#endif
+
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
 #include "screens.h" // function headers
 #ifdef SH1106
@@ -80,6 +84,12 @@ char screens::begin(const char *call_sign) {
 #ifdef USE_BOOT_LOGO
     display.display(); // show splash screen
     delay(3000);
+#endif
+#ifdef USE_CUSTOM_BOOT_LOGO
+    display.clearDisplay();
+    display.drawBitmap(0, 0,  LOGO_LCD, 128, 64, WHITE);     //( X start pos, Y start pos, IMAGE, Widht dimension, Height Dimension, COLOR)
+    display.display();
+    delay (3000);
 #endif
     // init done
     reset();
