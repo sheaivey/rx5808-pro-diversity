@@ -47,6 +47,7 @@ SOFTWARE.
 #define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 #define USE_BOOT_LOGO
+#define USE_CUSTOM_BOOT_LOGO
 // Choose if you wish to use 8 additional Channels 
 // 5362 MHz 5399 MHz 5436 MHz 5473 MHz 5510 MHz 5547 MHz 5584 MHz 5621 MHz
 // Local laws may prohibit the use of these frequencies use at your own risk!
