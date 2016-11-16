@@ -1,0 +1,24 @@
+<<<<<<< HEAD
+=======
+#ifdef USE_VOLTAGE_MONITORING
+void screens::voltage(uint8_t menu_id, int voltage_calibration, uint8_t warning_voltage, uint8_t critical_voltage) {
+    reset();
+    drawTitleBox(PSTR("VOLTAGE ALARM"));
+    TV.printPGM(MENU_X_MARGIN, MENU_Y_MARGIN+1*MENU_Y_SIZE, PSTR("Warning"));
+    TV.print(MENU_X_MARGIN+(11*8)-2, MENU_Y_MARGIN+1*MENU_Y_SIZE, (float)warning_voltage/10.0, 1);
+    TV.printPGM(MENU_X_MARGIN, MENU_Y_MARGIN+2*MENU_Y_SIZE, PSTR("Critical"));
+    TV.print(MENU_X_MARGIN+(11*8)-2, MENU_Y_MARGIN+2*MENU_Y_SIZE, (float)critical_voltage/10.0, 1);
+    TV.printPGM(MENU_X_MARGIN, MENU_Y_MARGIN+3*MENU_Y_SIZE, PSTR("Calibrate"));
+    TV.print(MENU_X_MARGIN+(11*8)-2, MENU_Y_MARGIN+3*MENU_Y_SIZE, voltage_calibration, 10);
+    TV.printPGM(MENU_X_MARGIN, MENU_Y_MARGIN+4*MENU_Y_SIZE, PSTR("Save"));
+
+    TV.draw_rect(0,3+(menu_id+1)*MENU_Y_SIZE,127,12,  WHITE, INVERT);
+}
+void screens::updateVoltage(int voltage){
+
+    TV.printPGM(MENU_X_MARGIN, MENU_Y_MARGIN+6*MENU_Y_SIZE, PSTR("Measured"));
+    TV.print(MENU_X_MARGIN+(11*8)-2, MENU_Y_MARGIN+6*MENU_Y_SIZE, (float)voltage/10, 1);
+
+}
+#endif
+>>>>>>> 7f772cc... menu restruct for tvout

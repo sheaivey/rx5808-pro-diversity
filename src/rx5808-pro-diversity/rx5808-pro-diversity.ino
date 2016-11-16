@@ -202,7 +202,13 @@ void setup()
 #ifdef USE_DIVERSITY
     pinMode(receiverB_led,OUTPUT);
 #endif
+#ifdef FAST_DIVERSITY_SWITCHING
+    //turn on the first recevier at start - we are not using setReceiver as it toggles receiver in fast switching mode
+    digitalWrite(receiverA_led, HIGH);
+    active_receiver = receiverA_led;
+#else
     setReceiver(useReceiverA);
+#endif
     // SPI pins for RX control
     pinMode (slaveSelectPin, OUTPUT);
     pinMode (spiDataPin, OUTPUT);
@@ -1241,16 +1247,23 @@ uint16_t readRSSI(char receiver)
 
 void setReceiver(uint8_t receiver) {
 #ifdef USE_DIVERSITY
-    if(receiver == useReceiverA)
-    {
-        digitalWrite(receiverB_led, LOW);
-        digitalWrite(receiverA_led, HIGH);
-    }
-    else
-    {
-        digitalWrite(receiverA_led, LOW);
-        digitalWrite(receiverB_led, HIGH);
-    }
+    #ifdef FAST_DIVERSITY_SWITCHING
+        // fast toggle by writing in the port register instead of using arduino library
+        if(receiver != active_receiver){
+            TOGGLE_RECEIVER // defined in settings.h
+        }
+    #else
+        if(receiver == useReceiverA)
+        {
+            digitalWrite(receiverB_led, LOW);
+            digitalWrite(receiverA_led, HIGH);
+        }
+        else
+        {
+            digitalWrite(receiverA_led, LOW);
+            digitalWrite(receiverB_led, HIGH);
+        }
+    #endif
 #else
     digitalWrite(receiverA_led, HIGH);
 #endif
