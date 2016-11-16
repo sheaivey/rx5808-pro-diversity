@@ -581,6 +581,11 @@ void loop()
 #else
         drawScreen.screenSaver(pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
 #endif
+#ifdef USE_VOLTAGE_MONITORING
+            read_voltage();
+            check_voltage_alarm();
+            drawScreen.updateVoltageScreenSaver(voltage);
+#endif
         do{
             rssi = readRSSI();
 
@@ -593,6 +598,7 @@ void loop()
 #ifdef USE_VOLTAGE_MONITORING
             read_voltage();
             check_voltage_alarm();
+            drawScreen.updateVoltageScreenSaver(voltage);
 #endif
         }
         while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next button press
@@ -610,9 +616,9 @@ void loop()
         do{
             drawScreen.voltage(menu_id, vbat_scale, warning_voltage, critical_voltage);
             do {
-                read_voltage();
                 drawScreen.updateVoltage(voltage);
-                delay(100); // timeout delay
+                read_voltage();
+                //delay(100); // timeout delay
             }
             while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next key press
 

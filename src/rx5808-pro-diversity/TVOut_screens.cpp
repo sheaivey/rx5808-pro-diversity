@@ -87,6 +87,12 @@ void screens::drawTitleBox(const char *title) {
     TV.printPGM(((127-strlen_P(title)*8)/2), 3,  title);
     TV.draw_rect(0,0,127,14,  WHITE,INVERT);
 }
+void screens::drawBottomTriangle(bool color){
+    //isn't needed NOW for tvscreen
+}
+void screens::drawTopTriangle(bool color){
+    //isn't needed NOW for tvscreen
+}
 
 void screens::mainMenu(uint8_t menu_id) {
     reset(); // start from fresh screen.
@@ -377,6 +383,11 @@ void screens::updateScreenSaver(uint8_t rssi) {
 void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssiA, uint8_t rssiB) {
 // not used in TVOut ... yet
 }
+#ifdef USE_VOLTAGE_MONITORING
+void screens::updateVoltageScreenSaver(int voltage){
+// not used in TVOut ... yet
+}
+#endif
 
 #ifdef USE_DIVERSITY
 void screens::diversity(uint8_t diversity_mode) {

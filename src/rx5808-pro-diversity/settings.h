@@ -47,8 +47,7 @@ SOFTWARE.
 #define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 #define USE_BOOT_LOGO
-// you can use any of the arduino analog pins to measure the voltage of the battery
-// TODO: interface works only for TVOUT_SCREENS
+// You can use any of the arduino analog pins to measure the voltage of the battery
 //#define USE_VOLTAGE_MONITORING
 // Choose if you wish to use 8 additional Channels
 // 5362 MHz 5399 MHz 5436 MHz 5473 MHz 5510 MHz 5547 MHz 5584 MHz 5621 MHz
@@ -105,7 +104,7 @@ SOFTWARE.
     #ifdef TVOUT_SCREENS
         #define VBAT_PIN A4
     #else
-        #define VBAT_PIN A0
+        #define VBAT_PIN A2
     #endif
 
     // these are default values
