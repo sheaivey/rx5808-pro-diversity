@@ -423,7 +423,7 @@ void loop()
                     if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
                         menu_id--;
                     }
-#else 
+#else
                     if(menu_id == 3) { // as we dont use diveristy make sure we back up two menu slots.
                         menu_id--;
                     }
@@ -638,7 +638,7 @@ void loop()
                     state=STATE_SAVE;
                     editing = -1;
                 }
-            } else if(digitalRead(buttonUp) == LOW) {
+            } else if(digitalRead(buttonDown) == LOW) {
                 switch (editing) {
                     case 0:
                         warning_voltage--;
@@ -654,7 +654,7 @@ void loop()
                         break;
                 }
             }
-            else if(digitalRead(buttonDown) == LOW) {
+            else if(digitalRead(buttonUp) == LOW) {
                 switch (editing) {
                     case 0:
                         warning_voltage++;
