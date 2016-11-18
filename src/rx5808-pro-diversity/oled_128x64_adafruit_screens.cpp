@@ -624,7 +624,7 @@ void screens::voltage(uint8_t menu_id, int voltage_calibration, uint8_t warning_
     display.setCursor(5,10*3+3);
     display.print(PSTR2("Calibrate:"));
     display.setCursor(80 ,10*3+3);
-    display.print((float)voltage_calibration/10.0);
+    display.print(voltage_calibration);
 
     display.setTextColor(menu_id == 3 ? BLACK : WHITE);
     display.setCursor(5,10*4+3);
