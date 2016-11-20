@@ -112,6 +112,14 @@ SOFTWARE.
     #define CRITICAL_VOLTAGE 100 // 3.3V per cell for 3S
     #define VBAT_SCALE 119
     #define VBAT_OFFSET 0
+    // alarm sounds - by default every 5 seconds an alarm is turned on
+    // for critical alarm its 3 long beeps
+    // for warning its 2 short beeps
+    #define ALARM_EVERY_MSEC 5000
+    #define CRITICAL_BEEP_EVERY_MSEC 400
+    #define CRITICAL_BEEPS 3
+    #define WARNING_BEEP_EVERY_MSEC 200
+    #define WARNING_BEEPS 2
 #endif
 
 // this two are minimum required

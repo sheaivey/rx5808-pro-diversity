@@ -161,7 +161,12 @@ uint8_t rssi_setup_run=0;
 int vbat_scale = VBAT_SCALE;
 uint8_t warning_voltage = WARNING_VOLTAGE;
 uint8_t critical_voltage = CRITICAL_VOLTAGE;
+boolean critical_alarm = false;
+boolean warning_alarm = false;
+uint8_t beep_times = 0;
+boolean beeping = false;
 unsigned long time_last_vbat_alarm = 0;
+unsigned long last_beep = 0;
 
 #define VBAT_SMOOTH 8
 #define VBAT_PRESCALER 16
@@ -316,6 +321,9 @@ void loop()
 
     if (digitalRead(buttonMode) == LOW) // key pressed ?
     {
+#ifdef USE_VOLTAGE_MONITORING
+        clear_alarm();
+#endif
         time_screen_saver=0;
         beep(50); // beep & debounce
         delay(KEY_DEBOUNCE/2); // debounce
@@ -583,7 +591,7 @@ void loop()
 #endif
 #ifdef USE_VOLTAGE_MONITORING
             read_voltage();
-            check_voltage_alarm();
+            voltage_alarm();
             drawScreen.updateVoltageScreenSaver(voltage);
 #endif
         do{
@@ -597,7 +605,7 @@ void loop()
 
 #ifdef USE_VOLTAGE_MONITORING
             read_voltage();
-            check_voltage_alarm();
+            voltage_alarm();
             drawScreen.updateVoltageScreenSaver(voltage);
 #endif
         }
@@ -618,6 +626,7 @@ void loop()
             do {
                 drawScreen.updateVoltage(voltage);
                 read_voltage();
+                voltage_alarm();
                 //delay(100); // timeout delay
             }
             while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next key press
@@ -650,7 +659,7 @@ void loop()
                         vbat_scale--;
                         break;
                     default:
-                        menu_id--;
+                        menu_id++;
                         break;
                 }
             }
@@ -666,7 +675,7 @@ void loop()
                         vbat_scale++;
                         break;
                     default:
-                        menu_id++;
+                        menu_id--;
                         break;
                 }
             }
@@ -1077,7 +1086,7 @@ void loop()
     }
 #ifdef USE_VOLTAGE_MONITORING
     read_voltage();
-    check_voltage_alarm();
+    voltage_alarm();
 #endif
 }
 
@@ -1412,31 +1421,58 @@ void read_voltage()
 #else
     voltage = ((voltages_sum /VBAT_SMOOTH) * VBAT_PRESCALER) / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
 #endif
+    if(voltage <= critical_voltage) {
+        critical_alarm = true;
+        warning_alarm = false;
+    } else if(voltage <= warning_voltage) {
+        warning_alarm = true;
+        critical_alarm = false;
+    } else {
+        critical_alarm = false;
+        warning_alarm = false;
+    }
 }
-void check_voltage_alarm(){
-    /**********************************/
-    /*   Check voltage every second   */
-    /**********************************/
-    if((millis() - time_last_vbat_alarm) > 5000){
-#define LONG_BEEP 300
-#define SHORT_BEEP 200
-        time_last_vbat_alarm = millis();
-        if(voltage <= critical_voltage){
-            beep(LONG_BEEP);
-            beep(SHORT_BEEP);
-            delay(100);
-            beep(LONG_BEEP);
-            beep(SHORT_BEEP);
-            delay(100);
-            beep(LONG_BEEP);
-            beep(SHORT_BEEP);
-            delay(100);
-            beep(LONG_BEEP);
-            beep(SHORT_BEEP);
-        }else if(voltage <= warning_voltage){
-            beep(LONG_BEEP);
-            beep(SHORT_BEEP);
+void voltage_alarm(){
+    if(millis() > time_last_vbat_alarm + ALARM_EVERY_MSEC){
+        if(critical_alarm){
+            //continue playint the critical alarm
+            if(millis() - CRITICAL_BEEP_EVERY_MSEC > last_beep){
+                //flip the beeper output
+                set_buzzer(beeping);
+                beeping = !beeping;
+                last_beep = millis();
+                beep_times++;
+            }
+            if(beep_times > (CRITICAL_BEEPS*2)) {
+                //stop the beeping if we already beeped enough times
+                clear_alarm();
+                time_last_vbat_alarm = millis();
+            }
+        } else if(warning_alarm) {
+            //continue playint the warning alarm
+            if(millis() - WARNING_BEEP_EVERY_MSEC > last_beep){
+                //flip the beeper output
+                set_buzzer(beeping);
+                beeping = !beeping;
+                last_beep = millis();
+                beep_times++;
+            }
+            if(beep_times > (WARNING_BEEPS*2)) {
+                //stop the beeping if we already beeped enough times
+                clear_alarm();
+                time_last_vbat_alarm = millis();
+            }
         }
     }
+}
+void clear_alarm(){
+    //stop alarm sound when we are at menu etc
+    // it might be problematic when were in the middle of a alarm sound
+    set_buzzer(false);
+    beep_times = 0;
+}
+void set_buzzer(boolean value){
+    digitalWrite(led, value);
+    digitalWrite(buzzer, !value);
 }
 #endif
