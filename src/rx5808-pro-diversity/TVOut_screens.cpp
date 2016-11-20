@@ -384,7 +384,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
 // not used in TVOut ... yet
 }
 #ifdef USE_VOLTAGE_MONITORING
-void screens::updateVoltageScreenSaver(int voltage){
+void screens::updateVoltageScreenSaver(int voltage, boolean alarm){
 // not used in TVOut ... yet
 }
 #endif

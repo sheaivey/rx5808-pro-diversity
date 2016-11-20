@@ -528,10 +528,13 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
 }
 
 #ifdef USE_VOLTAGE_MONITORING
-void screens::updateVoltageScreenSaver(int voltage){
-    display.setTextColor(WHITE);
+void screens::updateVoltageScreenSaver(int voltage, bool alarm){
+    if(alarm){
+        display.setTextColor((millis()%250 < 125) ? WHITE : BLACK, BLACK);
+    } else {
+        display.setTextColor(INVERT);
+    }
     display.setCursor(70,9);
-    display.fillRect(70, 9, 40, 6, BLACK);
     display.print((float)voltage/10.0);
     display.print(PSTR2("V"));
     display.setTextColor(BLACK);

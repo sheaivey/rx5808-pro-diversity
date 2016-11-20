@@ -69,7 +69,7 @@ class screens
         void updateScreenSaver(uint8_t rssi);
         void updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssiA, uint8_t rssiB); // diversity
 #ifdef USE_VOLTAGE_MONITORING
-        void updateVoltageScreenSaver(int voltage);
+        void updateVoltageScreenSaver(int voltage, bool alarm);
 #endif
 
         // DIVERSITY

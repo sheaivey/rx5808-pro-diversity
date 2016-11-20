@@ -42,7 +42,7 @@ SOFTWARE.
 // Up to 10 letters
 #define CALL_SIGN "CALL SIGN"
 
-// Feature Togglels
+// Feature Toggles
 #define USE_DIVERSITY
 #define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN

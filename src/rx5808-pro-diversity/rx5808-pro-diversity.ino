@@ -592,7 +592,7 @@ void loop()
 #ifdef USE_VOLTAGE_MONITORING
             read_voltage();
             voltage_alarm();
-            drawScreen.updateVoltageScreenSaver(voltage);
+            drawScreen.updateVoltageScreenSaver(voltage, warning_alarm || critical_alarm);
 #endif
         do{
             rssi = readRSSI();
@@ -606,7 +606,8 @@ void loop()
 #ifdef USE_VOLTAGE_MONITORING
             read_voltage();
             voltage_alarm();
-            drawScreen.updateVoltageScreenSaver(voltage);
+
+            drawScreen.updateVoltageScreenSaver(voltage, warning_alarm || critical_alarm);
 #endif
         }
         while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next button press
