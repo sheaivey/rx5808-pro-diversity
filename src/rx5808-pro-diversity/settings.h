@@ -26,7 +26,6 @@ SOFTWARE.
 
 #ifndef settings_h
 #define settings_h
-#include <avr/pgmspace.h>
 
 // Choose the display you will be using
 // you will also have to uncomment the includes in the main project.
@@ -54,9 +53,10 @@ SOFTWARE.
 #define USE_BOOT_CHECK
 #define USE_DIM_ON_SCREENSAVER
 // Switch the receivers faster - uses direct port manipulations instead of using arduino helper functions.
-// WARNING You can safely enable this only when using A0 and A1 for receivers
-// for other pins you have to supply your own TOGGLE_RECEIVER macro below (its written for the default pins - A0 and A1) and
-// the two pins have to be on the same atmega PORT
+// WARNING You can safely enable this only when receiverA_led and receiverB_led is on the same PORT
+// arduino/atmega has 3 ports - PORTD, PORTB and PORTC
+// by default the two outputs are on PORTC (A0 and A1) so you can safetly enable it if youre using the defaults
+// PORTC is analog pins A0-A7, PORTD is digital pins 0-7 and PORTB is digital pins 8-13
 //#define FAST_DIVERSITY_SWITCHING
 
 // Receiver Module version
@@ -90,7 +90,6 @@ SOFTWARE.
     #define DIVERSITY_MAX_CHECKS 5
 #endif
 
-<<<<<<< HEAD
 #ifdef USE_VOLTAGE_MONITORING
     // Voltage monitoring
     // you can use any arduino analog input to measure battery voltage
@@ -126,13 +125,6 @@ SOFTWARE.
     #define CRITICAL_BEEPS 3
     #define WARNING_BEEP_EVERY_MSEC 200
     #define WARNING_BEEPS 2
-=======
-#ifdef FAST_DIVERSITY_SWITCHING
-    // see https://www.arduino.cc/en/Reference/PortManipulation
-    // PORTC means analog ports (PORTD is arduino 0-7, PORTB is 8-13)
-    // PC0 is the current value of A0 (receiver A) PC1 is value of A1 (receiver B)
-    #define TOGGLE_RECEIVER PORTC ^= (1 << PC0)|(1 << PC1);
->>>>>>> use direct port manipulation when switching receivers - toggle the two outputs at once
 #endif
 
 // this two are minimum required

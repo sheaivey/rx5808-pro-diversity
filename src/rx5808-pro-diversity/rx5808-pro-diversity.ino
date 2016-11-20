@@ -1250,7 +1250,13 @@ void setReceiver(uint8_t receiver) {
     #ifdef FAST_DIVERSITY_SWITCHING
         // fast toggle by writing in the port register instead of using arduino library
         if(receiver != active_receiver){
-            TOGGLE_RECEIVER // defined in settings.h
+            uint8_t port = digitalPinToPort(receiverA_led);
+            uint8_t bitA = digitalPinToBitMask(receiverA_led);
+            uint8_t bitB = digitalPinToBitMask(receiverB_led);
+            volatile uint8_t *out;
+
+            out = portOutputRegister(port);
+            *out ^= bitA | bitB;
         }
     #else
         if(receiver == useReceiverA)
