@@ -140,6 +140,20 @@ void screens::drawTitleBox(const char *title) {
     display.setTextColor(WHITE);
 }
 
+void screens::drawBottomTriangle(bool color){
+    //use fillRect instead of fillTriangle
+    display.fillRect(120, 58, 5, 1, color);
+    display.fillRect(121, 59, 3, 1, color);
+    display.fillRect(122, 60, 1, 1, color);
+}
+
+void screens::drawTopTriangle(bool color){
+    //use fillRect instead of fillTriangle
+    display.fillRect(120, 14, 5, 1, color);
+    display.fillRect(121, 13, 3, 1, color);
+    display.fillRect(122, 12, 1, 1, color);
+}
+
 void screens::mainMenu(uint8_t menu_id) {
     reset(); // start from fresh screen.
     drawTitleBox(PSTR2("MODE SELECTION"));
@@ -277,12 +291,12 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
 #else
     display.fillRect((channel*3)+4,display.height()-12-14,3,14-rssi_scaled,BLACK);
     display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),3,rssi_scaled,WHITE);
-#endif    
-    
+#endif
+
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK) //
     { // SEEK MODE
-       
+
         // Show Scan Position
 #ifdef USE_LBAND
         display.fillRect((channel*5/2)+4+scan_position,display.height()-12-14,1,14,BLACK);
@@ -508,8 +522,26 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
         display.drawLine(50,display.height()-10,110,display.height()-10,BLACK);
     }
 #endif
+#ifndef USE_VOLTAGE_MONITORING
     display.display();
+#endif
 }
+
+#ifdef USE_VOLTAGE_MONITORING
+void screens::updateVoltageScreenSaver(int voltage, bool alarm){
+    if(alarm){
+        display.setTextColor((millis()%250 < 125) ? WHITE : BLACK, BLACK);
+    } else {
+        display.setTextColor(INVERT);
+    }
+    display.setCursor(70,9);
+    display.print((float)voltage/10.0);
+    display.print(PSTR2("V"));
+    display.setTextColor(BLACK);
+    display.display();
+
+}
+#endif
 
 #ifdef USE_DIVERSITY
 void screens::diversity(uint8_t diversity_mode) {
@@ -572,6 +604,53 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
 }
 #endif
 
+#ifdef USE_VOLTAGE_MONITORING
+void screens::voltage(uint8_t menu_id, int voltage_calibration, uint8_t warning_voltage, uint8_t critical_voltage) {
+    reset();
+    drawTitleBox(PSTR2("VOLTAGE ALARM"));
+
+    display.fillRect(0, 10*menu_id+12, display.width(), 10, WHITE);
+
+    display.setTextColor(menu_id == 0 ? BLACK : WHITE);
+    display.setCursor(5,10*1+3);
+    display.print(PSTR2("Warning:"));
+    display.setCursor(80 ,10*1+3);
+    display.print((float)warning_voltage/10.0);
+
+    display.setTextColor(menu_id == 1 ? BLACK : WHITE);
+    display.setCursor(5,10*2+3);
+    display.print(PSTR2("Critical:"));
+    display.setCursor(80 ,10*2+3);
+    display.print((float)critical_voltage/10.0);
+
+    display.setTextColor(menu_id == 2 ? BLACK : WHITE);
+    display.setCursor(5,10*3+3);
+    display.print(PSTR2("Calibrate:"));
+    display.setCursor(80 ,10*3+3);
+    display.print(voltage_calibration);
+
+    display.setTextColor(menu_id == 3 ? BLACK : WHITE);
+    display.setCursor(5,10*4+3);
+    display.print(PSTR2("Save"));
+
+    display.setTextColor(WHITE);
+    display.setCursor(5,10*5+3);
+    display.print(PSTR2("Measured:"));
+
+    display.display();
+}
+void screens::updateVoltage(int voltage){
+
+    display.fillRect(80, 53, 40, 10, BLACK);
+    display.setTextColor(WHITE);
+    display.setCursor(80 ,10*5+3);
+    //instaed of resetiing the whole display - black out the value
+    display.print((float)voltage/10.0);
+    display.setTextColor(BLACK);
+    display.display();
+
+}
+#endif
 
 void screens::setupMenu(){
 }
@@ -579,51 +658,66 @@ void screens::updateSetupMenu(uint8_t menu_id, bool settings_beeps, bool setting
     reset();
     drawTitleBox(PSTR2("SETUP MENU"));
     //selected
-    display.fillRect(0, 10*menu_id+12, display.width(), 10, WHITE);
-
-    display.setTextColor(menu_id == 0 ? BLACK : WHITE);
-    display.setCursor(5,10*1+3);
-    display.print(PSTR2("ORDER: "));
-    if(settings_orderby_channel) {
-        display.print(PSTR2("CHANNEL  "));
-    }
-    else {
-        display.print(PSTR2("FREQUENCY"));
-    }
-
-    display.setTextColor(menu_id == 1 ? BLACK : WHITE);
-    display.setCursor(5,10*2+3);
-    display.print(PSTR2("BEEPS: "));
-    if(settings_beeps) {
-        display.print(PSTR2("ON "));
-    }
-    else {
-        display.print(PSTR2("OFF"));
-    }
-
-
-    display.setTextColor(menu_id == 2 ? BLACK : WHITE);
-    display.setCursor(5,10*3+3);
-    display.print(PSTR2("SIGN : "));
-    if(editing>=0) {
-        display.fillRect(6*6+5, 10*2+13, display.width()-(6*6+6), 8, BLACK);
-        display.fillRect(6*7+6*(editing)+4, 10*2+13, 7, 8, WHITE); //set cursor
-        for(uint8_t i=0; i<10; i++) {
-            display.setTextColor(i == editing ? BLACK : WHITE);
-            display.print(call_sign[i]);
+    int selected_position = menu_id % 5;
+    display.fillRect(0, 10*selected_position+12, display.width(), 10, WHITE);
+    if(menu_id < 5){
+        drawBottomTriangle(selected_position == 4 ? BLACK : WHITE);
+        display.setTextColor(selected_position == 0 ? BLACK : WHITE);
+        display.setCursor(5,10*1+3);
+        display.print(PSTR2("ORDER: "));
+        if(settings_orderby_channel) {
+            display.print(PSTR2("CHANNEL  "));
         }
-    }
-    else {
-        display.print(call_sign);
-    }
+        else {
+            display.print(PSTR2("FREQUENCY"));
+        }
 
-    display.setTextColor(menu_id == 3 ? BLACK : WHITE);
-    display.setCursor(5,10*4+3);
-    display.print(PSTR2("CALIBRATE RSSI"));
+        display.setTextColor(selected_position == 1 ? BLACK : WHITE);
+        display.setCursor(5,10*2+3);
+        display.print(PSTR2("BEEPS: "));
+        if(settings_beeps) {
+            display.print(PSTR2("ON "));
+        }
+        else {
+            display.print(PSTR2("OFF"));
+        }
 
-    display.setTextColor(menu_id == 4 ? BLACK : WHITE);
-    display.setCursor(5,10*5+3);
-    display.print(PSTR2("SAVE & EXIT"));
+
+        display.setTextColor(selected_position == 2 ? BLACK : WHITE);
+        display.setCursor(5,10*3+3);
+        display.print(PSTR2("SIGN : "));
+        if(editing>=0) {
+            display.fillRect(6*6+5, 10*2+13, display.width()-(6*6+6), 8, BLACK);
+            display.fillRect(6*7+6*(editing)+4, 10*2+13, 7, 8, WHITE); //set cursor
+            for(uint8_t i=0; i<10; i++) {
+                display.setTextColor(i == editing ? BLACK : WHITE);
+                display.print(call_sign[i]);
+            }
+        }
+        else {
+            display.print(call_sign);
+        }
+
+        display.setTextColor(selected_position == 3 ? BLACK : WHITE);
+        display.setCursor(5,10*4+3);
+        display.print(PSTR2("CALIBRATE RSSI"));
+
+#ifdef USE_VOLTAGE_MONITORING
+        display.setTextColor(selected_position == 4 ? BLACK : WHITE);
+        display.setCursor(5,10*5+3);
+        display.print(PSTR2("VOLTAGE ALARM"));
+    } else {
+        drawTopTriangle(selected_position == 0 ? BLACK : WHITE);
+        display.setTextColor(selected_position == 0 ? BLACK : WHITE);
+        display.setCursor(5,10*1+3);
+        display.print(PSTR2("SAVE & EXIT"));
+    }
+#else
+        display.setTextColor(selected_position == 4 ? BLACK : WHITE);
+        display.setCursor(5,10*5+3);
+        display.print(PSTR2("SAVE & EXIT"));
+    }
+#endif
     display.display();
 }
 
@@ -707,6 +801,5 @@ void screens::updateSave(const char * msg) {
     display.print(msg);
     display.display();
 }
-
 
 #endif

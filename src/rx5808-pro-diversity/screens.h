@@ -44,6 +44,8 @@ class screens
         uint8_t last_channel;
         void reset();
         void drawTitleBox(const char *title);
+        void drawTopTriangle(bool color);
+        void drawBottomTriangle(bool color);
 
     public:
         screens();
@@ -66,10 +68,19 @@ class screens
         void screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency, const char *call_sign);
         void updateScreenSaver(uint8_t rssi);
         void updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssiA, uint8_t rssiB); // diversity
+#ifdef USE_VOLTAGE_MONITORING
+        void updateVoltageScreenSaver(int voltage, bool alarm);
+#endif
 
         // DIVERSITY
         void diversity(uint8_t diversity_mode);
         void updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB);
+
+        // VOLTAGE MENU
+#ifdef USE_VOLTAGE_MONITORING
+        void voltage(uint8_t menu_id, int voltage_calibration, uint8_t warning_voltage, uint8_t critical_voltage);
+        void updateVoltage(int voltage);
+#endif
 
         // SETUP MENU
         void setupMenu();
