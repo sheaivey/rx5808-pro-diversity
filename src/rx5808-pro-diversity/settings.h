@@ -43,13 +43,21 @@ SOFTWARE.
 #define USE_DIVERSITY
 #define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
-#define USE_BOOT_LOGO
 // You can use any of the arduino analog pins to measure the voltage of the battery
 //#define USE_VOLTAGE_MONITORING
 // Choose if you wish to use 8 additional Channels
 // 5362 MHz 5399 MHz 5436 MHz 5473 MHz 5510 MHz 5547 MHz 5584 MHz 5621 MHz
 // Local laws may prohibit the use of these frequencies use at your own risk!
 //#define USE_LBAND
+
+// Pick one boot logo style only (or none)!
+// Use boot logo provided by Adafruit library.
+//#define USE_BOOT_LOGO
+// Use custom boot animation, check boot_animation.h and additional settings 
+// below.
+// NOTE: This takes up quite a lot of program memory space so you may need to
+//       limit the number of frames you have, or disable some other features.
+#define USE_BOOT_ANIMATION
 
 // Receiver Module version
 // used for tuning time
@@ -117,6 +125,12 @@ SOFTWARE.
     #define CRITICAL_BEEPS 3
     #define WARNING_BEEP_EVERY_MSEC 200
     #define WARNING_BEEPS 2
+#endif
+
+#ifdef USE_BOOT_ANIMATION
+    #define BOOT_ANIMATION_FRAMES 4
+    #define BOOT_ANIMATION_INTERVAL 50 // milliseconds between frames
+    #define BOOT_ANIMATION_REPEATS 5 // number of times to loop all frames
 #endif
 
 // this two are minimum required
