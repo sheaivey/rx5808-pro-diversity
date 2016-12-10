@@ -36,26 +36,8 @@ SOFTWARE.
 #include <EEPROM.h>
 
 #include "settings.h"
-
-// uncomment depending on the display you are using.
-// this is an issue with the arduino preprocessor
-#ifdef TVOUT_SCREENS
-//    #include <TVout.h>
-//    #include <fontALL.h>
-#endif
-#ifdef OLED_128x64_ADAFRUIT_SCREENS
-
-	#ifdef SH1106
-		#include <Adafruit_SH1106.h>
-	#else
-		#include <Adafruit_SSD1306.h>
-	#endif
-    #include <Adafruit_GFX.h>
-    #include <Wire.h>
-    #include <SPI.h>
-#endif
-
 #include "screens.h"
+
 screens drawScreen;
 
 // Channels to sent to the SPI registers
