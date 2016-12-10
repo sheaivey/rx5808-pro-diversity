@@ -25,6 +25,7 @@ SOFTWARE.
 */
 
 #include "settings.h"
+#include "internal_settings.h"
 
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
 #include "screens.h" // function headers

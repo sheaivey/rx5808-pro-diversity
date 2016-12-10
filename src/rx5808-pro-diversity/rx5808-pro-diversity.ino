@@ -36,6 +36,7 @@ SOFTWARE.
 #include <EEPROM.h>
 
 #include "settings.h"
+#include "internal_settings.h"
 #include "screens.h"
 
 screens drawScreen;
@@ -140,8 +141,6 @@ bool beeping = false;
 unsigned long time_last_vbat_alarm = 0;
 unsigned long last_beep = 0;
 
-#define VBAT_SMOOTH 8
-#define VBAT_PRESCALER 16
 uint8_t voltage_reading_index = 0;
 uint16_t voltages[VBAT_SMOOTH];
 uint16_t voltages_sum;

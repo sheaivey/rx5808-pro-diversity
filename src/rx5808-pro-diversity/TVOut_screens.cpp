@@ -27,6 +27,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include "settings.h"
+#include "internal_settings.h"
 
 #ifdef TVOUT_SCREENS
 #include "screens.h" // function headers
