@@ -115,7 +115,7 @@ unsigned long time_next_payload = 0;
 uint8_t seek_found=0;
 uint8_t scan_start=0;
 uint8_t first_tune=1;
-boolean force_menu_redraw=0;
+bool force_menu_redraw=0;
 uint16_t rssi_best=0; // used for band scaner
 uint16_t rssi_min_a=RSSI_MIN_VAL;
 uint16_t rssi_max_a=RSSI_MAX_VAL;
@@ -133,10 +133,10 @@ uint8_t rssi_setup_run=0;
 int vbat_scale = VBAT_SCALE;
 uint8_t warning_voltage = WARNING_VOLTAGE;
 uint8_t critical_voltage = CRITICAL_VOLTAGE;
-boolean critical_alarm = false;
-boolean warning_alarm = false;
+bool critical_alarm = false;
+bool warning_alarm = false;
 uint8_t beep_times = 0;
-boolean beeping = false;
+bool beeping = false;
 unsigned long time_last_vbat_alarm = 0;
 unsigned long last_beep = 0;
 
@@ -1444,7 +1444,7 @@ void clear_alarm(){
     set_buzzer(false);
     beep_times = 0;
 }
-void set_buzzer(boolean value){
+void set_buzzer(bool value){
     digitalWrite(led, value);
     digitalWrite(buzzer, !value);
 }
