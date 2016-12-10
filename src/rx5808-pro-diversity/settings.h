@@ -39,7 +39,10 @@ SOFTWARE.
 #define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 #define USE_BOOT_LOGO
+<<<<<<< HEAD
 #define USE_CUSTOM_BOOT_LOGO
+=======
+>>>>>>> refs/remotes/sheaivey/master
 // You can use any of the arduino analog pins to measure the voltage of the battery
 //#define USE_VOLTAGE_MONITORING
 // Choose if you wish to use 8 additional Channels
