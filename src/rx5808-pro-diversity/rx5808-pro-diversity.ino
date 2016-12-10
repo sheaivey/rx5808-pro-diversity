@@ -54,9 +54,6 @@ SOFTWARE.
     #include <Wire.h>
     #include <SPI.h>
 #endif
-#ifdef OLED_128x64_U8G_SCREENS
-//    #include <U8glib.h>
-#endif
 
 #include "screens.h"
 screens drawScreen;
