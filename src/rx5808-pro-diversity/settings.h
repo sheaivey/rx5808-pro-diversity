@@ -50,6 +50,7 @@ SOFTWARE.
 // 5362 MHz 5399 MHz 5436 MHz 5473 MHz 5510 MHz 5547 MHz 5584 MHz 5621 MHz
 // Local laws may prohibit the use of these frequencies use at your own risk!
 //#define USE_LBAND
+#define USE_BOOT_CHECK
 
 // Receiver Module version
 // used for tuning time
