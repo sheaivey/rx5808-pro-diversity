@@ -35,9 +35,6 @@ SOFTWARE.
 // use the library from https://github.com/badzz/Adafruit_SH1106 before enabling
 //#define SH1106
 
-// u8glib has performance issues.
-//#define OLED_128x64_U8G_SCREENS
-
 // this will be displayed on the screensaver.
 // Up to 10 letters
 #define CALL_SIGN "CALL SIGN"
