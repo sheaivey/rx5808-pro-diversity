@@ -39,10 +39,16 @@ SOFTWARE.
 #define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
 #define USE_BOOT_LOGO
-<<<<<<< HEAD
+
+//------------------------------------------------------------------------------
+// Use this program to create the array from a Bitmap 128x64 to be put in BOOT_LOGO.h
+// http://en.radzio.dxp.pl/bitmap_converter/
+// Setup of the program: 
+// Byte orientation: Horizontal
+// Size endianness: little
+// Pixel / byte: 8
 #define USE_CUSTOM_BOOT_LOGO
-=======
->>>>>>> refs/remotes/sheaivey/master
+
 // You can use any of the arduino analog pins to measure the voltage of the battery
 //#define USE_VOLTAGE_MONITORING
 // Choose if you wish to use 8 additional Channels
