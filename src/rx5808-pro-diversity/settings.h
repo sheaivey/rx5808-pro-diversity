@@ -24,8 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef settings_h
-#define settings_h
+#ifndef __settings_h
+#define __settings_h
 
 // Choose the display you will be using
 // you will also have to uncomment the includes in the main project.

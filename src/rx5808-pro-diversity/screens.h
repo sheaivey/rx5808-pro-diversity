@@ -24,9 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef display_h
-#define display_h
-
+#ifndef __display_h
+#define __display_h
 
 #include <avr/pgmspace.h>
 
@@ -90,4 +89,5 @@ class screens
         void save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency, const char *call_sign);
         void updateSave(const char *msg);
 };
+
 #endif
