@@ -40,8 +40,8 @@ SOFTWARE.
 // uncomment depending on the display you are using.
 // this is an issue with the arduino preprocessor
 #ifdef TVOUT_SCREENS
-//    #include <TVout.h>
-//    #include <fontALL.h>
+    #include <TVout.h>
+    #include <fontALL.h>
 #endif
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
 
@@ -54,9 +54,6 @@ SOFTWARE.
     #include <Wire.h>
     #include <SPI.h>
 #endif
-#ifdef OLED_128x64_U8G_SCREENS
-//    #include <U8glib.h>
-#endif
 
 #include "screens.h"
 screens drawScreen;
@@ -68,49 +65,65 @@ const uint16_t channelTable[] PROGMEM = {
   0x2903,    0x290C,    0x2916,    0x291F,    0x2989,    0x2992,    0x299C,    0x2A05,    // Band B
   0x2895,    0x288B,    0x2881,    0x2817,    0x2A0F,    0x2A19,    0x2A83,    0x2A8D,    // Band E
   0x2906,    0x2910,    0x291A,    0x2984,    0x298E,    0x2998,    0x2A02,    0x2A0C,    // Band F / Airwave
-#ifdef USE_LBAND
   0x281D,    0x288F,    0x2902,    0x2914,    0x2987,    0x2999,    0x2A0C,    0x2A1E,    // Band C / Immersion Raceband
-  0x2609,    0x261C,    0x268E,    0x2701,    0x2713,    0x2786,    0x2798,    0x280B     // Band D / 5.3
-#else
-  0x281D,    0x288F,    0x2902,    0x2914,    0x2987,    0x2999,    0x2A0C,    0x2A1E     // Band C / Immersion Raceband
-#endif
+#ifdef USE_LBAND
+  0x2609,    0x261C,    0x268E,    0x2701,    0x2713,    0x2786,    0x2798,    0x280B,     // Band D / 5.3 
+#endif  
+#ifdef USE_9BAND
+	0x2597,    0x2602,    0x260B,    0x2614,    0x261D,    0x2686,    0x268F,    0x2698,    // Band U
+	0x2701,    0x2980,    0x2713,    0x271C,    0x2785,    0x278E,    0x2797,    0x2800,    // Band O
+	0x259B,    0x260F,    0x2683,    0x2697,    0x270B,    0x271F,    0x2793,    0x2807,    // Band L
+	0x281B,    0x288F,    0x2903,    0x2917,    0x298B,    0x299F,    0x2A13,    0x2A87,     // Band H
+#endif  
 };
 
 // Channels with their Mhz Values
 const uint16_t channelFreqTable[] PROGMEM = {
-  // Channel 1 - 8
-  5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725, // Band A
-  5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866, // Band B
-  5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945, // Band E
-  5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880, // Band F / Airwave
+	// Channel 1 - 8
+	5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725, // Band A
+	5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866, // Band B
+	5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945, // Band E
+	5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880, // Band F / Airwave
+	5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917, // Band C / Immersion Raceband
 #ifdef USE_LBAND
-  5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917, // Band C / Immersion Raceband
-  5362, 5399, 5436, 5473, 5510, 5547, 5584, 5621  // Band D / 5.3
-#else
-  5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917  // Band C / Immersion Raceband
-#endif
+	5362, 5399, 5436, 5473, 5510, 5547, 5584, 5621,  // Band D / 5.3 
+#endif  
+#ifdef USE_9BAND
+	5325, 5348, 5366, 5384, 5402, 5420, 5438, 5456, // Band U
+	5333, 5373, 5413, 5453, 5493, 5533, 5573, 5613, // Band O
+	5333, 5373, 5413, 5453, 5493, 5533, 5573, 5613, // Band L
+	5653, 5693, 5733, 5773, 5813, 5853, 5893, 5933, // Band H
+#endif  
 };
 
 // do coding as simple hex value to save memory.
 const uint8_t channelNames[] PROGMEM = {
-  0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8, // Band A
-  0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, // Band B
-  0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, // Band E
-  0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, // Band F / Airwave
+	0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8, // Band A
+	0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, // Band B
+	0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, // Band E
+	0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, // Band F / Airwave
+	0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, // Band C / Immersion Raceband
 #ifdef USE_LBAND
-  0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, // Band C / Immersion Raceband
-  0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8  // BAND D / 5.3
-#else
-  0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8  // Band C / Immersion Raceband
+	0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8,  // BAND D / 5.3
 #endif
+#ifdef USE_9BAND
+	0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, // Band U
+	0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, // Band O
+	0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, // Band L
+	0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48  // BAND H
+#endif  
 };
 
 // All Channels of the above List ordered by Mhz
 const uint8_t channelList[] PROGMEM = {
-#ifdef USE_LBAND
-  40, 41, 42, 43, 44, 45, 46, 47, 19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9, 25, 5, 35, 10, 26, 4, 11, 27, 3, 36, 12, 28, 2, 13, 29, 37, 1, 14, 30, 0, 15, 31, 38, 20, 21, 39, 22, 23
+#if defined(USE_LBAND) && defined(USE_9BAND)
+	49, 65, 50, 41, 51, 66, 52, 42, 53, 67, 54, 43, 55, 68, 56, 44, 57, 69, 45, 59, 60, 70, 61, 46, 62, 71, 63, 47, 64, 72, 48, 20, 73, 33, 19, 18, 74, 34, 17, 8, 35, 9, 75, 25, 7, 10, 26, 6, 36, 11, 76, 27, 5, 12, 58, 28, 4, 37, 13, 77, 29, 3, 14, 30, 38, 2, 15, 78, 31, 16, 1, 32, 39, 21, 79, 22, 40, 23, 80, 24
+#elif defined(USE_9BAND)
+	10, 41, 57, 42, 43, 58, 44, 45, 59, 46, 47, 60, 48, 49, 61, 51, 52, 62, 53, 54, 63, 55, 56, 64, 20, 65, 33, 19, 18, 66, 34, 17, 8, 35, 9, 67, 25, 7, 10, 26, 6, 36, 11, 68, 27, 5, 12, 50, 28, 4, 37, 13, 69, 29, 3, 14, 30, 38, 2, 15, 70, 31, 16, 1, 32, 39, 21, 71, 22, 40, 23, 72, 24
+#elif defined (USE_LBAND)
+	40, 41, 42, 43, 44, 45, 46, 47, 19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9, 25, 5, 35, 10, 26, 4, 11, 27, 3, 36, 12, 28, 2, 13, 29, 37, 1, 14, 30, 0, 15, 31, 38, 20, 21, 39, 22, 23
 #else
-  19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9, 25, 5, 35, 10, 26, 4, 11, 27, 3, 36, 12, 28, 2, 13, 29, 37, 1, 14, 30, 0, 15, 31, 38, 20, 21, 39, 22, 23
+	19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9, 25, 5, 35, 10, 26, 4, 11, 27, 3, 36, 12, 28, 2, 13, 29, 37, 1, 14, 30, 0, 15, 31, 38, 20, 21, 39, 22, 23
 #endif
 };
 
@@ -158,22 +171,22 @@ uint16_t rssi_setup_max_a=RSSI_MAX_VAL;
 uint8_t rssi_setup_run=0;
 
 #ifdef USE_VOLTAGE_MONITORING
-int vbat_scale = VBAT_SCALE;
-uint8_t warning_voltage = WARNING_VOLTAGE;
-uint8_t critical_voltage = CRITICAL_VOLTAGE;
+	int vbat_scale = VBAT_SCALE;
+	uint8_t warning_voltage = WARNING_VOLTAGE;
+	uint8_t critical_voltage = CRITICAL_VOLTAGE;
 boolean critical_alarm = false;
 boolean warning_alarm = false;
 uint8_t beep_times = 0;
 boolean beeping = false;
-unsigned long time_last_vbat_alarm = 0;
+	unsigned long time_last_vbat_alarm = 0;
 unsigned long last_beep = 0;
 
-#define VBAT_SMOOTH 8
-#define VBAT_PRESCALER 16
-uint8_t voltage_reading_index = 0;
-uint16_t voltages[VBAT_SMOOTH];
-uint16_t voltages_sum;
-uint16_t voltage;
+	#define VBAT_SMOOTH 8
+	#define VBAT_PRESCALER 16
+	uint8_t voltage_reading_index = 0;
+	uint16_t voltages[VBAT_SMOOTH];
+	uint16_t voltages_sum;
+	uint16_t voltage;
 #endif
 
 char call_sign[10];
@@ -205,7 +218,13 @@ void setup()
 #ifdef USE_DIVERSITY
     pinMode(receiverB_led,OUTPUT);
 #endif
+#ifdef FAST_DIVERSITY_SWITCHING
+    //turn on the first recevier at start - we are not using setReceiver as it toggles receiver in fast switching mode
+    digitalWrite(receiverA_led, HIGH);
+    active_receiver = receiverA_led;
+#else
     setReceiver(useReceiverA);
+#endif
     // SPI pins for RX control
     pinMode (slaveSelectPin, OUTPUT);
     pinMode (spiDataPin, OUTPUT);
@@ -233,25 +252,22 @@ void setup()
             EEPROM.write(EEPROM_ADR_CALLSIGN+i,call_sign[i]);
         }
 
-
-
-#ifdef USE_DIVERSITY
-        // diversity
-        EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
-        // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,lowByte(RSSI_MIN_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,highByte(RSSI_MIN_VAL));
-        // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,lowByte(RSSI_MAX_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,highByte(RSSI_MAX_VAL));
-#endif
-
-#ifdef USE_VOLTAGE_MONITORING
-        EEPROM.write(EEPROM_ADR_VBAT_SCALE, vbat_scale);
-        EEPROM.write(EEPROM_ADR_VBAT_WARNING, warning_voltage);
-        EEPROM.write(EEPROM_ADR_VBAT_CRITICAL, critical_voltage);
-#endif
-
+		#ifdef USE_DIVERSITY
+			// diversity
+			EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
+			// save 16 bit
+			EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,lowByte(RSSI_MIN_VAL));
+			EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,highByte(RSSI_MIN_VAL));
+			// save 16 bit
+			EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,lowByte(RSSI_MAX_VAL));
+			EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,highByte(RSSI_MAX_VAL));
+		#endif
+		
+		#ifdef USE_VOLTAGE_MONITORING
+			EEPROM.write(EEPROM_ADR_VBAT_SCALE, vbat_scale);
+			EEPROM.write(EEPROM_ADR_VBAT_WARNING, warning_voltage);
+			EEPROM.write(EEPROM_ADR_VBAT_CRITICAL, critical_voltage);
+		#endif
     }
 
     // read last setting from eeprom
@@ -288,27 +304,28 @@ void setup()
         }
     }
 
-#ifdef USE_IR_EMITTER
-    // Used to Transmit IR Payloads
-    Serial.begin(9600);
-#endif
+	#ifdef USE_IR_EMITTER
+		// Used to Transmit IR Payloads
+		Serial.begin(9600);
+	#endif
 
-#ifdef USE_DIVERSITY
-    // make sure we use receiver Auto when diveristy is unplugged.
-    if(!isDiversity()) {
-        diversity_mode = useReceiverAuto;
-    }
-#endif
-#ifdef USE_VOLTAGE_MONITORING
-        vbat_scale = EEPROM.read(EEPROM_ADR_VBAT_SCALE);
-        warning_voltage = EEPROM.read(EEPROM_ADR_VBAT_WARNING);
-        critical_voltage = EEPROM.read(EEPROM_ADR_VBAT_CRITICAL);
-#endif
+	#ifdef USE_DIVERSITY
+		// make sure we use receiver Auto when diveristy is unplugged.
+		if(!isDiversity()) {
+			diversity_mode = useReceiverAuto;
+		}
+	#endif
+	
+	#ifdef USE_VOLTAGE_MONITORING
+		vbat_scale = EEPROM.read(EEPROM_ADR_VBAT_SCALE);
+		warning_voltage = EEPROM.read(EEPROM_ADR_VBAT_WARNING);
+		critical_voltage = EEPROM.read(EEPROM_ADR_VBAT_CRITICAL);
+	#endif
+	
     // Setup Done - Turn Status LED off.
     digitalWrite(led, LOW);
 
 }
-
 
 // LOOP ----------------------------------------------------------------------------
 void loop()
@@ -431,7 +448,7 @@ void loop()
                     if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
                         menu_id--;
                     }
-#else
+#else 
                     if(menu_id == 3) { // as we dont use diveristy make sure we back up two menu slots.
                         menu_id--;
                     }
@@ -535,12 +552,12 @@ void loop()
 #ifdef USE_DIVERSITY
             case STATE_DIVERSITY:
                 // diversity menu is below this is just a place holder.
-            break;
+				break;
 #endif
 #ifdef USE_VOLTAGE_MONITORING
-            case STATE_VOLTAGE:
-                // voltage menu below
-            break;
+			case STATE_VOLTAGE:
+				// voltage menu below
+			break;
 #endif
             case STATE_SETUP_MENU:
 
@@ -557,11 +574,10 @@ void loop()
 #ifdef USE_DIVERSITY
                 EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
 #endif
-
 #ifdef USE_VOLTAGE_MONITORING
-                EEPROM.write(EEPROM_ADR_VBAT_SCALE, vbat_scale);
-                EEPROM.write(EEPROM_ADR_VBAT_WARNING, warning_voltage);
-                EEPROM.write(EEPROM_ADR_VBAT_CRITICAL, critical_voltage);
+				EEPROM.write(EEPROM_ADR_VBAT_SCALE, vbat_scale);
+				EEPROM.write(EEPROM_ADR_VBAT_WARNING, warning_voltage);
+				EEPROM.write(EEPROM_ADR_VBAT_CRITICAL, critical_voltage);
 #endif
                 drawScreen.save(state_last_used, channelIndex, pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
                 for (uint8_t loop=0;loop<5;loop++)
@@ -602,9 +618,8 @@ void loop()
 #else
             drawScreen.updateScreenSaver(rssi);
 #endif
-
 #ifdef USE_VOLTAGE_MONITORING
-            read_voltage();
+			read_voltage();
             voltage_alarm();
 
             drawScreen.updateVoltageScreenSaver(voltage, warning_alarm || critical_alarm);
@@ -616,86 +631,88 @@ void loop()
         return;
     }
 #endif
+
 #ifdef USE_VOLTAGE_MONITORING
-    if(state == STATE_VOLTAGE) {
-        // simple menu
-        char menu_id=0;
-        uint8_t in_voltage_menu=1;
-        int editing = -1;
-        do{
-            drawScreen.voltage(menu_id, vbat_scale, warning_voltage, critical_voltage);
-            do {
-                drawScreen.updateVoltage(voltage);
+if(state == STATE_VOLTAGE) {
+	// simple menu
+	char menu_id=0;
+	uint8_t in_voltage_menu=1;
+	int editing = -1;
+	do{
+		drawScreen.voltage(menu_id, vbat_scale, warning_voltage, critical_voltage);
+		do {
+			drawScreen.updateVoltage(voltage);
                 read_voltage();
                 voltage_alarm();
                 //delay(100); // timeout delay
-            }
-            while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next key press
+		}
+		while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next key press
 
-            if(digitalRead(buttonMode) == LOW){
-                if(editing > -1){
-                    // user is done editing
-                    editing = -1;
-                }
-                else if(menu_id < 3)
-                {
-                    editing = menu_id;
-                }
-                else if(menu_id == 3)
-                {
-                    in_menu = 0; // save & exit menu
-                    in_voltage_menu = 0; // save & exit menu
-                    state=STATE_SAVE;
-                    editing = -1;
-                }
-            } else if(digitalRead(buttonDown) == LOW) {
-                switch (editing) {
-                    case 0:
-                        warning_voltage--;
-                        break;
-                    case 1:
-                        critical_voltage--;
-                        break;
-                    case 2:
-                        vbat_scale--;
-                        break;
-                    default:
+		if(digitalRead(buttonMode) == LOW){
+			if(editing > -1){
+				// user is done editing
+				editing = -1;
+			}
+			else if(menu_id < 3)
+			{
+				editing = menu_id;
+			}
+			else if(menu_id == 3)
+			{
+				in_menu = 0; // save & exit menu
+				in_voltage_menu = 0; // save & exit menu
+				state=STATE_SAVE;
+				editing = -1;
+			}
+		}
+		else if(digitalRead(buttonDown) == LOW) {
+			switch (editing) {
+				case 0:
+					warning_voltage--;
+					break;
+				case 1:
+					critical_voltage--;
+					break;
+				case 2:
+					vbat_scale--;
+					break;
+				default:
                         menu_id++;
-                        break;
-                }
-            }
-            else if(digitalRead(buttonUp) == LOW) {
-                switch (editing) {
-                    case 0:
-                        warning_voltage++;
-                        break;
-                    case 1:
-                        critical_voltage++;
-                        break;
-                    case 2:
-                        vbat_scale++;
-                        break;
-                    default:
+					break;
+			}
+		}
+		else if(digitalRead(buttonUp) == LOW) {
+			switch (editing) {
+				case 0:
+					warning_voltage++;
+					break;
+				case 1:
+					critical_voltage++;
+					break;
+				case 2:
+					vbat_scale++;
+					break;
+				default:
                         menu_id--;
-                        break;
-                }
-            }
+					break;
+			}
+		}
 
-            if(menu_id > 3) {
-                menu_id = 0;
-            }
-            if(menu_id < 0) {
-                menu_id = 3;
-            }
-            beep(50); // beep & debounce
-            //delay(KEY_DEBOUNCE); // debounce
-            do{
-                delay(150);// wait for button release
-            }
-            while(editing==-1 && (digitalRead(buttonMode) == LOW || digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW));
-        }
-        while(in_voltage_menu);
-    }
+		if(menu_id > 3) {
+			menu_id = 0;
+		}
+		if(menu_id < 0) {
+			menu_id = 3;
+		}
+		beep(50); // beep & debounce
+		//delay(KEY_DEBOUNCE); // debounce
+		do{
+			delay(150);// wait for button release
+		}
+		while(editing==-1 && (digitalRead(buttonMode) == LOW || digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW));
+	}
+	while(in_voltage_menu);
+}
 #endif
 
 #ifdef USE_DIVERSITY
@@ -703,7 +720,7 @@ void loop()
         // simple menu
         char menu_id=diversity_mode;
         uint8_t in_menu=1;
-        do{
+        do {
             diversity_mode = menu_id;
             drawScreen.diversity(diversity_mode);
             do
@@ -789,7 +806,6 @@ void loop()
             if(!settings_orderby_channel) { // order by frequency
                 channelIndex = pgm_read_byte_near(channelList + channel);
             }
-
         }
 
         // handling for seek mode after screen and RSSI has been fully processed
@@ -844,7 +860,7 @@ void loop()
                 }
                 else {
                     seek_direction = -1;
-                }
+            	}
                 beep(50); // beep & debounce
                 delay(KEY_DEBOUNCE); // debounce
                 force_seek=1;
@@ -962,7 +978,7 @@ void loop()
         in_menu=1;
         drawScreen.setupMenu();
         int editing = -1;
-        do{
+        do {
             in_menu_time_out=80;
             drawScreen.updateSetupMenu(menu_id, settings_beeps, settings_orderby_channel, call_sign, editing);
             while(--in_menu_time_out && ((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH))) // wait for next key press or time out
@@ -1003,18 +1019,17 @@ void loop()
                         state=STATE_RSSI_SETUP;
                         break;
 #ifdef USE_VOLTAGE_MONITORING
-                    case 4:// Change Voltage Settings
-                        in_menu = 0;
-                        state=STATE_VOLTAGE;
-                        break;
-                    case 5:
+					case 4:// Change Voltage Settings
+						in_menu = 0;
+						state=STATE_VOLTAGE;
+						break;
+					case 5:
 #else
-                    case 4:
+					case 4:
 #endif
                         in_menu = 0; // save & exit menu
                         state=STATE_SAVE;
                         break;
-
                 }
             }
             else if(digitalRead(buttonUp) == LOW) {
@@ -1086,7 +1101,7 @@ void loop()
         }
     }
 #ifdef USE_VOLTAGE_MONITORING
-    read_voltage();
+	read_voltage();
     voltage_alarm();
 #endif
 }
@@ -1151,7 +1166,6 @@ uint16_t readRSSI(char receiver)
     for (uint8_t i = 0; i < RSSI_READS; i++)
     {
         rssiA += analogRead(rssiPinA);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
-
 #ifdef USE_DIVERSITY
         rssiB += analogRead(rssiPinB);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
 #endif
@@ -1244,16 +1258,22 @@ uint16_t readRSSI(char receiver)
 
 void setReceiver(uint8_t receiver) {
 #ifdef USE_DIVERSITY
-    if(receiver == useReceiverA)
-    {
-        digitalWrite(receiverB_led, LOW);
-        digitalWrite(receiverA_led, HIGH);
-    }
-    else
-    {
-        digitalWrite(receiverA_led, LOW);
-        digitalWrite(receiverB_led, HIGH);
-    }
+    #ifdef FAST_DIVERSITY_SWITCHING
+        // fast toggle by writing in the port register instead of using arduino library
+        if(receiver != active_receiver)
+            TOGGLE_RECEIVER // defined in settings.h
+    #else
+		if(receiver == useReceiverA)
+		{
+			digitalWrite(receiverB_led, LOW);
+			digitalWrite(receiverA_led, HIGH);
+		}
+		else
+		{
+			digitalWrite(receiverA_led, LOW);
+			digitalWrite(receiverB_led, HIGH);
+		}
+    #endif
 #else
     digitalWrite(receiverA_led, HIGH);
 #endif
@@ -1406,74 +1426,73 @@ void SERIAL_ENABLE_HIGH()
   delayMicroseconds(1);
 }
 
-
 #ifdef USE_VOLTAGE_MONITORING
-void read_voltage()
-{
-    uint16_t v = analogRead(VBAT_PIN);
-    voltages_sum += v;
-    voltages_sum -= voltages[voltage_reading_index];
-    voltages[voltage_reading_index++] = v;
-    voltage_reading_index %= VBAT_SMOOTH;
-#if VBAT_SMOOTH == VBAT_PRESCALER
-    voltage = voltages_sum / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
-#elif VBAT_SMOOTH < VBAT_PRESCALER
-    voltage = (voltages_sum * (VBAT_PRESCALER/VBAT_SMOOTH)) / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
-#else
-    voltage = ((voltages_sum /VBAT_SMOOTH) * VBAT_PRESCALER) / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
-#endif
-    if(voltage <= critical_voltage) {
-        critical_alarm = true;
-        warning_alarm = false;
-    } else if(voltage <= warning_voltage) {
-        warning_alarm = true;
-        critical_alarm = false;
-    } else {
-        critical_alarm = false;
-        warning_alarm = false;
-    }
-}
-void voltage_alarm(){
-    if(millis() > time_last_vbat_alarm + ALARM_EVERY_MSEC){
-        if(critical_alarm){
-            //continue playint the critical alarm
-            if(millis() - CRITICAL_BEEP_EVERY_MSEC > last_beep){
-                //flip the beeper output
-                set_buzzer(beeping);
-                beeping = !beeping;
-                last_beep = millis();
-                beep_times++;
-            }
-            if(beep_times > (CRITICAL_BEEPS*2)) {
-                //stop the beeping if we already beeped enough times
-                clear_alarm();
-                time_last_vbat_alarm = millis();
-            }
-        } else if(warning_alarm) {
-            //continue playint the warning alarm
-            if(millis() - WARNING_BEEP_EVERY_MSEC > last_beep){
-                //flip the beeper output
-                set_buzzer(beeping);
-                beeping = !beeping;
-                last_beep = millis();
-                beep_times++;
-            }
-            if(beep_times > (WARNING_BEEPS*2)) {
-                //stop the beeping if we already beeped enough times
-                clear_alarm();
-                time_last_vbat_alarm = millis();
-            }
-        }
-    }
-}
-void clear_alarm(){
-    //stop alarm sound when we are at menu etc
-    // it might be problematic when were in the middle of a alarm sound
-    set_buzzer(false);
-    beep_times = 0;
-}
-void set_buzzer(boolean value){
-    digitalWrite(led, value);
-    digitalWrite(buzzer, !value);
-}
+	void read_voltage()
+	{
+		uint16_t v = analogRead(VBAT_PIN);
+		voltages_sum += v;
+		voltages_sum -= voltages[voltage_reading_index];
+		voltages[voltage_reading_index++] = v;
+		voltage_reading_index %= VBAT_SMOOTH;
+		#if VBAT_SMOOTH == VBAT_PRESCALER
+		voltage = voltages_sum / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+		#elif VBAT_SMOOTH < VBAT_PRESCALER
+		voltage = (voltages_sum * (VBAT_PRESCALER/VBAT_SMOOTH)) / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+		#else
+		voltage = ((voltages_sum /VBAT_SMOOTH) * VBAT_PRESCALER) / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+		#endif
+		if(voltage <= critical_voltage) {
+			critical_alarm = true;
+			warning_alarm = false;
+		} else if(voltage <= warning_voltage) {
+			warning_alarm = true;
+			critical_alarm = false;
+		} else {
+			critical_alarm = false;
+			warning_alarm = false;
+		}
+	}
+	void voltage_alarm(){
+		if(millis() > time_last_vbat_alarm + ALARM_EVERY_MSEC){
+			if(critical_alarm){
+				//continue playint the critical alarm
+				if(millis() - CRITICAL_BEEP_EVERY_MSEC > last_beep){
+					//flip the beeper output
+					set_buzzer(beeping);
+					beeping = !beeping;
+					last_beep = millis();
+					beep_times++;
+				}
+				if(beep_times > (CRITICAL_BEEPS*2)) {
+					//stop the beeping if we already beeped enough times
+					clear_alarm();
+					time_last_vbat_alarm = millis();
+				}
+			} else if(warning_alarm) {
+				//continue playint the warning alarm
+				if(millis() - WARNING_BEEP_EVERY_MSEC > last_beep){
+					//flip the beeper output
+					set_buzzer(beeping);
+					beeping = !beeping;
+					last_beep = millis();
+					beep_times++;
+				}
+				if(beep_times > (WARNING_BEEPS*2)) {
+					//stop the beeping if we already beeped enough times
+					clear_alarm();
+					time_last_vbat_alarm = millis();
+				}
+			}
+		}
+	}
+	void clear_alarm(){
+		//stop alarm sound when we are at menu etc
+		// it might be problematic when were in the middle of a alarm sound
+		set_buzzer(false);
+		beep_times = 0;
+	}
+	void set_buzzer(boolean value){
+		digitalWrite(led, value);
+		digitalWrite(buzzer, !value);
+	}
 #endif

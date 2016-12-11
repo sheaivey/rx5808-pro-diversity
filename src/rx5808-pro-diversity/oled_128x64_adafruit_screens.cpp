@@ -141,17 +141,17 @@ void screens::drawTitleBox(const char *title) {
 }
 
 void screens::drawBottomTriangle(bool color){
-    //use fillRect instead of fillTriangle
-    display.fillRect(120, 58, 5, 1, color);
-    display.fillRect(121, 59, 3, 1, color);
-    display.fillRect(122, 60, 1, 1, color);
+	//use fillRect instead of fillTriangle
+	display.fillRect(120, 58, 5, 1, color);
+	display.fillRect(121, 59, 3, 1, color);
+	display.fillRect(122, 60, 1, 1, color);
 }
 
 void screens::drawTopTriangle(bool color){
-    //use fillRect instead of fillTriangle
-    display.fillRect(120, 14, 5, 1, color);
-    display.fillRect(121, 13, 3, 1, color);
-    display.fillRect(122, 12, 1, 1, color);
+	//use fillRect instead of fillTriangle
+	display.fillRect(120, 14, 5, 1, color);
+	display.fillRect(121, 13, 3, 1, color);
+	display.fillRect(122, 12, 1, 1, color);
 }
 
 void screens::mainMenu(uint8_t menu_id) {
@@ -209,11 +209,7 @@ void screens::seekMode(uint8_t state) {
     display.drawLine(0, 36, display.width(), 36, WHITE);
     display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
     display.setCursor(2,display.height()-9);
-#ifdef USE_LBAND
-    display.print(PSTR2("5362"));
-#else
-    display.print(PSTR2("5645"));
-#endif
+    display.print(PSTR2("CHANNEL_MIN_FRQ"));
     display.setCursor(55,display.height()-9);
     display.print(PSTR2("5800"));
     display.setCursor(display.width()-25,display.height()-9);
@@ -236,34 +232,27 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
         display.setTextColor(WHITE,BLACK);
         display.setCursor(36,12);
         // show current used channel of bank
-#ifdef USE_LBAND
-        if(channelIndex > 39)
-        {
-            display.print(PSTR2("D/5.3    "));
-        }
-        else if(channelIndex > 31)
-#else
-	if(channelIndex > 31)
+#if defined(USE_9BAND) && defined(USE_LBAND)
+			 if (channelIndex > 71) {            display.print(PSTR2("H 72CH   ")); }
+        else if (channelIndex > 63) {            display.print(PSTR2("L 72CH   ")); }
+        else if (channelIndex > 55) {            display.print(PSTR2("O 72CH   ")); }
+        else if (channelIndex > 47) {            display.print(PSTR2("U 72CH   ")); }
+        else if (channelIndex > 39) {            display.print(PSTR2("D/5.3    ")); }
+        else 
+#elif defined(USE_9BAND)
+			 if (channelIndex > 63) {            display.print(PSTR2("H 72CH   ")); }
+        else if (channelIndex > 55) {            display.print(PSTR2("L 72CH   ")); }
+        else if (channelIndex > 47) {            display.print(PSTR2("O 72CH   ")); }
+        else if (channelIndex > 39) {            display.print(PSTR2("U 72CH   ")); }
+#elif defined(USE_LBAND)
+			 if(channelIndex > 39) {            display.print(PSTR2("D/5.3    ")); }
+        else 
 #endif
-        {
-            display.print(PSTR2("C/Race   "));
-        }
-        else if(channelIndex > 23)
-        {
-            display.print(PSTR2("F/Airwave"));
-        }
-        else if (channelIndex > 15)
-        {
-            display.print(PSTR2("E        "));
-        }
-        else if (channelIndex > 7)
-        {
-            display.print(PSTR2("B        "));
-        }
-        else
-        {
-            display.print(PSTR2("A        "));
-        }
+			 if (channelIndex > 31) {            display.print(PSTR2("C/Race   ")); }
+        else if (channelIndex > 23) {            display.print(PSTR2("F/Airwave")); }
+        else if (channelIndex > 15) {            display.print(PSTR2("E        ")); }
+        else if (channelIndex > 7)  {            display.print(PSTR2("B        ")); }
+        else						{            display.print(PSTR2("A        ")); }
 
         uint8_t active_channel = channelIndex%CHANNEL_BAND_SIZE; // get channel inside band
         for(int i=0;i<8;i++) {
@@ -285,20 +274,30 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     display.fillRect(1, 33, rssi_scaled, 3, WHITE);
 
     rssi_scaled=map(rssi, 1, 100, 1, 14);
-#ifdef USE_LBAND
+#if defined(USE_9BAND) && defined(USE_LBAND)
+    display.fillRect((channel*3)+4,display.height()-12-14,7/5,14-rssi_scaled,BLACK);
+    display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),7/5,rssi_scaled,WHITE);
+#elif defined(USE_9BAND)
+    display.fillRect((channel*3)+4,display.height()-12-14,49/30,14-rssi_scaled,BLACK);
+    display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),49/30,rssi_scaled,WHITE);
+#elif defined(USE_LBAND)
     display.fillRect((channel*3)+4,display.height()-12-14,5/2,14-rssi_scaled,BLACK);
     display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),5/2,rssi_scaled,WHITE);
 #else
     display.fillRect((channel*3)+4,display.height()-12-14,3,14-rssi_scaled,BLACK);
     display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),3,rssi_scaled,WHITE);
-#endif
-
+#endif    
+    
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK) //
     { // SEEK MODE
-
+       
         // Show Scan Position
-#ifdef USE_LBAND
+#if defined(USE_9BAND) && defined(USE_LBAND)
+        display.fillRect((channel*7/5)+4+scan_position,display.height()-12-14,1,14,BLACK);
+#elif defined(USE_9BAND)
+        display.fillRect((channel*49/30)+4+scan_position,display.height()-12-14,1,14,BLACK);
+#elif defined(USE_LBAND)
         display.fillRect((channel*5/2)+4+scan_position,display.height()-12-14,1,14,BLACK);
 #else
         display.fillRect((channel*3)+4+scan_position,display.height()-12-14,1,14,BLACK);
@@ -348,11 +347,7 @@ void screens::bandScanMode(uint8_t state) {
 
     display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
     display.setCursor(2,display.height()-9);
-#ifdef USE_LBAND
-    display.print(PSTR2("5362"));
-#else
-    display.print(PSTR2("5645"));
-#endif
+    display.print(PSTR2("CHANNEL_MIN_FRQ"));
     display.setCursor(55,display.height()-9);
     display.print(PSTR2("5800"));
     display.setCursor(display.width()-25,display.height()-9);
@@ -367,11 +362,21 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     uint16_t hight = (display.height()-12-rssi_scaled);
     if(channel != last_channel) // only updated on changes
     {
-#ifdef USE_LBAND
-        display.fillRect((channel*5/2)+4,display.height()-12-30,5/2,30-rssi_scaled,BLACK);
+#if defined(USE_9BAND) && defined(USE_LBAND)
+     	display.fillRect((channel*7/5)+4,display.height()-12-30,7/5,30-rssi_scaled,BLACK);
+        display.fillRect((channel*7/5)+4,hight,7/5,rssi_scaled,WHITE);
+        // Show Scan Position
+        display.fillRect((channel*7/5)+4+3,display.height()-12-30,1,30,BLACK);	
+#elif defined(USE_9BAND)
+     	display.fillRect((channel*49/30)+4,display.height()-12-30,49/30,30-rssi_scaled,BLACK);
+        display.fillRect((channel*49/30)+4,hight,49/30,rssi_scaled,WHITE);
+        // Show Scan Position
+        display.fillRect((channel*49/30)+4+3,display.height()-12-30,1,30,BLACK);	
+#elif defined(USE_LBAND)
+     	display.fillRect((channel*5/2)+4,display.height()-12-30,5/2,30-rssi_scaled,BLACK);
         display.fillRect((channel*5/2)+4,hight,5/2,rssi_scaled,WHITE);
         // Show Scan Position
-        display.fillRect((channel*5/2)+4+3,display.height()-12-30,1,30,BLACK);
+        display.fillRect((channel*5/2)+4+3,display.height()-12-30,1,30,BLACK);	
 #else
         display.fillRect((channel*3)+4,display.height()-12-30,3,30-rssi_scaled,BLACK);
         display.fillRect((channel*3)+4,hight,3,rssi_scaled,WHITE);
@@ -523,24 +528,23 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
     }
 #endif
 #ifndef USE_VOLTAGE_MONITORING
-    display.display();
+	display.display();
 #endif
 }
 
 #ifdef USE_VOLTAGE_MONITORING
-void screens::updateVoltageScreenSaver(int voltage, bool alarm){
-    if(alarm){
-        display.setTextColor((millis()%250 < 125) ? WHITE : BLACK, BLACK);
-    } else {
-        display.setTextColor(INVERT);
-    }
-    display.setCursor(70,9);
-    display.print((float)voltage/10.0);
-    display.print(PSTR2("V"));
-    display.setTextColor(BLACK);
-    display.display();
-
-}
+	void screens::updateVoltageScreenSaver(int voltage, bool alarm){
+	    if(alarm){
+	        display.setTextColor((millis()%250 < 125) ? WHITE : BLACK, BLACK);
+	    } else {
+	        display.setTextColor(INVERT);
+	    }
+		display.setCursor(70,9);
+		display.print((float)voltage/10.0);
+		display.print(PSTR2("V"));
+		display.setTextColor(BLACK);
+		display.display();
+	}
 #endif
 
 #ifdef USE_DIVERSITY
@@ -604,67 +608,65 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
 }
 #endif
 
+
 #ifdef USE_VOLTAGE_MONITORING
 void screens::voltage(uint8_t menu_id, int voltage_calibration, uint8_t warning_voltage, uint8_t critical_voltage) {
-    reset();
-    drawTitleBox(PSTR2("VOLTAGE ALARM"));
+	reset();
+	drawTitleBox(PSTR2("VOLTAGE ALARM"));
+	display.fillRect(0, 10*menu_id+12, display.width(), 10, WHITE);
 
-    display.fillRect(0, 10*menu_id+12, display.width(), 10, WHITE);
+	display.setTextColor(menu_id == 0 ? BLACK : WHITE);
+	display.setCursor(5,10*1+3);
+	display.print(PSTR2("Warning:"));
+	display.setCursor(80 ,10*1+3);
+	display.print((float)warning_voltage/10.0);
 
-    display.setTextColor(menu_id == 0 ? BLACK : WHITE);
-    display.setCursor(5,10*1+3);
-    display.print(PSTR2("Warning:"));
-    display.setCursor(80 ,10*1+3);
-    display.print((float)warning_voltage/10.0);
+	display.setTextColor(menu_id == 1 ? BLACK : WHITE);
+	display.setCursor(5,10*2+3);
+	display.print(PSTR2("Critical:"));
+	display.setCursor(80 ,10*2+3);
+	display.print((float)critical_voltage/10.0);
 
-    display.setTextColor(menu_id == 1 ? BLACK : WHITE);
-    display.setCursor(5,10*2+3);
-    display.print(PSTR2("Critical:"));
-    display.setCursor(80 ,10*2+3);
-    display.print((float)critical_voltage/10.0);
-
-    display.setTextColor(menu_id == 2 ? BLACK : WHITE);
-    display.setCursor(5,10*3+3);
-    display.print(PSTR2("Calibrate:"));
-    display.setCursor(80 ,10*3+3);
+	display.setTextColor(menu_id == 2 ? BLACK : WHITE);
+	display.setCursor(5,10*3+3);
+	display.print(PSTR2("Calibrate:"));
+	display.setCursor(80 ,10*3+3);
     display.print(voltage_calibration);
 
-    display.setTextColor(menu_id == 3 ? BLACK : WHITE);
-    display.setCursor(5,10*4+3);
-    display.print(PSTR2("Save"));
+	display.setTextColor(menu_id == 3 ? BLACK : WHITE);
+	display.setCursor(5,10*4+3);
+	display.print(PSTR2("Save"));
 
-    display.setTextColor(WHITE);
-    display.setCursor(5,10*5+3);
-    display.print(PSTR2("Measured:"));
+	display.setTextColor(WHITE);
+	display.setCursor(5,10*5+3);
+	display.print(PSTR2("Measured:"));
 
-    display.display();
+	display.display();
 }
 void screens::updateVoltage(int voltage){
-
-    display.fillRect(80, 53, 40, 10, BLACK);
-    display.setTextColor(WHITE);
-    display.setCursor(80 ,10*5+3);
-    //instaed of resetiing the whole display - black out the value
-    display.print((float)voltage/10.0);
-    display.setTextColor(BLACK);
-    display.display();
-
+	display.fillRect(80, 53, 40, 10, BLACK);
+	display.setTextColor(WHITE);
+	display.setCursor(80 ,10*5+3);
+	//instaed of resetiing the whole display - black out the value
+	display.print((float)voltage/10.0);
+	display.setTextColor(BLACK);
+	display.display();
 }
 #endif
 
 void screens::setupMenu(){
 }
 void screens::updateSetupMenu(uint8_t menu_id, bool settings_beeps, bool settings_orderby_channel, const char *call_sign, char editing){
-    reset();
-    drawTitleBox(PSTR2("SETUP MENU"));
-    //selected
-    int selected_position = menu_id % 5;
-    display.fillRect(0, 10*selected_position+12, display.width(), 10, WHITE);
-    if(menu_id < 5){
-        drawBottomTriangle(selected_position == 4 ? BLACK : WHITE);
-        display.setTextColor(selected_position == 0 ? BLACK : WHITE);
-        display.setCursor(5,10*1+3);
-        display.print(PSTR2("ORDER: "));
+	reset();
+	drawTitleBox(PSTR2("SETUP MENU"));
+	//selected
+	int selected_position = menu_id % 5;
+	display.fillRect(0, 10*selected_position+12, display.width(), 10, WHITE);
+	if(menu_id < 5){
+		drawBottomTriangle(selected_position == 4 ? BLACK : WHITE);
+		display.setTextColor(selected_position == 0 ? BLACK : WHITE);
+		display.setCursor(5,10*1+3);
+		display.print(PSTR2("ORDER: "));
         if(settings_orderby_channel) {
             display.print(PSTR2("CHANNEL  "));
         }
@@ -672,9 +674,9 @@ void screens::updateSetupMenu(uint8_t menu_id, bool settings_beeps, bool setting
             display.print(PSTR2("FREQUENCY"));
         }
 
-        display.setTextColor(selected_position == 1 ? BLACK : WHITE);
-        display.setCursor(5,10*2+3);
-        display.print(PSTR2("BEEPS: "));
+		display.setTextColor(selected_position == 1 ? BLACK : WHITE);
+		display.setCursor(5,10*2+3);
+		display.print(PSTR2("BEEPS: "));
         if(settings_beeps) {
             display.print(PSTR2("ON "));
         }
@@ -683,40 +685,40 @@ void screens::updateSetupMenu(uint8_t menu_id, bool settings_beeps, bool setting
         }
 
 
-        display.setTextColor(selected_position == 2 ? BLACK : WHITE);
-        display.setCursor(5,10*3+3);
-        display.print(PSTR2("SIGN : "));
-        if(editing>=0) {
-            display.fillRect(6*6+5, 10*2+13, display.width()-(6*6+6), 8, BLACK);
-            display.fillRect(6*7+6*(editing)+4, 10*2+13, 7, 8, WHITE); //set cursor
-            for(uint8_t i=0; i<10; i++) {
-                display.setTextColor(i == editing ? BLACK : WHITE);
-                display.print(call_sign[i]);
-            }
-        }
+		display.setTextColor(selected_position == 2 ? BLACK : WHITE);
+		display.setCursor(5,10*3+3);
+		display.print(PSTR2("SIGN : "));
+		if(editing>=0) {
+			display.fillRect(6*6+5, 10*2+13, display.width()-(6*6+6), 8, BLACK);
+			display.fillRect(6*7+6*(editing)+4, 10*2+13, 7, 8, WHITE); //set cursor
+			for(uint8_t i=0; i<10; i++) {
+				display.setTextColor(i == editing ? BLACK : WHITE);
+				display.print(call_sign[i]);
+			}
+		}
         else {
             display.print(call_sign);
         }
 
-        display.setTextColor(selected_position == 3 ? BLACK : WHITE);
-        display.setCursor(5,10*4+3);
-        display.print(PSTR2("CALIBRATE RSSI"));
+		display.setTextColor(selected_position == 3 ? BLACK : WHITE);
+		display.setCursor(5,10*4+3);
+		display.print(PSTR2("CALIBRATE RSSI"));
 
 #ifdef USE_VOLTAGE_MONITORING
-        display.setTextColor(selected_position == 4 ? BLACK : WHITE);
-        display.setCursor(5,10*5+3);
-        display.print(PSTR2("VOLTAGE ALARM"));
-    } else {
-        drawTopTriangle(selected_position == 0 ? BLACK : WHITE);
-        display.setTextColor(selected_position == 0 ? BLACK : WHITE);
-        display.setCursor(5,10*1+3);
-        display.print(PSTR2("SAVE & EXIT"));
-    }
+		display.setTextColor(selected_position == 4 ? BLACK : WHITE);
+		display.setCursor(5,10*5+3);
+		display.print(PSTR2("VOLTAGE ALARM"));
+	} else {
+		drawTopTriangle(selected_position == 0 ? BLACK : WHITE);
+		display.setTextColor(selected_position == 0 ? BLACK : WHITE);
+		display.setCursor(5,10*1+3);
+		display.print(PSTR2("SAVE & EXIT"));
+	}
 #else
-        display.setTextColor(selected_position == 4 ? BLACK : WHITE);
-        display.setCursor(5,10*5+3);
-        display.print(PSTR2("SAVE & EXIT"));
-    }
+		display.setTextColor(selected_position == 4 ? BLACK : WHITE);
+		display.setCursor(5,10*5+3);
+		display.print(PSTR2("SAVE & EXIT"));
+	}
 #endif
     display.display();
 }
@@ -746,34 +748,27 @@ void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency
     display.print(PSTR2("BAND:"));
     display.setCursor(38,8*2+4);
     // print band
-#ifdef USE_LBAND
-    if(channelIndex > 39)
-    {
-        display.print(PSTR2("D/5.3    "));
-    }
-    else if(channelIndex > 31)
-#else
-    if(channelIndex > 31)
+#if defined(USE_9BAND) && defined(USE_LBAND)
+		 if (channelIndex > 71) {            display.print(PSTR2("H 72CH   ")); }
+	else if (channelIndex > 63) {            display.print(PSTR2("L 72CH   ")); }
+	else if (channelIndex > 55) {            display.print(PSTR2("O 72CH   ")); }
+	else if (channelIndex > 47) {            display.print(PSTR2("U 72CH   ")); }
+	else if (channelIndex > 39) {            display.print(PSTR2("D/5.3    ")); }
+	else 
+#elif defined(USE_9BAND)
+		 if (channelIndex > 63) {            display.print(PSTR2("H 72CH   ")); }
+	else if (channelIndex > 55) {            display.print(PSTR2("L 72CH   ")); }
+	else if (channelIndex > 47) {            display.print(PSTR2("O 72CH   ")); }
+	else if (channelIndex > 39) {            display.print(PSTR2("U 72CH   ")); }
+#elif defined(USE_LBAND)
+		 if(channelIndex > 39) {            display.print(PSTR2("D/5.3    ")); }
+	else 
 #endif
-    {
-        display.print(PSTR2("C/Race"));
-    }
-    else if(channelIndex > 23)
-    {
-        display.print(PSTR2("F/Airwave"));
-    }
-    else if (channelIndex > 15)
-    {
-        display.print(PSTR2("E"));
-    }
-    else if (channelIndex > 7)
-    {
-        display.print(PSTR2("B"));
-    }
-    else
-    {
-        display.print(PSTR2("A"));
-    }
+		 if (channelIndex > 31) {            display.print(PSTR2("C/Race   ")); }
+	else if (channelIndex > 23) {            display.print(PSTR2("F/Airwave")); }
+	else if (channelIndex > 15) {            display.print(PSTR2("E        ")); }
+	else if (channelIndex > 7)  {            display.print(PSTR2("B        ")); }
+	else						{            display.print(PSTR2("A        ")); }
 
     display.setCursor(5,8*3+4);
     display.print(PSTR2("CHAN:"));
@@ -801,5 +796,6 @@ void screens::updateSave(const char * msg) {
     display.print(msg);
     display.display();
 }
+
 
 #endif

@@ -136,11 +136,7 @@ void screens::seekMode(uint8_t state) {
     TV.draw_line(0,5*TV_Y_GRID-4,TV_X_MAX,5*TV_Y_GRID-4,WHITE);
     // frame for tune graph
     TV.draw_rect(0,TV_ROWS - TV_SCANNER_OFFSET,TV_X_MAX,13,  WHITE); // lower frame
-#ifdef USE_LBAND
-    TV.print(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5362");
-#else
-    TV.print(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5645");
-#endif
+		TV.print(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), "CHANNEL_MIN_FRQ");
     TV.print(57, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5800");
     TV.print(111, (TV_ROWS - TV_SCANNER_OFFSET + 2), "5945");
 
@@ -152,34 +148,28 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     if(channelIndex != last_channel) // only updated on changes
     {
         // show current used channel of bank
-#ifdef USE_LBAND
-        if(channelIndex > 39)
-        {
-            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("D/5.3    "));
-        }
-        else if(channelIndex > 31)
-#else
-        if(channelIndex > 31)
+#if defined(USE_LBAND) && defined(USE_LBAND)
+			 if (channelIndex > 71) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("H 72CH   ")); }
+		else if (channelIndex > 63) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("L 72CH   ")); }
+		else if (channelIndex > 55) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("O 72CH   ")); }
+		else if (channelIndex > 47) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("U 72CH   ")); }
+		else if (channelIndex > 39) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("D/5.3    ")); }
+		else
+#elif defined(USE_LBAND)
+			 if (channelIndex > 63) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("H 72CH   ")); }
+		else if (channelIndex > 55) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("L 72CH   ")); }
+		else if (channelIndex > 47) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("O 72CH   ")); }
+		else if (channelIndex > 39) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("U 72CH   ")); }
+		else
+#elif defined(USE_LBAND)
+			 if (channelIndex > 39) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("D/5.3    ")); }
+		else
 #endif
-        {
-            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("C/Race   "));
-        }
-        else if(channelIndex > 23)
-        {
-            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("F/Airwave"));
-        }
-        else if (channelIndex > 15)
-        {
-            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("E        "));
-        }
-        else if (channelIndex > 7)
-        {
-            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("B        "));
-        }
-        else
-        {
-            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("A        "));
-        }
+			 if (channelIndex > 31) {            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("C/Race   ")); }
+        else if (channelIndex > 23) {            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("F/Airwave")); }
+        else if (channelIndex > 15) {            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("E        ")); }
+        else if (channelIndex > 7)  {            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("B        ")); }
+        else 						{            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("A        ")); }
         // show channel inside band
         uint8_t active_channel = channelIndex%CHANNEL_BAND_SIZE; // get channel inside band
 
@@ -191,13 +181,16 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
         // clear last square
         TV.draw_rect(1, (TV_ROWS - TV_SCANNER_OFFSET + 8),125,SCANNER_MARKER_SIZE,  BLACK, BLACK);
         // draw next
-#ifdef USE_LBAND
-        TV.draw_rect((channel * 5/2)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+		#if defined(USE_9BAND) defined(USE_LBAND)
+			TV.draw_rect((channel * 7/5)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+		#elif defined(USE_9BAND)
+			TV.draw_rect((channel * 49/30)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+		#elif defined(USE_LBAND)
+			TV.draw_rect((channel * 5/2)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+		#else
+			TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+		#endif
 
-#else
-        TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
-
-#endif
         // show frequence
         TV.print(50,TV_Y_OFFSET+3*TV_Y_GRID, channelFrequency);
     }
@@ -211,21 +204,28 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     // print bar for spectrum
 
     #define SCANNER_BAR_MINI_SIZE 14
-
     rssi_scaled=map(rssi, 1, 100, 1, SCANNER_BAR_MINI_SIZE);
-
- 
-#ifdef USE_LBAND
-    // clear last bar
-    TV.draw_rect((channel * 5/2)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
-    //  draw new bar
-    TV.draw_rect((channel * 5/2)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
-#else
-   // clear last bar
-    TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
-    //  draw new bar
-    TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
-#endif
+	#if defined(USE_9BAND) && defined(USE_LBAND)
+		// clear last bar
+		TV.draw_rect((channel * 7/5)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
+		//  draw new bar
+		TV.draw_rect((channel * 7/5)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
+	#elif defined(USE_9BAND)
+		// clear last bar
+		TV.draw_rect((channel * 49/30)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
+		//  draw new bar
+		TV.draw_rect((channel * 49/30)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
+	#elif defined(USE_LBAND)
+		// clear last bar
+		TV.draw_rect((channel * 5/2)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
+		//  draw new bar
+		TV.draw_rect((channel * 5/2)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
+	#else
+		// clear last bar
+		TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
+		//  draw new bar
+		TV.draw_rect((channel * 3)+4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled), 2, rssi_scaled , WHITE, WHITE);
+	#endif
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK)
     { // SEEK MODE
@@ -279,11 +279,7 @@ void screens::bandScanMode(uint8_t state) {
     TV.draw_rect(0,1*TV_Y_GRID,TV_X_MAX,9,  WHITE); // list frame
     TV.draw_rect(0,TV_ROWS - TV_SCANNER_OFFSET,TV_X_MAX,13,  WHITE); // lower frame
     TV.select_font(font4x6);
-#ifdef USE_LBAND
-    TV.printPGM(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), PSTR("5362"));
-#else
-    TV.printPGM(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), PSTR("5645"));
-#endif
+	TV.printPGM(2, (TV_ROWS - TV_SCANNER_OFFSET + 2), PSTR("CHANNEL_MIN_FRQ"));
     TV.printPGM(57, (TV_ROWS - TV_SCANNER_OFFSET + 2), PSTR("5800"));
     TV.printPGM(111, (TV_ROWS - TV_SCANNER_OFFSET + 2), PSTR("5945"));
 }
@@ -296,13 +292,19 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     {
         // clear last square
         TV.draw_rect(1, (TV_ROWS - TV_SCANNER_OFFSET + 8),125,SCANNER_MARKER_SIZE,  BLACK, BLACK);
-#ifdef USE_LBAND
-        // draw next
-        TV.draw_rect((channel * 5/2)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
-#else
-        // draw next
-        TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
-#endif
+		#if defined(USE_9BAND) && defined(USE_LBAND)
+			// draw next
+			TV.draw_rect((channel * 7/5)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+		#elif defined(USE_9BAND)
+			// draw next
+			TV.draw_rect((channel * 49/30)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+		#elif defined(USE_LBAND)
+			// draw next
+			TV.draw_rect((channel * 5/2)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+		#else
+			// draw next
+			TV.draw_rect((channel * 3)+5, (TV_ROWS - TV_SCANNER_OFFSET + 8),SCANNER_MARKER_SIZE,SCANNER_MARKER_SIZE,  WHITE, WHITE);
+		#endif
     }
     // print bar for spectrum
 
@@ -423,25 +425,24 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
 #endif
 
 #ifdef USE_VOLTAGE_MONITORING
-void screens::voltage(uint8_t menu_id, int voltage_calibration, uint8_t warning_voltage, uint8_t critical_voltage) {
-    reset();
-    drawTitleBox(PSTR("VOLTAGE ALARM"));
-    TV.printPGM(5, 5+1*MENU_Y_SIZE, PSTR("Warning"));
-    TV.print(5+(11*8), 5+1*MENU_Y_SIZE, (float)warning_voltage/10.0, 1);
-    TV.printPGM(5, 5+2*MENU_Y_SIZE, PSTR("Critical"));
-    TV.print(5+(11*8), 5+2*MENU_Y_SIZE, (float)critical_voltage/10.0, 1);
-    TV.printPGM(5, 5+3*MENU_Y_SIZE, PSTR("Calibrate"));
-    TV.print(5+(11*8), 5+3*MENU_Y_SIZE, voltage_calibration, 10);
-    TV.printPGM(5, 5+4*MENU_Y_SIZE, PSTR("Save"));
+	void screens::voltage(uint8_t menu_id, int voltage_calibration, uint8_t warning_voltage, uint8_t critical_voltage) {
+		reset();
+		drawTitleBox(PSTR("VOLTAGE ALARM"));
+		TV.printPGM(5, 5+1*MENU_Y_SIZE, PSTR("Warning"));
+		TV.print(5+(11*8), 5+1*MENU_Y_SIZE, (float)warning_voltage/10.0, 1);
+		TV.printPGM(5, 5+2*MENU_Y_SIZE, PSTR("Critical"));
+		TV.print(5+(11*8), 5+2*MENU_Y_SIZE, (float)critical_voltage/10.0, 1);
+		TV.printPGM(5, 5+3*MENU_Y_SIZE, PSTR("Calibrate"));
+		TV.print(5+(11*8), 5+3*MENU_Y_SIZE, voltage_calibration, 10);
+		TV.printPGM(5, 5+4*MENU_Y_SIZE, PSTR("Save"));
+		
+		TV.draw_rect(0,3+(menu_id+1)*MENU_Y_SIZE,127,12,  WHITE, INVERT);
+	}
+	void screens::updateVoltage(int voltage){
 
-    TV.draw_rect(0,3+(menu_id+1)*MENU_Y_SIZE,127,12,  WHITE, INVERT);
-}
-void screens::updateVoltage(int voltage){
-
-    TV.printPGM(5, 10+5*MENU_Y_SIZE, PSTR("Measured"));
-    TV.print(5+(11*8), 10+5*MENU_Y_SIZE, (float)voltage/10, 1);
-
-}
+		TV.printPGM(5, 10+5*MENU_Y_SIZE, PSTR("Measured"));
+		TV.print(5+(11*8), 10+5*MENU_Y_SIZE, (float)voltage/10, 1);
+	}
 #endif
 
 void screens::setupMenu(){
@@ -469,6 +470,7 @@ void screens::updateSetupMenu(uint8_t menu_id,bool settings_beeps,bool settings_
 
 
 /* NO NEED FOR CALL SIGN IN TVOUT MODE
+*/
     TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("SIGN : "));
     if(editing>=0) {
         for(uint8_t i=0; i<10; i++) {
@@ -481,17 +483,16 @@ void screens::updateSetupMenu(uint8_t menu_id,bool settings_beeps,bool settings_
     else {
         TV.print(5+(6*8), 5+3*MENU_Y_SIZE, call_sign);
     }
-*/
 
     TV.printPGM(5, 5+4*MENU_Y_SIZE, PSTR("CALIBRATE RSSI"));
-#ifdef USE_VOLTAGE_MONITORING
-    TV.printPGM(5, 5+5*MENU_Y_SIZE, PSTR("VOLTAGE ALARM"));
 
-    TV.printPGM(5, 5+6*MENU_Y_SIZE, PSTR("SAVE & EXIT"));
-#else
-    TV.printPGM(5, 5+5*MENU_Y_SIZE, PSTR("SAVE & EXIT"));
-#endif
 
+	#ifdef USE_VOLTAGE_MONITORING
+		TV.printPGM(5, 5+5*MENU_Y_SIZE, PSTR("VOLTAGE ALARM"));
+		TV.printPGM(5, 5+6*MENU_Y_SIZE, PSTR("SAVE & EXIT"));
+	#else
+		TV.printPGM(5, 5+5*MENU_Y_SIZE, PSTR("SAVE & EXIT"));
+	#endif
     TV.draw_rect(0,3+(menu_id+1)*MENU_Y_SIZE,127,12,  WHITE, INVERT);
 }
 
@@ -513,30 +514,28 @@ void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency
     }
     TV.printPGM(10, 5+2*MENU_Y_SIZE, PSTR("Band:"));
     // print band
-    if(channelIndex > 39)
-    {
-        TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("D/5.3    "));
-    }
-    else if(channelIndex > 31)
-    {
-        TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("C/Race   "));
-    }
-    else if(channelIndex > 23)
-    {
-        TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("F/Airwave"));
-    }
-    else if (channelIndex > 15)
-    {
-        TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("E        "));
-    }
-    else if (channelIndex > 7)
-    {
-        TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("B        "));
-    }
-    else
-    {
-        TV.printPGM(50,5+2*MENU_Y_SIZE,  PSTR("A        "));
-    }
+#if defined(USE_LBAND) && defined(USE_LBAND)
+		 if (channelIndex > 71) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("H 72CH   ")); }
+	else if (channelIndex > 63) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("L 72CH   ")); }
+	else if (channelIndex > 55) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("O 72CH   ")); }
+	else if (channelIndex > 47) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("U 72CH   ")); }
+	else if (channelIndex > 39) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("D/5.3    ")); }
+	else
+#elif defined(USE_LBAND)
+		 if (channelIndex > 63) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("H 72CH   ")); }
+	else if (channelIndex > 55) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("L 72CH   ")); }
+	else if (channelIndex > 47) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("O 72CH   ")); }
+	else if (channelIndex > 39) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("U 72CH   ")); }
+	else
+#elif defined(USE_LBAND)
+		 if (channelIndex > 39) {			TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("D/5.3    ")); }
+	else
+#endif
+		 if (channelIndex > 31) {            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("C/Race   ")); }
+	else if (channelIndex > 23) {            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("F/Airwave")); }
+	else if (channelIndex > 15) {            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("E        ")); }
+	else if (channelIndex > 7)  {            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("B        ")); }
+	else 						{            TV.printPGM(50,TV_Y_OFFSET+1*TV_Y_GRID,  PSTR("A        ")); }
     TV.printPGM(10, 5+3*MENU_Y_SIZE, PSTR("Chan:"));
     uint8_t active_channel = channelIndex%CHANNEL_BAND_SIZE+1; // get channel inside band
     TV.print(50,5+3*MENU_Y_SIZE,active_channel,DEC);
@@ -549,6 +548,5 @@ void screens::updateSave(const char * msg) {
     TV.select_font(font4x6);
     TV.print(((127-strlen(msg)*4)/2), 14+5*MENU_Y_SIZE, msg);
 }
-
 
 #endif

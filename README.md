@@ -1,5 +1,3 @@
-Manufactured version of this project can be found at [La Forge FPV](www.laforgefpv.com)
-
 #Introduction
 The main goal of this project is to add diversity to an already amazing feature set. Please see the following video for a quick intro of the project.
 
@@ -41,7 +39,6 @@ Donations help show the developer your appreciation for all their hard work. A l
 - *(NEW)* **Backward Compatibility** - Use this code with your existing setup.
 - *(NEW)* **OLED Version** - Use a 128x64 OLED Display instead of TV_OUT.
 - *(NEW)* **Setup Menu** - Creating menu for toggling settings.
-- *(NEW)* **Voltage Alarm** - you can now use the built in buzzer for monitoring voltage
 - *(REMOVED)* ~~**DIP mode** - Set channel by extern DIP switch~~
 
 ##Usage
@@ -59,8 +56,7 @@ Donations help show the developer your appreciation for all their hard work. A l
     2. **BEEPS** - Turn beeps on or off.
     3. **SIGN** - Edit your call sign. ( OLED Only )
     4. **Calibrate RSSI** - Calibrate the min and max RSSI values.
-    5. **Voltage Alarm** - Change the warning/alarm voltage and calibration value.
-    6. **Save & Exit**
+    5. **Save & Exit**
 
 ####Initial Setup
 When powering on for the first time it is best to calibrate your RSSI modules. No two modules have the same RSSI min and max readings. To calibrate follow these steps below. You can repeat this process as many times as needed.
@@ -87,7 +83,6 @@ For more information on specific hardware implementations:
 2. [DIY Advanced - Custom Board](/docs/diy-custom-board.md)
 1. [OLED Version - Arduino Nano](/docs/oled-arduino-nano.md)
 3. [rx5808 SPI modification](/docs/rx5808-spi-mod.md)
-6. [Voltage Monitoring](/docs/voltage-monitoring.md)
 
 ##Software
 The major software changes are centered around the diversity menu. This required removing the dip switch mode from the origional project. Within the diversity menu you will find RSSI signal strength for each receiver and the ability to select which mode the receivers are operating in (Auto, Receiver A, Receiver B).
@@ -132,7 +127,7 @@ Please follow [CONTRIBUTING.md](CONTRIBUTING.md) for standard practices regardin
 ####Recognition
 - SPI driver based on fs_skyrf_58g-main.c Written by Simon Chambers
 - TVOUT by Myles Metzel
-- Scanner by Johann Hermen (der-Frickler.net)
+- Scanner by Johan Hermen
 - Initial 2 Button version by Peter (pete1990)
 - Refactored and GUI reworked by Marko Hoepken
 - Universal version my Marko Hoepken
@@ -141,7 +136,6 @@ Please follow [CONTRIBUTING.md](CONTRIBUTING.md) for standard practices regardin
 - Separating Display concerns for TVOut and OLED by Shea Ivey
 - Adding Setup Menu by Shea Ivey
 - DIY Throughole board and documentation. by RCDaddy
-- Voltage monitoring by kabturek
 
 ####License
 The MIT License (MIT)

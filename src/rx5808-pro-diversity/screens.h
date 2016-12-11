@@ -75,11 +75,11 @@ class screens
         // DIVERSITY
         void diversity(uint8_t diversity_mode);
         void updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB);
-
-        // VOLTAGE MENU
+		
+		// VOLTAGE MENU
 #ifdef USE_VOLTAGE_MONITORING
-        void voltage(uint8_t menu_id, int voltage_calibration, uint8_t warning_voltage, uint8_t critical_voltage);
-        void updateVoltage(int voltage);
+		void voltage(uint8_t menu_id, int voltage_calibration, uint8_t warning_voltage, uint8_t critical_voltage);
+		void updateVoltage(int voltage);
 #endif
 
         // SETUP MENU
@@ -89,5 +89,18 @@ class screens
         // SAVE
         void save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency, const char *call_sign);
         void updateSave(const char *msg);
+/*		
+    // GENERAL
+		const char nameFrq(int channelIndex) {
+#ifdef USE_LBAND
+				 if(channelIndex > 39) {	return "D/5.3    "; } else 
+#endif
+				 if(channelIndex > 31) {	return "C/Race";    }
+			else if(channelIndex > 23) {	return "F/Airwave"; }
+			else if (channelIndex > 15) {	return "E";     }
+			else if (channelIndex > 7) {	return "B";     }
+			else {							return "A";     }
+		}
+*/
 };
 #endif

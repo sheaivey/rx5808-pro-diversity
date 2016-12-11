@@ -49,7 +49,7 @@ screens::screens() {
 }
 
 
-char screens::begin() {
+char screens::begin(const char *call_sign) {
     return 0;
 }
 
@@ -112,7 +112,7 @@ void screens::seekMode(uint8_t state) {
     reset(); // start from fresh screen.
 }
 
-void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, bool locked) {
+void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, uint8_t rssi_seek_threshold, bool locked) {
 
     last_channel = channel;
 }
@@ -131,14 +131,15 @@ void screens::bandScanMode(uint8_t state) {
 }
 
 void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, uint8_t channelName, uint16_t channelFrequency, uint16_t rssi_setup_min_a, uint16_t rssi_setup_max_a) {
+    #define SCANNER_LIST_X_POS 60
     static uint8_t writePos=SCANNER_LIST_X_POS;
     last_channel = channel;
 }
 
-void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency) {
-    screenSaver(-1, channelName, channelFrequency);
+void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency, const char *call_sign) {
+    screenSaver(-1, channelName, channelFrequency, call_sign);
 }
-void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency) {
+void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency, const char *call_sign) {
 
 }
 
@@ -158,8 +159,10 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
 
 }
 #endif
+void screens::setupMenu(){
+}
 
-void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency) {
+void screens::save(uint8_t mode, uint8_t channelIndex, uint16_t channelFrequency,const char *call_sign) {
     reset();
     drawTitleBox("SAVE SETTINGS");
 }

@@ -26,17 +26,15 @@ SOFTWARE.
 
 #ifndef settings_h
 #define settings_h
+#include <avr/pgmspace.h>
 
 // Choose the display you will be using
 // you will also have to uncomment the includes in the main project.
-//#define TVOUT_SCREENS
-#define OLED_128x64_ADAFRUIT_SCREENS
+#define TVOUT_SCREENS
+//#define OLED_128x64_ADAFRUIT_SCREENS
 
 // use the library from https://github.com/badzz/Adafruit_SH1106 before enabling
 //#define SH1106
-
-// u8glib has performance issues.
-//#define OLED_128x64_U8G_SCREENS
 
 // this will be displayed on the screensaver.
 // Up to 10 letters
@@ -46,13 +44,22 @@ SOFTWARE.
 #define USE_DIVERSITY
 #define USE_IR_EMITTER
 //#define USE_FLIP_SCREEN
-#define USE_BOOT_LOGO
+//#define USE_BOOT_LOGO
+
 // You can use any of the arduino analog pins to measure the voltage of the battery
 //#define USE_VOLTAGE_MONITORING
-// Choose if you wish to use 8 additional Channels
+
+// Choose if you wish to use 8 additional Channels 
 // 5362 MHz 5399 MHz 5436 MHz 5473 MHz 5510 MHz 5547 MHz 5584 MHz 5621 MHz
 // Local laws may prohibit the use of these frequencies use at your own risk!
-//#define USE_LBAND
+#define USE_LBAND
+//#define USE_9BAND
+
+// Switch the receivers faster - uses direct port manipulations instead of using arduino helper functions.
+// WARNING You can safely enable this only when using A0 and A1 for receivers
+// for other pins you have to supply your own TOGGLE_RECEIVER macro below (its written for the default pins - A0 and A1) and
+// the two pins have to be on the same atmega PORT
+#define FAST_DIVERSITY_SWITCHING
 
 // Receiver Module version
 // used for tuning time
@@ -86,32 +93,32 @@ SOFTWARE.
 #endif
 
 #ifdef USE_VOLTAGE_MONITORING
-    // Voltage monitoring
-    // you can use any arduino analog input to measure battery voltage
-    // keep in mind that A4 and A5 is used by OLED and A6 and A7 are used for measuring RSSI
-    // use a voltage divider to lower the voltage to max 5V - values for max  13V (3s)
-    // You can use a 100nF capacitor near the arduino pin to smooth the voltage
-    //
-    //           R1 = 5.6k
-    //    BAT+ ----====----+----+---- ARDUINO ANALOG PIN
-    //                     |    |
-    //                     |    |  (optional)
-    //                     |    || 100n CAP
-    //                     |    |
-    //           R2 = 3.3k |    |
-    //    BAT- ----====----|----|
+	// Voltage monitoring
+	// you can use any arduino analog input to measure battery voltage
+	// keep in mind that A4 and A5 is used by OLED and A6 and A7 are used for measuring RSSI
+	// use a voltage divider to lower the voltage to max 5V - values for max  13V (3s)
+	// You can use a 100nF capacitor near the arduino pin to smooth the voltage
+	//
+	//           R1 = 5.6k
+	//    BAT+ ----====----+----+---- ARDUINO ANALOG PIN
+	//                     |    |
+	//                     |    |  (optional)
+	//                     |    || 100n CAP
+	//                     |    |
+	//           R2 = 3.3k |    |
+	//    BAT- ----====----|----|
 
-    #ifdef TVOUT_SCREENS
-        #define VBAT_PIN A4
-    #else
+	#ifdef TVOUT_SCREENS
+		#define VBAT_PIN A4
+	#else
         #define VBAT_PIN A2
-    #endif
+	#endif
 
-    // these are default values
-    #define WARNING_VOLTAGE 108 // 3.6V per cell for 3S
-    #define CRITICAL_VOLTAGE 100 // 3.3V per cell for 3S
-    #define VBAT_SCALE 119
-    #define VBAT_OFFSET 0
+	// these are default values
+	#define WARNING_VOLTAGE 108 // 3.6V per cell for 3S
+	#define CRITICAL_VOLTAGE 100 // 3.3V per cell for 3S
+	#define VBAT_SCALE 119
+	#define VBAT_OFFSET 0
     // alarm sounds - by default every 5 seconds an alarm is turned on
     // for critical alarm its 3 long beeps
     // for warning its 2 short beeps
@@ -120,6 +127,13 @@ SOFTWARE.
     #define CRITICAL_BEEPS 3
     #define WARNING_BEEP_EVERY_MSEC 200
     #define WARNING_BEEPS 2
+#endif
+
+#ifdef FAST_DIVERSITY_SWITCHING
+	// see https://www.arduino.cc/en/Reference/PortManipulation
+	// PORTC means analog ports (PORTD is arduino 0-7, PORTB is 8-13)
+	// PC0 is the current value of A0 (receiver A) PC1 is value of A1 (receiver B)
+	#define TOGGLE_RECEIVER PORTC ^= (1 << PC0)|(1 << PC1);
 #endif
 
 // this two are minimum required
@@ -168,17 +182,29 @@ SOFTWARE.
 #define START_STATE STATE_SEEK
 #define MAX_STATE STATE_MANUAL
 #ifdef USE_VOLTAGE_MONITORING
-    #define SETUP_MENU_MAX_ITEMS 5
+	#define SETUP_MENU_MAX_ITEMS 5
 #else
-    #define SETUP_MENU_MAX_ITEMS 4
+	#define SETUP_MENU_MAX_ITEMS 4
 #endif
 
 #define CHANNEL_BAND_SIZE 8
 #define CHANNEL_MIN_INDEX 0
-#ifdef USE_LBAND
-    #define CHANNEL_MAX_INDEX 47
+#if defined(USE_9BAND) &&  defined( USE_LBAND)
+	#define CHANNEL_MAX_INDEX 79
+	#define CHANNEL_MAX 679
+	#define CHANNEL_MIN_FRQ 5325
+#elif defined(USE_9BAND)
+	#define CHANNEL_MAX_INDEX 63
+	#define CHANNEL_MAX 63
+	#define CHANNEL_MIN_FRQ 5325
+#elif defined( USE_LBAND)
+	#define CHANNEL_MAX_INDEX 47
+	#define CHANNEL_MAX 47
+	#define CHANNEL_MIN_FRQ 5362
 #else
     #define CHANNEL_MAX_INDEX 39
+    #define CHANNEL_MAX 39
+	#define CHANNEL_MIN_FRQ 5645
 #endif
 
 #ifdef rx5808
@@ -192,11 +218,6 @@ SOFTWARE.
     #define MIN_TUNE_TIME 35
 #endif
 
-#ifdef USE_LBAND
-    #define CHANNEL_MAX 47
-#else
-    #define CHANNEL_MAX 39
-#endif
 #define CHANNEL_MIN 0
 
 #define EEPROM_ADR_STATE 0
@@ -220,13 +241,11 @@ SOFTWARE.
 
 #define EEPROM_ADR_BEEP 11
 #define EEPROM_ADR_ORDERBY 12
-
-#ifdef USE_VOLTAGE_MONITORING
-    #define EEPROM_ADR_VBAT_SCALE 13
-    #define EEPROM_ADR_VBAT_WARNING 14
-    #define EEPROM_ADR_VBAT_CRITICAL 15
-#endif
-
 #define EEPROM_ADR_CALLSIGN 20
+#ifdef USE_VOLTAGE_MONITORING
+	#define EEPROM_ADR_VBAT_SCALE 13
+	#define EEPROM_ADR_VBAT_WARNING 14
+	#define EEPROM_ADR_VBAT_CRITICAL 15
+#endif
 
 #endif // file_defined
