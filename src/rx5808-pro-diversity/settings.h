@@ -115,6 +115,10 @@ SOFTWARE.
     #endif
 #endif
 
+#ifdef OLED_128x64_ADAFRUIT_SCREENS
+    #define OLED_RESET 4
+#endif
+
 // === Diversity ===============================================================
 
 #ifdef USE_DIVERSITY

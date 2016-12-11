@@ -60,7 +60,6 @@ char *PSTRtoBuffer_P(PGM_P str) {
     return PSTR2_BUFFER;
 }
 
-#define OLED_RESET 4
 #ifdef SH1106
 	Adafruit_SH1106 display(OLED_RESET);
 	#if !defined SH1106_128_64
