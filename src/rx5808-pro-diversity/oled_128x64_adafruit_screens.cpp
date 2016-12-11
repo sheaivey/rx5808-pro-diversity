@@ -80,12 +80,10 @@ screens::screens() {
 }
 
 char screens::begin(const char *call_sign) {
-    // Set the address of your OLED Display.
-    // 128x64 ONLY!!
 #ifdef SH1106
-    display.begin(SH1106_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D or 0x3C (for the 128x64)
+    display.begin(SH1106_SWITCHCAPVCC, OLED_ADDRESS);
 #else
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D or 0x3C (for the 128x64)
+    display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDRESS);
 #endif
 
 

@@ -30,7 +30,8 @@ SOFTWARE.
 
 // === Display Module ==========================================================
 //
-// You can choose one only.
+// You can choose one display module only. Only 128x64 OLED displays are
+// supported.
 //
 // =============================================================================
 
@@ -42,6 +43,10 @@ SOFTWARE.
 
 // Enable this if your screen is upside down.
 //#define USE_FLIP_SCREEN
+
+#ifdef OLED_128x64_ADAFRUIT_SCREENS
+    #define OLED_ADDRESS 0x3C // I2C address for display (0x3C or 0x3D, usually)
+#endif
 
 // === Receiver Module =========================================================
 //
