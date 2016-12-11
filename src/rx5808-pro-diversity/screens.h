@@ -27,8 +27,7 @@ SOFTWARE.
 #ifndef SCREENS_H
 #define SCREENS_H
 
-
-#include <avr/pgmspace.h>
+#include <stdint.h>
 
 //Each screen has the following
 // public entry method

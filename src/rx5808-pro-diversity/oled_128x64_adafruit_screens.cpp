@@ -46,29 +46,7 @@ SOFTWARE.
 #include <Adafruit_GFX.h>
 #include <Wire.h>
 #include <SPI.h>
-
-// Modified PSTR that pushes string into a char* buffer for easy use.
-//
-// There is only one buffer so this will cause problems if you need to pass two
-// strings to one function.
-#define PSTR2(x) PSTRtoBuffer_P(PSTR(x))
-#define PSTR2_BUFFER_SIZE 16 // May need adjusted depending on your needs.
-
-char PSTR2_BUFFER[PSTR2_BUFFER_SIZE];
-char *PSTRtoBuffer_P(PGM_P str) { 
-    uint8_t i = 0;
-    
-    for (
-        uint8_t c = '\0';
-        c = pgm_read_byte(str + i) && i < sizeof(PSTR2_BUFFER); 
-        i++
-    ) {
-        PSTR2_BUFFER[i] = pgm_read_byte(str + i);
-    }
-    
-    PSTR2_BUFFER[i] = '\0'; // Loop drops early so add in finishing terminator.
-    return PSTR2_BUFFER;
-}
+#include "pstr_helper.h"
 
 OLED_CLASS display;
 
