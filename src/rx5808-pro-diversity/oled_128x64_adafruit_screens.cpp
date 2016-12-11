@@ -43,7 +43,6 @@ SOFTWARE.
 	#endif
 #endif
 
-#include <Adafruit_GFX.h>
 #include <Wire.h>
 #include <SPI.h>
 #include "pstr_helper.h"
