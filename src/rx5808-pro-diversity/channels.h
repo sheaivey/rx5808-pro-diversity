@@ -1,5 +1,5 @@
-#ifndef __channels_h
-#define __channels_h
+#ifndef CHANNELS_H
+#define CHANNELS_H
 
 
 // Channels to sent to the SPI registers

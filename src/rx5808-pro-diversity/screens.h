@@ -24,8 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef display_h
-#define display_h
+#ifndef SCREENS_H
+#define SCREENS_H
 
 
 #include <avr/pgmspace.h>

@@ -24,8 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __internal_settings_h
-#define __internal_settings_h
+#ifndef INTERNAL_SETTINGS_H
+#define INTERNAL_SETTINGS_H
 
 
 #include "settings.h"
