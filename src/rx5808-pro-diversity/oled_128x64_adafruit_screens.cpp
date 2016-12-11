@@ -29,8 +29,6 @@ SOFTWARE.
 
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
 
-#include "screens.h" // function headers
-
 #ifdef SH1106
 	#include <Adafruit_SH1106.h>
     #ifndef SH1106_128_64
@@ -43,10 +41,11 @@ SOFTWARE.
 	#endif
 #endif
 
-
+#include "screens.h"
 #include "pstr_helper.h"
 
 OLED_CLASS display;
+char scan_position = 3;
 
 screens::screens() {
     last_channel = -1;
@@ -209,8 +208,6 @@ void screens::seekMode(uint8_t state) {
     display.print(PSTR2("5945"));
     display.display();
 }
-
-char scan_position = 3;
 
 void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, uint8_t rssi_seek_threshold, bool locked) {
     // display refresh handler
