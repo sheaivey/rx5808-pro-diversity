@@ -24,8 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __settings_h
-#define __settings_h
+#ifndef settings_h
+#define settings_h
 
 
 // === Display Module ==========================================================
