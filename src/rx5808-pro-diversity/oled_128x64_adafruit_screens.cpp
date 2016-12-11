@@ -129,14 +129,16 @@ void screens::drawTitleBox(const char *title) {
 }
 
 void screens::drawBottomTriangle(bool color){
-    //use fillRect instead of fillTriangle
+    // Use fillRect instead of fillTriangle as triangle is only 3px high and
+    // fillTriangle is extremely heavy.
     display.fillRect(120, 58, 5, 1, color);
     display.fillRect(121, 59, 3, 1, color);
     display.fillRect(122, 60, 1, 1, color);
 }
 
 void screens::drawTopTriangle(bool color){
-    //use fillRect instead of fillTriangle
+    // Use fillRect instead of fillTriangle as triangle is only 3px high and
+    // fillTriangle is extremely heavy.
     display.fillRect(120, 14, 5, 1, color);
     display.fillRect(121, 13, 3, 1, color);
     display.fillRect(122, 12, 1, 1, color);
