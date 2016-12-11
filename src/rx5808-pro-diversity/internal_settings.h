@@ -73,38 +73,8 @@ SOFTWARE.
 
 // === EEPROM ==================================================================
 
-#define EEPROM_MAGIC 0x1337
-
-#define EEPROM_ADR_MAGIC_L 0
-#define EEPROM_ADR_MAGIC_H 1
-#define EEPROM_ADR_STATE 2
-#define EEPROM_ADR_TUNE 3
-#define EEPROM_ADR_RSSI_MIN_A_L 4
-#define EEPROM_ADR_RSSI_MIN_A_H 5
-#define EEPROM_ADR_RSSI_MAX_A_L 6
-#define EEPROM_ADR_RSSI_MAX_A_H 7
-#ifdef USE_DIVERSITY
-    #define EEPROM_ADR_DIVERSITY 8
-    #define EEPROM_ADR_RSSI_MIN_B_L 9
-    #define EEPROM_ADR_RSSI_MIN_B_H 10
-    #define EEPROM_ADR_RSSI_MAX_B_L 11
-    #define EEPROM_ADR_RSSI_MAX_B_H 12
-
-    // Used to figure out if diversity module has been plugged in.
-    // When RSSI is plugged in the min value is around 90.
-    // When RSSI is not plugged in the min value is 0.
-    #define isDiversity() (analogRead(PIN_RSSI_B) >= 5)
-#endif
-
-#define EEPROM_ADR_BEEP 13
-#define EEPROM_ADR_ORDERBY 14
-#define EEPROM_ADR_CALLSIGN 20
-
-#ifdef USE_VOLTAGE_MONITORING
-    #define EEPROM_ADR_VBAT_SCALE 15
-    #define EEPROM_ADR_VBAT_WARNING 16
-    #define EEPROM_ADR_VBAT_CRITICAL 17
-#endif
+// This should be incremented after every EEPROM change.
+#define EEPROM_MAGIC 0x00000001
 
 // === Receiver Modules =========================================================
 
@@ -139,6 +109,13 @@ SOFTWARE.
 #ifdef USE_VOLTAGE_MONITORING
     #define VBAT_SMOOTH 8
     #define VBAT_PRESCALER 16
+#endif
+
+#ifdef USE_DIVERSITY
+    // Used to figure out if diversity module has been plugged in.
+    // When RSSI is plugged in the min value is around 90.
+    // When RSSI is not plugged in the min value is 0.
+    #define isDiversity() (analogRead(PIN_RSSI_B) >= 5)
 #endif
 
 #endif // file_defined

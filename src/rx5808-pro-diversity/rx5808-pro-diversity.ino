@@ -33,10 +33,11 @@ SOFTWARE.
 */
 
 #include <avr/pgmspace.h>
-#include <EEPROM.h>
 
 #include "settings.h"
 #include "internal_settings.h"
+#include "eeprom_settings.h"
+
 #include "screens.h"
 #include "channels.h"
 
@@ -99,50 +100,6 @@ char call_sign[10];
 bool settings_beeps = true;
 bool settings_orderby_channel = true;
 
-void setEEPROMDefaults() {
-    // Check for "magic" EEPROM values to check if data is already valid.
-    uint16_t magic = word(
-        EEPROM.read(EEPROM_ADR_MAGIC_H),
-        EEPROM.read(EEPROM_ADR_MAGIC_L));
-    if (magic == EEPROM_MAGIC)
-        return;
-
-    EEPROM.write(EEPROM_ADR_MAGIC_L, lowByte(EEPROM_MAGIC));
-    EEPROM.write(EEPROM_ADR_MAGIC_H, highByte(EEPROM_MAGIC));
-
-    EEPROM.write(EEPROM_ADR_STATE, START_STATE);
-    EEPROM.write(EEPROM_ADR_TUNE, CHANNEL_MIN_INDEX);
-    EEPROM.write(EEPROM_ADR_BEEP, settings_beeps);
-    EEPROM.write(EEPROM_ADR_ORDERBY, settings_orderby_channel);
-
-    EEPROM.write(EEPROM_ADR_RSSI_MIN_A_L, lowByte(RSSI_MIN_VAL));
-    EEPROM.write(EEPROM_ADR_RSSI_MIN_A_H, highByte(RSSI_MIN_VAL));
-
-    EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L, lowByte(RSSI_MAX_VAL));
-    EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H, highByte(RSSI_MAX_VAL));
-
-    strcpy(call_sign, CALL_SIGN);
-    for(uint8_t i = 0; i < sizeof(call_sign); i++) {
-        EEPROM.write(EEPROM_ADR_CALLSIGN + i, call_sign[i]);
-    }
-
-    #ifdef USE_DIVERSITY
-        EEPROM.write(EEPROM_ADR_DIVERSITY, diversity_mode);
-
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L, lowByte(RSSI_MIN_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H, highByte(RSSI_MIN_VAL));
-
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L, lowByte(RSSI_MAX_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H, highByte(RSSI_MAX_VAL));
-    #endif
-
-    #ifdef USE_VOLTAGE_MONITORING
-        EEPROM.write(EEPROM_ADR_VBAT_SCALE, vbat_scale);
-        EEPROM.write(EEPROM_ADR_VBAT_WARNING, warning_voltage);
-        EEPROM.write(EEPROM_ADR_VBAT_CRITICAL, critical_voltage);
-    #endif
-}
-
 // SETUP ----------------------------------------------------------------------------
 void setup()
 {
@@ -174,30 +131,29 @@ void setup()
     pinMode (PIN_SPI_DATA, OUTPUT);
 	pinMode (PIN_SPI_CLOCK, OUTPUT);
 
-    setEEPROMDefaults();
+    EepromSettings.load();
 
     // read last setting from eeprom
-    state=EEPROM.read(EEPROM_ADR_STATE);
-    channelIndex=EEPROM.read(EEPROM_ADR_TUNE);
+    state = EepromSettings.defaultState;
+    channelIndex = EepromSettings.channel;
+
     // set the channel as soon as we can
     // faster boot up times :)
     setChannelModule(channelIndex);
     last_channel_index=channelIndex;
 
-    settings_beeps=EEPROM.read(EEPROM_ADR_BEEP);
-    settings_orderby_channel=EEPROM.read(EEPROM_ADR_ORDERBY);
+    settings_beeps = EepromSettings.beepEnabled;
+    settings_orderby_channel = EepromSettings.orderByChannel;
 
     // load saved call sign
-    for(uint8_t i = 0;i<sizeof(call_sign);i++) {
-        call_sign[i] = EEPROM.read(EEPROM_ADR_CALLSIGN+i);
-    }
+    memcpy(call_sign, EepromSettings.callSign, sizeof(call_sign));
 
-    rssi_min_a=((EEPROM.read(EEPROM_ADR_RSSI_MIN_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_A_L)));
-    rssi_max_a=((EEPROM.read(EEPROM_ADR_RSSI_MAX_A_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_A_L)));
+    rssi_min_a = EepromSettings.rssiAMin;
+    rssi_max_a = EepromSettings.rssiAMax;
 #ifdef USE_DIVERSITY
-    diversity_mode = EEPROM.read(EEPROM_ADR_DIVERSITY);
-    rssi_min_b=((EEPROM.read(EEPROM_ADR_RSSI_MIN_B_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_B_L)));
-    rssi_max_b=((EEPROM.read(EEPROM_ADR_RSSI_MAX_B_H)<<8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_B_L)));
+    diversity_mode = EepromSettings.diversityMode;
+    rssi_min_b = EepromSettings.rssiBMin;
+    rssi_max_b = EepromSettings.rssiBMax;
 #endif
     force_menu_redraw=1;
 
@@ -222,9 +178,9 @@ void setup()
     }
 #endif
 #ifdef USE_VOLTAGE_MONITORING
-        vbat_scale = EEPROM.read(EEPROM_ADR_VBAT_SCALE);
-        warning_voltage = EEPROM.read(EEPROM_ADR_VBAT_WARNING);
-        critical_voltage = EEPROM.read(EEPROM_ADR_VBAT_CRITICAL);
+        vbat_scale = EepromSettings.vbatScale;
+        warning_voltage = EepromSettings.vbatWarning;
+        critical_voltage = EepromSettings.vbatCritical;
 #endif
     // Setup Done - Turn Status LED off.
     digitalWrite(PIN_LED, LOW);
@@ -450,7 +406,7 @@ void loop()
 
                 // return user to their saved channel after bandscan
                 if(state_last_used == STATE_SCAN || last_state == STATE_RSSI_SETUP) {
-                    channelIndex=EEPROM.read(EEPROM_ADR_TUNE);
+                    channelIndex = EepromSettings.channel;
                 }
                 state_last_used=state;
             break;
@@ -468,24 +424,26 @@ void loop()
 
             break;
             case STATE_SAVE:
-                EEPROM.write(EEPROM_ADR_TUNE,channelIndex);
-                EEPROM.write(EEPROM_ADR_STATE,state_last_used);
-                EEPROM.write(EEPROM_ADR_BEEP,settings_beeps);
-                EEPROM.write(EEPROM_ADR_ORDERBY,settings_orderby_channel);
-                // save call sign
-                for(uint8_t i = 0;i<sizeof(call_sign);i++) {
-                    EEPROM.write(EEPROM_ADR_CALLSIGN+i,call_sign[i]);
-                }
+                EepromSettings.channel = channelIndex;
+                EepromSettings.defaultState = state_last_used;
+                EepromSettings.beepEnabled = settings_beeps;
+                EepromSettings.orderByChannel = settings_orderby_channel;
+                memcpy(EepromSettings.callSign, call_sign, sizeof(call_sign));
+
 #ifdef USE_DIVERSITY
-                EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
+                EepromSettings.diversityMode = diversity_mode;
 #endif
 
 #ifdef USE_VOLTAGE_MONITORING
-                EEPROM.write(EEPROM_ADR_VBAT_SCALE, vbat_scale);
-                EEPROM.write(EEPROM_ADR_VBAT_WARNING, warning_voltage);
-                EEPROM.write(EEPROM_ADR_VBAT_CRITICAL, critical_voltage);
+                EepromSettings.vbatScale = vbat_scale;
+                EepromSettings.vbatWarning = warning_voltage;
+                EepromSettings.vbatCritical = critical_voltage;
 #endif
+
                 drawScreen.save(state_last_used, channelIndex, pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
+
+                EepromSettings.save();
+
                 for (uint8_t loop=0;loop<5;loop++)
                 {
                     beep(100); // beep
@@ -834,12 +792,9 @@ void loop()
                     if(rssi_max_a < 125) { // user probably did not turn on the VTX during calibration
                         rssi_max_a = RSSI_MAX_VAL;
                     }
-                    // save 16 bit
-                    EEPROM.write(EEPROM_ADR_RSSI_MIN_A_L,(rssi_min_a & 0xff));
-                    EEPROM.write(EEPROM_ADR_RSSI_MIN_A_H,(rssi_min_a >> 8));
-                    // save 16 bit
-                    EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L,(rssi_max_a & 0xff));
-                    EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,(rssi_max_a >> 8));
+
+                    EepromSettings.rssiAMin = rssi_min_a;
+                    EepromSettings.rssiAMax = rssi_max_a;
 
 #ifdef USE_DIVERSITY
 
@@ -849,15 +804,12 @@ void loop()
                         if(rssi_max_b < 125) { // user probably did not turn on the VTX during calibration
                             rssi_max_b = RSSI_MAX_VAL;
                         }
-                        // save 16 bit
-                        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,(rssi_min_b & 0xff));
-                        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,(rssi_min_b >> 8));
-                        // save 16 bit
-                        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,(rssi_max_b & 0xff));
-                        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,(rssi_max_b >> 8));
+
+                        EepromSettings.rssiBMin = rssi_min_b;
+                        EepromSettings.rssiBMax = rssi_max_b;
                     }
 #endif
-                    state=EEPROM.read(EEPROM_ADR_STATE);
+                    state = EepromSettings.defaultState;
                     beep(1000);
                 }
             }
