@@ -121,6 +121,16 @@ SOFTWARE.
     #define useReceiverB 2
 #endif
 
+// === Display Modules =========================================================
+
+#ifdef SH1106
+  #define OLED_VCCSTATE SH1106_SWITCHCAPVCC
+  #define OLED_CLASS Adafruit_SH1106
+#else
+  #define OLED_VCCSTATE SSD1306_SWITCHCAPVCC
+  #define OLED_CLASS Adafruit_SSD1306
+#endif
+
 // === Misc ====================================================================
 
 #ifdef USE_VOLTAGE_MONITORING

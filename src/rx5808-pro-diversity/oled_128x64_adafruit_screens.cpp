@@ -28,12 +28,21 @@ SOFTWARE.
 #include "internal_settings.h"
 
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
+
 #include "screens.h" // function headers
+
 #ifdef SH1106
 	#include <Adafruit_SH1106.h>
+    #ifndef SH1106_128_64
+		#error("Screen size incorrect, please fix Adafruit_SH1106.h!");
+	#endif
 #else
 	#include <Adafruit_SSD1306.h>
+    #ifndef SSD1306_128_64
+		#error("Screen size incorrect, please fix Adafruit_SSD1306.h!");
+	#endif
 #endif
+
 #include <Adafruit_GFX.h>
 #include <Wire.h>
 #include <SPI.h>
@@ -61,18 +70,7 @@ char *PSTRtoBuffer_P(PGM_P str) {
     return PSTR2_BUFFER;
 }
 
-#ifdef SH1106
-	Adafruit_SH1106 display(OLED_RESET);
-	#if !defined SH1106_128_64
-		#error("Screen size incorrect, please fix Adafruit_SH1106.h!");
-	#endif
-#else
-	Adafruit_SSD1306 display(OLED_RESET);
-	#if !defined SSD1306_128_64
-		#error("Screen size incorrect, please fix Adafruit_SSD1306.h!");
-	#endif
-#endif
-
+OLED_CLASS display;
 
 screens::screens() {
     last_channel = -1;
@@ -80,12 +78,7 @@ screens::screens() {
 }
 
 char screens::begin(const char *call_sign) {
-#ifdef SH1106
-    display.begin(SH1106_SWITCHCAPVCC, OLED_ADDRESS);
-#else
-    display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDRESS);
-#endif
-
+    display.begin(OLED_VCCSTATE, OLED_ADDRESS);
 
 #ifdef USE_FLIP_SCREEN
     flip();
