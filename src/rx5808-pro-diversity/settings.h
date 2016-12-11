@@ -97,7 +97,7 @@ SOFTWARE.
 #define PIN_BUTTON_SAVE 5
 
 #define PIN_LED 13
-#define PIN_BUZZER 6
+#define PIN_BUZZER 6 // Must be an active buzzer, not passive.
 
 #define PIN_SPI_DATA 10
 #define PIN_SPI_SLAVE_SELECT 11
@@ -118,10 +118,6 @@ SOFTWARE.
     #else
         #define PIN_VBAT A2
     #endif
-#endif
-
-#ifdef OLED_128x64_ADAFRUIT_SCREENS
-    #define OLED_RESET 4
 #endif
 
 // === Diversity ===============================================================
