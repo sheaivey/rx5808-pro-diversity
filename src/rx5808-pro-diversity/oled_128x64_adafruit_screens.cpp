@@ -60,7 +60,6 @@ char *PSTRtoBuffer_P(PGM_P str) {
     return PSTR2_BUFFER;
 }
 
-#define INVERT INVERSE
 #define OLED_RESET 4
 #ifdef SH1106
 	Adafruit_SH1106 display(OLED_RESET);
@@ -559,7 +558,7 @@ void screens::updateVoltageScreenSaver(int voltage, bool alarm){
     if(alarm){
         display.setTextColor((millis()%250 < 125) ? WHITE : BLACK, BLACK);
     } else {
-        display.setTextColor(INVERT);
+        display.setTextColor(INVERSE);
     }
     display.setCursor(70,9);
     display.print((float)voltage/10.0);
