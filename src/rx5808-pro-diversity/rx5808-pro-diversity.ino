@@ -40,6 +40,7 @@ SOFTWARE.
 
 #include "screens.h"
 #include "channels.h"
+#include "receiver.h"
 
 screens drawScreen;
 
@@ -1159,129 +1160,6 @@ void sendIRPayload() {
     Serial.write(check_sum); // send ceck_sum for payload validation
 }
 #endif
-
-void setChannelModule(uint8_t channel)
-{
-  uint8_t i;
-  uint16_t channelData;
-
-  channelData = pgm_read_word_near(channelTable + channel);
-
-  // bit bash out 25 bits of data
-  // Order: A0-3, !R/W, D0-D19
-  // A0=0, A1=0, A2=0, A3=1, RW=0, D0-19=0
-  SERIAL_ENABLE_HIGH();
-  delayMicroseconds(1);
-  //delay(2);
-  SERIAL_ENABLE_LOW();
-
-  SERIAL_SENDBIT0();
-  SERIAL_SENDBIT0();
-  SERIAL_SENDBIT0();
-  SERIAL_SENDBIT1();
-
-  SERIAL_SENDBIT0();
-
-  // remaining zeros
-  for (i = 20; i > 0; i--)
-    SERIAL_SENDBIT0();
-
-  // Clock the data in
-  SERIAL_ENABLE_HIGH();
-  //delay(2);
-  delayMicroseconds(1);
-  SERIAL_ENABLE_LOW();
-
-  // Second is the channel data from the lookup table
-  // 20 bytes of register data are sent, but the MSB 4 bits are zeros
-  // register address = 0x1, write, data0-15=channelData data15-19=0x0
-  SERIAL_ENABLE_HIGH();
-  SERIAL_ENABLE_LOW();
-
-  // Register 0x1
-  SERIAL_SENDBIT1();
-  SERIAL_SENDBIT0();
-  SERIAL_SENDBIT0();
-  SERIAL_SENDBIT0();
-
-  // Write to register
-  SERIAL_SENDBIT1();
-
-  // D0-D15
-  //   note: loop runs backwards as more efficent on AVR
-  for (i = 16; i > 0; i--)
-  {
-    // Is bit high or low?
-    if (channelData & 0x1)
-    {
-      SERIAL_SENDBIT1();
-    }
-    else
-    {
-      SERIAL_SENDBIT0();
-    }
-
-    // Shift bits along to check the next one
-    channelData >>= 1;
-  }
-
-  // Remaining D16-D19
-  for (i = 4; i > 0; i--)
-    SERIAL_SENDBIT0();
-
-  // Finished clocking data in
-  SERIAL_ENABLE_HIGH();
-  delayMicroseconds(1);
-  //delay(2);
-
-  digitalWrite(PIN_SPI_SLAVE_SELECT, LOW);
-  digitalWrite(PIN_SPI_CLOCK, LOW);
-  digitalWrite(PIN_SPI_DATA, LOW);
-}
-
-
-void SERIAL_SENDBIT1()
-{
-  digitalWrite(PIN_SPI_CLOCK, LOW);
-  delayMicroseconds(1);
-
-  digitalWrite(PIN_SPI_DATA, HIGH);
-  delayMicroseconds(1);
-  digitalWrite(PIN_SPI_CLOCK, HIGH);
-  delayMicroseconds(1);
-
-  digitalWrite(PIN_SPI_CLOCK, LOW);
-  delayMicroseconds(1);
-}
-
-void SERIAL_SENDBIT0()
-{
-  digitalWrite(PIN_SPI_CLOCK, LOW);
-  delayMicroseconds(1);
-
-  digitalWrite(PIN_SPI_DATA, LOW);
-  delayMicroseconds(1);
-  digitalWrite(PIN_SPI_CLOCK, HIGH);
-  delayMicroseconds(1);
-
-  digitalWrite(PIN_SPI_CLOCK, LOW);
-  delayMicroseconds(1);
-}
-
-void SERIAL_ENABLE_LOW()
-{
-  delayMicroseconds(1);
-  digitalWrite(PIN_SPI_SLAVE_SELECT, LOW);
-  delayMicroseconds(1);
-}
-
-void SERIAL_ENABLE_HIGH()
-{
-  delayMicroseconds(1);
-  digitalWrite(PIN_SPI_SLAVE_SELECT, HIGH);
-  delayMicroseconds(1);
-}
-
 
 #ifdef USE_VOLTAGE_MONITORING
 void read_voltage()

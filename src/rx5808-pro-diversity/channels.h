@@ -1,6 +1,7 @@
 #ifndef CHANNELS_H
 #define CHANNELS_H
 
+#include <avr/pgmspace.h>
 
 // Channels to sent to the SPI registers
 const uint16_t channelTable[] PROGMEM = {
@@ -47,8 +48,8 @@ const uint8_t channelNames[] PROGMEM = {
 // All Channels of the above List ordered by Mhz
 const uint8_t channelList[] PROGMEM = {
 #ifdef USE_LBAND
-    40, 41, 42, 43, 44, 45, 46, 47, 19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9, 
-    25, 5, 35, 10, 26, 4, 11, 27, 3, 36, 12, 28, 2, 13, 29, 37, 1, 14, 30, 0, 
+    40, 41, 42, 43, 44, 45, 46, 47, 19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9,
+    25, 5, 35, 10, 26, 4, 11, 27, 3, 36, 12, 28, 2, 13, 29, 37, 1, 14, 30, 0,
     15, 31, 38, 20, 21, 39, 22, 23
 #else
     19, 18, 32, 17, 33, 16, 7, 34, 8, 24, 6, 9, 25, 5, 35, 10, 26, 4, 11, 27, 3,
