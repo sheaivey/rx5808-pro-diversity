@@ -89,7 +89,7 @@ SOFTWARE.
     // Used to figure out if diversity module has been plugged in.
     // When RSSI is plugged in the min value is around 90.
     // When RSSI is not plugged in the min value is 0.
-    #define isDiversity() (analogRead(rssiPinB) >= 5)
+    #define isDiversity() (analogRead(PIN_RSSI_B) >= 5)
 #endif
 
 #define EEPROM_ADR_BEEP 11

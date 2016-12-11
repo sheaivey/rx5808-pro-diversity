@@ -104,31 +104,31 @@ void setup()
 {
     // IO INIT
     // initialize digital pin 13 LED as an output.
-    pinMode(led, OUTPUT); // status pin for TV mode errors
-    digitalWrite(led, HIGH);
+    pinMode(PIN_LED, OUTPUT); // status pin for TV mode errors
+    digitalWrite(PIN_LED, HIGH);
     // buzzer
-    pinMode(buzzer, OUTPUT); // Feedback buzzer (active buzzer, not passive piezo)
-    digitalWrite(buzzer, HIGH);
+    pinMode(PIN_BUZZER, OUTPUT); // Feedback buzzer (active buzzer, not passive piezo)
+    digitalWrite(PIN_BUZZER, HIGH);
     // minimum control pins
-    pinMode(buttonUp, INPUT);
-    digitalWrite(buttonUp, INPUT_PULLUP);
-    pinMode(buttonMode, INPUT);
-    digitalWrite(buttonMode, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_UP, INPUT);
+    digitalWrite(PIN_BUTTON_UP, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_MODE, INPUT);
+    digitalWrite(PIN_BUTTON_MODE, INPUT_PULLUP);
     // optional control
-    pinMode(buttonDown, INPUT);
-    digitalWrite(buttonDown, INPUT_PULLUP);
-    pinMode(buttonSave, INPUT);
-    digitalWrite(buttonSave, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_DOWN, INPUT);
+    digitalWrite(PIN_BUTTON_DOWN, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_SAVE, INPUT);
+    digitalWrite(PIN_BUTTON_SAVE, INPUT_PULLUP);
     //Receiver Setup
-    pinMode(receiverA_led,OUTPUT);
+    pinMode(PIN_LED_A,OUTPUT);
 #ifdef USE_DIVERSITY
-    pinMode(receiverB_led,OUTPUT);
+    pinMode(PIN_LED_B,OUTPUT);
 #endif
     setReceiver(useReceiverA);
     // SPI pins for RX control
-    pinMode (slaveSelectPin, OUTPUT);
-    pinMode (spiDataPin, OUTPUT);
-	pinMode (spiClockPin, OUTPUT);
+    pinMode (PIN_SPI_SLAVE_SELECT, OUTPUT);
+    pinMode (PIN_SPI_DATA, OUTPUT);
+	pinMode (PIN_SPI_CLOCK, OUTPUT);
 
     // use values only of EEprom is not 255 = unsaved
     uint8_t eeprom_check = EEPROM.read(EEPROM_ADR_STATE);
@@ -202,7 +202,7 @@ void setup()
     if (drawScreen.begin(call_sign) > 0) {
         // on Error flicker LED
         while (true) { // stay in ERROR for ever
-            digitalWrite(led, !digitalRead(led));
+            digitalWrite(PIN_LED, !digitalRead(PIN_LED));
             delay(100);
         }
     }
@@ -224,7 +224,7 @@ void setup()
         critical_voltage = EEPROM.read(EEPROM_ADR_VBAT_CRITICAL);
 #endif
     // Setup Done - Turn Status LED off.
-    digitalWrite(led, LOW);
+    digitalWrite(PIN_LED, LOW);
 
 }
 
@@ -238,7 +238,7 @@ void loop()
     uint8_t in_menu;
     uint8_t in_menu_time_out;
 
-    if (digitalRead(buttonMode) == LOW) // key pressed ?
+    if (digitalRead(PIN_BUTTON_MODE) == LOW) // key pressed ?
     {
 #ifdef USE_VOLTAGE_MONITORING
         clear_alarm();
@@ -251,7 +251,7 @@ void loop()
 
         uint8_t press_time=0;
         // on entry wait for release
-        while(digitalRead(buttonMode) == LOW && press_time < 10)
+        while(digitalRead(PIN_BUTTON_MODE) == LOW && press_time < 10)
         {
             delay(100);
             press_time++;
@@ -319,18 +319,18 @@ void loop()
             // draw mode select screen
             drawScreen.mainMenu(menu_id);
 
-            while(digitalRead(buttonMode) == LOW || digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW)
+            while(digitalRead(PIN_BUTTON_MODE) == LOW || digitalRead(PIN_BUTTON_UP) == LOW || digitalRead(PIN_BUTTON_DOWN) == LOW)
             {
                 // wait for MODE release
                 in_menu_time_out=50;
             }
-            while(--in_menu_time_out && ((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH))) // wait for next key press or time out
+            while(--in_menu_time_out && ((digitalRead(PIN_BUTTON_MODE) == HIGH) && (digitalRead(PIN_BUTTON_UP) == HIGH) && (digitalRead(PIN_BUTTON_DOWN) == HIGH))) // wait for next key press or time out
             {
                 delay(100); // timeout delay
             }
-            if(in_menu_time_out==0 || digitalRead(buttonMode) == LOW)
+            if(in_menu_time_out==0 || digitalRead(PIN_BUTTON_MODE) == LOW)
             {
-                if(digitalRead(buttonMode) != LOW) {
+                if(digitalRead(PIN_BUTTON_MODE) != LOW) {
                     state=state_last_used; // exit to last state on timeout.
                 }
                 in_menu=0; // EXIT
@@ -344,7 +344,7 @@ void loop()
                 /*********************/
                 /*   Menu handler   */
                 /*********************/
-                if(digitalRead(buttonUp) == LOW) {
+                if(digitalRead(PIN_BUTTON_UP) == LOW) {
                     menu_id--;
 #ifdef USE_DIVERSITY
                     if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
@@ -356,7 +356,7 @@ void loop()
                     }
 #endif
                 }
-                else if(digitalRead(buttonDown) == LOW) {
+                else if(digitalRead(PIN_BUTTON_DOWN) == LOW) {
                     menu_id++;
                 }
 
@@ -384,7 +384,7 @@ void loop()
     /*     Save buttom     */
     /***********************/
     // hardware save buttom support (if no display is used)
-    if(digitalRead(buttonSave) == LOW)
+    if(digitalRead(PIN_BUTTON_SAVE) == LOW)
     {
         state=STATE_SAVE;
     }
@@ -529,7 +529,7 @@ void loop()
             drawScreen.updateVoltageScreenSaver(voltage, warning_alarm || critical_alarm);
 #endif
         }
-        while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next button press
+        while((digitalRead(PIN_BUTTON_MODE) == HIGH) && (digitalRead(PIN_BUTTON_UP) == HIGH) && (digitalRead(PIN_BUTTON_DOWN) == HIGH)); // wait for next button press
         state=state_last_used;
         time_screen_saver=0;
         return;
@@ -549,9 +549,9 @@ void loop()
                 voltage_alarm();
                 //delay(100); // timeout delay
             }
-            while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next key press
+            while((digitalRead(PIN_BUTTON_MODE) == HIGH) && (digitalRead(PIN_BUTTON_UP) == HIGH) && (digitalRead(PIN_BUTTON_DOWN) == HIGH)); // wait for next key press
 
-            if(digitalRead(buttonMode) == LOW){
+            if(digitalRead(PIN_BUTTON_MODE) == LOW){
                 if(editing > -1){
                     // user is done editing
                     editing = -1;
@@ -567,7 +567,7 @@ void loop()
                     state=STATE_SAVE;
                     editing = -1;
                 }
-            } else if(digitalRead(buttonDown) == LOW) {
+            } else if(digitalRead(PIN_BUTTON_DOWN) == LOW) {
                 switch (editing) {
                     case 0:
                         warning_voltage--;
@@ -583,7 +583,7 @@ void loop()
                         break;
                 }
             }
-            else if(digitalRead(buttonUp) == LOW) {
+            else if(digitalRead(PIN_BUTTON_UP) == LOW) {
                 switch (editing) {
                     case 0:
                         warning_voltage++;
@@ -611,7 +611,7 @@ void loop()
             do{
                 delay(150);// wait for button release
             }
-            while(editing==-1 && (digitalRead(buttonMode) == LOW || digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW));
+            while(editing==-1 && (digitalRead(PIN_BUTTON_MODE) == LOW || digitalRead(PIN_BUTTON_UP) == LOW || digitalRead(PIN_BUTTON_DOWN) == LOW));
         }
         while(in_voltage_menu);
     }
@@ -631,16 +631,16 @@ void loop()
                 readRSSI();
                 drawScreen.updateDiversity(active_receiver, readRSSI(useReceiverA), readRSSI(useReceiverB));
             }
-            while((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH)); // wait for next mode or time out
+            while((digitalRead(PIN_BUTTON_MODE) == HIGH) && (digitalRead(PIN_BUTTON_UP) == HIGH) && (digitalRead(PIN_BUTTON_DOWN) == HIGH)); // wait for next mode or time out
 
-            if(digitalRead(buttonMode) == LOW)        // channel UP
+            if(digitalRead(PIN_BUTTON_MODE) == LOW)        // channel UP
             {
                 in_menu = 0; // exit menu
             }
-            else if(digitalRead(buttonUp) == LOW) {
+            else if(digitalRead(PIN_BUTTON_UP) == LOW) {
                 menu_id--;
             }
-            else if(digitalRead(buttonDown) == LOW) {
+            else if(digitalRead(PIN_BUTTON_DOWN) == LOW) {
                 menu_id++;
             }
 
@@ -678,7 +678,7 @@ void loop()
             }
 #endif
             // handling of keys
-            if( digitalRead(buttonUp) == LOW)        // channel UP
+            if( digitalRead(PIN_BUTTON_UP) == LOW)        // channel UP
             {
                 time_screen_saver=millis();
                 beep(50); // beep & debounce
@@ -691,7 +691,7 @@ void loop()
                     channelIndex = CHANNEL_MIN_INDEX;
                 }
             }
-            if( digitalRead(buttonDown) == LOW) // channel DOWN
+            if( digitalRead(PIN_BUTTON_DOWN) == LOW) // channel DOWN
             {
                 time_screen_saver=millis();
                 beep(50); // beep & debounce
@@ -756,9 +756,9 @@ void loop()
             { // seek was successful
 
             }
-            if (digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW) // restart seek if key pressed
+            if (digitalRead(PIN_BUTTON_UP) == LOW || digitalRead(PIN_BUTTON_DOWN) == LOW) // restart seek if key pressed
             {
-                if(digitalRead(buttonUp) == LOW) {
+                if(digitalRead(PIN_BUTTON_UP) == LOW) {
                     seek_direction = 1;
                 }
                 else {
@@ -860,7 +860,7 @@ void loop()
             }
         }
         // new scan possible by press scan
-        if (digitalRead(buttonUp) == LOW) // force new full new scan
+        if (digitalRead(PIN_BUTTON_UP) == LOW) // force new full new scan
         {
             beep(50); // beep & debounce
             delay(KEY_DEBOUNCE); // debounce
@@ -884,7 +884,7 @@ void loop()
         do{
             in_menu_time_out=80;
             drawScreen.updateSetupMenu(menu_id, settings_beeps, settings_orderby_channel, call_sign, editing);
-            while(--in_menu_time_out && ((digitalRead(buttonMode) == HIGH) && (digitalRead(buttonUp) == HIGH) && (digitalRead(buttonDown) == HIGH))) // wait for next key press or time out
+            while(--in_menu_time_out && ((digitalRead(PIN_BUTTON_MODE) == HIGH) && (digitalRead(PIN_BUTTON_UP) == HIGH) && (digitalRead(PIN_BUTTON_DOWN) == HIGH))) // wait for next key press or time out
             {
                 delay(100); // timeout delay
             }
@@ -894,7 +894,7 @@ void loop()
                 break; // Timed out, Don't save...
             }
 
-            if(digitalRead(buttonMode) == LOW)        // modeButton
+            if(digitalRead(PIN_BUTTON_MODE) == LOW)        // modeButton
             {
                 // do something about the users selection
                 switch(menu_id) {
@@ -936,7 +936,7 @@ void loop()
 
                 }
             }
-            else if(digitalRead(buttonUp) == LOW) {
+            else if(digitalRead(PIN_BUTTON_UP) == LOW) {
                 if(editing == -1) {
                     menu_id--;
 #ifdef TVOUT_SCREENS
@@ -951,7 +951,7 @@ void loop()
                 }
 
             }
-            else if(digitalRead(buttonDown) == LOW) {
+            else if(digitalRead(PIN_BUTTON_DOWN) == LOW) {
                 if(editing == -1) {
                     menu_id++;
 
@@ -978,7 +978,7 @@ void loop()
             do{
                 delay(150);// wait for button release
             }
-            while(editing==-1 && (digitalRead(buttonMode) == LOW || digitalRead(buttonUp) == LOW || digitalRead(buttonDown) == LOW));
+            while(editing==-1 && (digitalRead(PIN_BUTTON_MODE) == LOW || digitalRead(PIN_BUTTON_UP) == LOW || digitalRead(PIN_BUTTON_DOWN) == LOW));
         }
         while(in_menu);
     }
@@ -1017,13 +1017,13 @@ void loop()
 
 void beep(uint16_t time)
 {
-    digitalWrite(led, HIGH);
+    digitalWrite(PIN_LED, HIGH);
     if(settings_beeps){
-        digitalWrite(buzzer, LOW); // activate beep
+        digitalWrite(PIN_BUZZER, LOW); // activate beep
     }
     delay(time/2);
-    digitalWrite(led, LOW);
-    digitalWrite(buzzer, HIGH);
+    digitalWrite(PIN_LED, LOW);
+    digitalWrite(PIN_BUZZER, HIGH);
 }
 
 uint8_t channel_from_index(uint8_t channelIndex)
@@ -1069,10 +1069,10 @@ uint16_t readRSSI(char receiver)
 #endif
     for (uint8_t i = 0; i < RSSI_READS; i++)
     {
-        rssiA += analogRead(rssiPinA);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
+        rssiA += analogRead(PIN_RSSI_A);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
 
 #ifdef USE_DIVERSITY
-        rssiB += analogRead(rssiPinB);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
+        rssiB += analogRead(PIN_RSSI_B);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
 #endif
     }
     rssiA = rssiA/RSSI_READS; // average of RSSI_READS readings
@@ -1165,16 +1165,16 @@ void setReceiver(uint8_t receiver) {
 #ifdef USE_DIVERSITY
     if(receiver == useReceiverA)
     {
-        digitalWrite(receiverB_led, LOW);
-        digitalWrite(receiverA_led, HIGH);
+        digitalWrite(PIN_LED_B, LOW);
+        digitalWrite(PIN_LED_A, HIGH);
     }
     else
     {
-        digitalWrite(receiverA_led, LOW);
-        digitalWrite(receiverB_led, HIGH);
+        digitalWrite(PIN_LED_A, LOW);
+        digitalWrite(PIN_LED_B, HIGH);
     }
 #else
-    digitalWrite(receiverA_led, HIGH);
+    digitalWrite(PIN_LED_A, HIGH);
 #endif
 
     active_receiver = receiver;
@@ -1277,51 +1277,51 @@ void setChannelModule(uint8_t channel)
   delayMicroseconds(1);
   //delay(2);
 
-  digitalWrite(slaveSelectPin, LOW);
-  digitalWrite(spiClockPin, LOW);
-  digitalWrite(spiDataPin, LOW);
+  digitalWrite(PIN_SPI_SLAVE_SELECT, LOW);
+  digitalWrite(PIN_SPI_CLOCK, LOW);
+  digitalWrite(PIN_SPI_DATA, LOW);
 }
 
 
 void SERIAL_SENDBIT1()
 {
-  digitalWrite(spiClockPin, LOW);
+  digitalWrite(PIN_SPI_CLOCK, LOW);
   delayMicroseconds(1);
 
-  digitalWrite(spiDataPin, HIGH);
+  digitalWrite(PIN_SPI_DATA, HIGH);
   delayMicroseconds(1);
-  digitalWrite(spiClockPin, HIGH);
+  digitalWrite(PIN_SPI_CLOCK, HIGH);
   delayMicroseconds(1);
 
-  digitalWrite(spiClockPin, LOW);
+  digitalWrite(PIN_SPI_CLOCK, LOW);
   delayMicroseconds(1);
 }
 
 void SERIAL_SENDBIT0()
 {
-  digitalWrite(spiClockPin, LOW);
+  digitalWrite(PIN_SPI_CLOCK, LOW);
   delayMicroseconds(1);
 
-  digitalWrite(spiDataPin, LOW);
+  digitalWrite(PIN_SPI_DATA, LOW);
   delayMicroseconds(1);
-  digitalWrite(spiClockPin, HIGH);
+  digitalWrite(PIN_SPI_CLOCK, HIGH);
   delayMicroseconds(1);
 
-  digitalWrite(spiClockPin, LOW);
+  digitalWrite(PIN_SPI_CLOCK, LOW);
   delayMicroseconds(1);
 }
 
 void SERIAL_ENABLE_LOW()
 {
   delayMicroseconds(1);
-  digitalWrite(slaveSelectPin, LOW);
+  digitalWrite(PIN_SPI_SLAVE_SELECT, LOW);
   delayMicroseconds(1);
 }
 
 void SERIAL_ENABLE_HIGH()
 {
   delayMicroseconds(1);
-  digitalWrite(slaveSelectPin, HIGH);
+  digitalWrite(PIN_SPI_SLAVE_SELECT, HIGH);
   delayMicroseconds(1);
 }
 
@@ -1329,7 +1329,7 @@ void SERIAL_ENABLE_HIGH()
 #ifdef USE_VOLTAGE_MONITORING
 void read_voltage()
 {
-    uint16_t v = analogRead(VBAT_PIN);
+    uint16_t v = analogRead(PIN_VBAT);
     voltages_sum += v;
     voltages_sum -= voltages[voltage_reading_index];
     voltages[voltage_reading_index++] = v;
@@ -1392,7 +1392,7 @@ void clear_alarm(){
     beep_times = 0;
 }
 void set_buzzer(bool value){
-    digitalWrite(led, value);
-    digitalWrite(buzzer, !value);
+    digitalWrite(PIN_LED, value);
+    digitalWrite(PIN_BUZZER, !value);
 }
 #endif

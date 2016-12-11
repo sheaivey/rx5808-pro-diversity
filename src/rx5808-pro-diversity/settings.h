@@ -89,34 +89,34 @@ SOFTWARE.
 // === Pins ====================================================================
 
 // Buttons (required)
-#define buttonUp 2
-#define buttonMode 3
+#define PIN_BUTTON_UP 2
+#define PIN_BUTTON_MODE 3
 
 // Buttons (optional, for comfort)
-#define buttonDown 4
-#define buttonSave 5
+#define PIN_BUTTON_DOWN 4
+#define PIN_BUTTON_SAVE 5
 
-#define led 13
-#define buzzer 6
+#define PIN_LED 13
+#define PIN_BUZZER 6
 
-#define spiDataPin 10
-#define slaveSelectPin 11
-#define spiClockPin 12
+#define PIN_SPI_DATA 10
+#define PIN_SPI_SLAVE_SELECT 11
+#define PIN_SPI_CLOCK 12
 
-#define rssiPinA A6
+#define PIN_RSSI_A A6
 #define useReceiverA 1
-#define receiverA_led A0
+#define PIN_LED_A A0
 
 #ifdef USE_DIVERSITY
-    #define receiverB_led A1
-    #define rssiPinB A7
+    #define PIN_LED_B A1
+    #define PIN_RSSI_B A7
 #endif
 
 #ifdef USE_VOLTAGE_MONITORING
     #ifdef TVOUT_SCREENS
-        #define VBAT_PIN A4
+        #define PIN_VBAT A4
     #else
-        #define VBAT_PIN A2
+        #define PIN_VBAT A2
     #endif
 #endif
 
