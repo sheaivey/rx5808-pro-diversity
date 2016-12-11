@@ -43,8 +43,9 @@ SOFTWARE.
 // There is only one buffer so this will cause problems if you need to pass two
 // strings to one function.
 #define PSTR2(x) PSTRtoBuffer_P(PSTR(x))
+#define PSTR2_BUFFER_SIZE 16 // May need adjusted depending on your needs.
 
-char PSTR2_BUFFER[16]; // May need adjusted depending on your needs.
+char PSTR2_BUFFER[PSTR2_BUFFER_SIZE];
 char *PSTRtoBuffer_P(PGM_P str) { 
     uint8_t i = 0;
     
