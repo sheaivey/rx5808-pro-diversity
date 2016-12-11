@@ -43,8 +43,7 @@ SOFTWARE.
 	#endif
 #endif
 
-#include <Wire.h>
-#include <SPI.h>
+
 #include "pstr_helper.h"
 
 OLED_CLASS display;
