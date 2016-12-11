@@ -100,95 +100,97 @@ char call_sign[10];
 bool settings_beeps = true;
 bool settings_orderby_channel = true;
 
-// SETUP ----------------------------------------------------------------------------
+// === Setup ===================================================================
+
 void setup()
 {
-    // IO INIT
-    // initialize digital pin 13 LED as an output.
-    pinMode(PIN_LED, OUTPUT); // status pin for TV mode errors
-    digitalWrite(PIN_LED, HIGH);
-    // buzzer
-    pinMode(PIN_BUZZER, OUTPUT); // Feedback buzzer (active buzzer, not passive piezo)
-    digitalWrite(PIN_BUZZER, HIGH);
-    // minimum control pins
-    pinMode(PIN_BUTTON_UP, INPUT);
-    digitalWrite(PIN_BUTTON_UP, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_MODE, INPUT);
-    digitalWrite(PIN_BUTTON_MODE, INPUT_PULLUP);
-    // optional control
-    pinMode(PIN_BUTTON_DOWN, INPUT);
-    digitalWrite(PIN_BUTTON_DOWN, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_SAVE, INPUT);
-    digitalWrite(PIN_BUTTON_SAVE, INPUT_PULLUP);
-    //Receiver Setup
-    pinMode(PIN_LED_A,OUTPUT);
-#ifdef USE_DIVERSITY
-    pinMode(PIN_LED_B,OUTPUT);
-#endif
-    setReceiver(useReceiverA);
-    // SPI pins for RX control
-    pinMode (PIN_SPI_SLAVE_SELECT, OUTPUT);
-    pinMode (PIN_SPI_DATA, OUTPUT);
-	pinMode (PIN_SPI_CLOCK, OUTPUT);
+    setupIo();
 
+    // Enable buzzer and LED for duration of setup process.
+    digitalWrite(PIN_LED, HIGH);
+    digitalWrite(PIN_BUZZER, HIGH);
+
+    setReceiver(useReceiverA);
+    setupSettings();
+
+    // Init Display
+    if (drawScreen.begin(call_sign) > 0) {
+        haltWithError();
+    }
+
+    #ifdef USE_IR_EMITTER
+        // Used to Transmit IR Payloads
+        Serial.begin(9600);
+    #endif
+
+    // Setup complete.
+    digitalWrite(PIN_LED, LOW);
+    digitalWrite(PIN_BUZZER, LOW);
+}
+
+void setupIo() {
+    pinMode(PIN_LED, OUTPUT);
+    pinMode(PIN_BUZZER, OUTPUT);
+
+    pinMode(PIN_BUTTON_UP, INPUT);
+    pinMode(PIN_BUTTON_MODE, INPUT);
+    digitalWrite(PIN_BUTTON_UP, INPUT_PULLUP);
+    digitalWrite(PIN_BUTTON_MODE, INPUT_PULLUP);
+
+    pinMode(PIN_BUTTON_DOWN, INPUT);
+    pinMode(PIN_BUTTON_SAVE, INPUT);
+    digitalWrite(PIN_BUTTON_DOWN, INPUT_PULLUP);
+    digitalWrite(PIN_BUTTON_SAVE, INPUT_PULLUP);
+
+    pinMode(PIN_LED_A,OUTPUT);
+    #ifdef USE_DIVERSITY
+        pinMode(PIN_LED_B,OUTPUT);
+    #endif
+
+    pinMode(PIN_SPI_SLAVE_SELECT, OUTPUT);
+    pinMode(PIN_SPI_DATA, OUTPUT);
+	pinMode(PIN_SPI_CLOCK, OUTPUT);
+}
+
+void setupSettings() {
     EepromSettings.load();
 
-    // read last setting from eeprom
-    state = EepromSettings.defaultState;
+    // Set channel ASAP for fast boot times.
     channelIndex = EepromSettings.channel;
-
-    // set the channel as soon as we can
-    // faster boot up times :)
     setChannelModule(channelIndex);
-    last_channel_index=channelIndex;
+    last_channel_index = channelIndex;
 
+    state = EepromSettings.defaultState;
     settings_beeps = EepromSettings.beepEnabled;
     settings_orderby_channel = EepromSettings.orderByChannel;
-
-    // load saved call sign
     memcpy(call_sign, EepromSettings.callSign, sizeof(call_sign));
 
     rssi_min_a = EepromSettings.rssiAMin;
     rssi_max_a = EepromSettings.rssiAMax;
-#ifdef USE_DIVERSITY
-    diversity_mode = EepromSettings.diversityMode;
-    rssi_min_b = EepromSettings.rssiBMin;
-    rssi_max_b = EepromSettings.rssiBMax;
-#endif
-    force_menu_redraw=1;
+    #ifdef USE_DIVERSITY
+        diversity_mode = EepromSettings.diversityMode;
+        rssi_min_b = EepromSettings.rssiBMin;
+        rssi_max_b = EepromSettings.rssiBMax;
+    #endif
 
-    // Init Display
-    if (drawScreen.begin(call_sign) > 0) {
-        // on Error flicker LED
-        while (true) { // stay in ERROR for ever
-            digitalWrite(PIN_LED, !digitalRead(PIN_LED));
-            delay(100);
+    #ifdef USE_DIVERSITY
+        // make sure we use receiver Auto when diveristy is unplugged.
+        if(!isDiversity()) {
+            diversity_mode = useReceiverAuto;
         }
-    }
+    #endif
 
-#ifdef USE_IR_EMITTER
-    // Used to Transmit IR Payloads
-    Serial.begin(9600);
-#endif
-
-#ifdef USE_DIVERSITY
-    // make sure we use receiver Auto when diveristy is unplugged.
-    if(!isDiversity()) {
-        diversity_mode = useReceiverAuto;
-    }
-#endif
-#ifdef USE_VOLTAGE_MONITORING
+    #ifdef USE_VOLTAGE_MONITORING
         vbat_scale = EepromSettings.vbatScale;
         warning_voltage = EepromSettings.vbatWarning;
         critical_voltage = EepromSettings.vbatCritical;
-#endif
-    // Setup Done - Turn Status LED off.
-    digitalWrite(PIN_LED, LOW);
+    #endif
 
+    force_menu_redraw = 1;
 }
 
+// === Main Loop ===============================================================
 
-// LOOP ----------------------------------------------------------------------------
 void loop()
 {
     /*******************/
@@ -1351,3 +1353,11 @@ void set_buzzer(bool value){
     digitalWrite(PIN_BUZZER, !value);
 }
 #endif
+
+void haltWithError() {
+    while (true) {
+        digitalWrite(PIN_LED, !digitalRead(PIN_LED));
+        digitalWrite(PIN_BUZZER, !digitalRead(PIN_BUZZER));
+        delay(100);
+    }
+}
