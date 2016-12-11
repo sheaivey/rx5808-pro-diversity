@@ -99,6 +99,50 @@ char call_sign[10];
 bool settings_beeps = true;
 bool settings_orderby_channel = true;
 
+void setEEPROMDefaults() {
+    // Check for "magic" EEPROM values to check if data is already valid.
+    uint16_t magic = word(
+        EEPROM.read(EEPROM_ADR_MAGIC_H),
+        EEPROM.read(EEPROM_ADR_MAGIC_L));
+    if (magic == EEPROM_MAGIC)
+        return;
+
+    EEPROM.write(EEPROM_ADR_MAGIC_L, lowByte(EEPROM_MAGIC));
+    EEPROM.write(EEPROM_ADR_MAGIC_H, highByte(EEPROM_MAGIC));
+
+    EEPROM.write(EEPROM_ADR_STATE, START_STATE);
+    EEPROM.write(EEPROM_ADR_TUNE, CHANNEL_MIN_INDEX);
+    EEPROM.write(EEPROM_ADR_BEEP, settings_beeps);
+    EEPROM.write(EEPROM_ADR_ORDERBY, settings_orderby_channel);
+
+    EEPROM.write(EEPROM_ADR_RSSI_MIN_A_L, lowByte(RSSI_MIN_VAL));
+    EEPROM.write(EEPROM_ADR_RSSI_MIN_A_H, highByte(RSSI_MIN_VAL));
+
+    EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L, lowByte(RSSI_MAX_VAL));
+    EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H, highByte(RSSI_MAX_VAL));
+
+    strcpy(call_sign, CALL_SIGN);
+    for(uint8_t i = 0; i < sizeof(call_sign); i++) {
+        EEPROM.write(EEPROM_ADR_CALLSIGN + i, call_sign[i]);
+    }
+
+    #ifdef USE_DIVERSITY
+        EEPROM.write(EEPROM_ADR_DIVERSITY, diversity_mode);
+
+        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L, lowByte(RSSI_MIN_VAL));
+        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H, highByte(RSSI_MIN_VAL));
+
+        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L, lowByte(RSSI_MAX_VAL));
+        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H, highByte(RSSI_MAX_VAL));
+    #endif
+
+    #ifdef USE_VOLTAGE_MONITORING
+        EEPROM.write(EEPROM_ADR_VBAT_SCALE, vbat_scale);
+        EEPROM.write(EEPROM_ADR_VBAT_WARNING, warning_voltage);
+        EEPROM.write(EEPROM_ADR_VBAT_CRITICAL, critical_voltage);
+    #endif
+}
+
 // SETUP ----------------------------------------------------------------------------
 void setup()
 {
@@ -130,48 +174,7 @@ void setup()
     pinMode (PIN_SPI_DATA, OUTPUT);
 	pinMode (PIN_SPI_CLOCK, OUTPUT);
 
-    // use values only of EEprom is not 255 = unsaved
-    uint8_t eeprom_check = EEPROM.read(EEPROM_ADR_STATE);
-    if(eeprom_check == 255) // unused
-    {
-        // save 8 bit
-        EEPROM.write(EEPROM_ADR_STATE,START_STATE);
-        EEPROM.write(EEPROM_ADR_TUNE,CHANNEL_MIN_INDEX);
-        EEPROM.write(EEPROM_ADR_BEEP,settings_beeps);
-        EEPROM.write(EEPROM_ADR_ORDERBY,settings_orderby_channel);
-        // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_A_L,lowByte(RSSI_MIN_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_A_H,highByte(RSSI_MIN_VAL));
-        // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_A_L,lowByte(RSSI_MAX_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_A_H,highByte(RSSI_MAX_VAL));
-
-        // save default call sign
-        strcpy(call_sign, CALL_SIGN); // load callsign
-        for(uint8_t i = 0;i<sizeof(call_sign);i++) {
-            EEPROM.write(EEPROM_ADR_CALLSIGN+i,call_sign[i]);
-        }
-
-
-
-#ifdef USE_DIVERSITY
-        // diversity
-        EEPROM.write(EEPROM_ADR_DIVERSITY,diversity_mode);
-        // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_L,lowByte(RSSI_MIN_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MIN_B_H,highByte(RSSI_MIN_VAL));
-        // save 16 bit
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_L,lowByte(RSSI_MAX_VAL));
-        EEPROM.write(EEPROM_ADR_RSSI_MAX_B_H,highByte(RSSI_MAX_VAL));
-#endif
-
-#ifdef USE_VOLTAGE_MONITORING
-        EEPROM.write(EEPROM_ADR_VBAT_SCALE, vbat_scale);
-        EEPROM.write(EEPROM_ADR_VBAT_WARNING, warning_voltage);
-        EEPROM.write(EEPROM_ADR_VBAT_CRITICAL, critical_voltage);
-#endif
-
-    }
+    setEEPROMDefaults();
 
     // read last setting from eeprom
     state=EEPROM.read(EEPROM_ADR_STATE);
