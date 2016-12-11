@@ -38,11 +38,27 @@ SOFTWARE.
 #include <Wire.h>
 #include <SPI.h>
 
-// New version of PSTR that uses a temp buffer and returns char *
-// by Shea Ivey
+// Modified PSTR that pushes string into a char* buffer for easy use.
+//
+// There is only one buffer so this will cause problems if you need to pass two
+// strings to one function.
 #define PSTR2(x) PSTRtoBuffer_P(PSTR(x))
-char PSTR2_BUFFER[30]; // adjust size depending on need.
-char *PSTRtoBuffer_P(PGM_P str) { uint8_t c='\0', i=0; for(; (c = pgm_read_byte(str)) && i < sizeof(PSTR2_BUFFER); str++, i++) PSTR2_BUFFER[i]=c;PSTR2_BUFFER[i]=c; return PSTR2_BUFFER;}
+
+char PSTR2_BUFFER[16]; // May need adjusted depending on your needs.
+char *PSTRtoBuffer_P(PGM_P str) { 
+    uint8_t i = 0;
+    
+    for (
+        uint8_t c = '\0';
+        c = pgm_read_byte(str + i) && i < sizeof(PSTR2_BUFFER); 
+        i++
+    ) {
+        PSTR2_BUFFER[i] = pgm_read_byte(str + i);
+    }
+    
+    PSTR2_BUFFER[i] = '\0'; // Loop drops early so add in finishing terminator.
+    return PSTR2_BUFFER;
+}
 
 #define INVERT INVERSE
 #define OLED_RESET 4
