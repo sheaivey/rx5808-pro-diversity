@@ -101,6 +101,8 @@ char call_sign[10];
 bool settings_beeps = true;
 bool settings_orderby_channel = true;
 
+void beep(uint8_t count = 1, uint16_t milliseconds = 100);
+
 // === Setup ===================================================================
 
 void setup()
@@ -203,13 +205,10 @@ void loop()
     if (digitalRead(PIN_BUTTON_MODE) == LOW) // key pressed ?
     {
 #ifdef USE_VOLTAGE_MONITORING
-        clear_alarm();
+        clearAlarm();
 #endif
         time_screen_saver=0;
-        beep(50); // beep & debounce
-        delay(KEY_DEBOUNCE/2); // debounce
-        beep(50); // beep & debounce
-        delay(KEY_DEBOUNCE/2); // debounce
+        beep(2); // beep & debounce
 
         uint8_t press_time=0;
         // on entry wait for release
@@ -296,10 +295,7 @@ void loop()
                     state=state_last_used; // exit to last state on timeout.
                 }
                 in_menu=0; // EXIT
-                beep(KEY_DEBOUNCE/2); // beep & debounce
-                delay(50); // debounce
-                beep(KEY_DEBOUNCE/2); // beep & debounce
-                delay(50); // debounce
+                beep(2);
             }
             else // no timeout, must be keypressed
             {
@@ -331,7 +327,7 @@ void loop()
                     menu_id = MAX_MENU;
                 }
                 in_menu_time_out=50;
-                beep(50); // beep & debounce
+                beep(); // beep & debounce
                 delay(KEY_DEBOUNCE); // debounce
             }
         } while(in_menu);
@@ -386,7 +382,7 @@ void loop()
 
                 // trigger new scan from begin
                 channel=CHANNEL_MIN;
-                channelIndex = pgm_read_byte_near(channelList + channel);
+                channelIndex = pgm_read_byte_near(channelFreqOrderedIndex + channel);
                 rssi_best=0;
                 scan_start=1;
 
@@ -449,8 +445,7 @@ void loop()
 
                 for (uint8_t loop=0;loop<5;loop++)
                 {
-                    beep(100); // beep
-                    delay(100);
+                    beep(); // beep
                 }
                 delay(3000);
                 state=state_last_used; // return to saved function
@@ -473,7 +468,7 @@ void loop()
         drawScreen.screenSaver(pgm_read_byte_near(channelNames + channelIndex), pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
 #endif
 #ifdef USE_VOLTAGE_MONITORING
-            read_voltage();
+            readVoltage();
             voltage_alarm();
             drawScreen.updateVoltageScreenSaver(voltage, warning_alarm || critical_alarm);
 #endif
@@ -487,7 +482,7 @@ void loop()
 #endif
 
 #ifdef USE_VOLTAGE_MONITORING
-            read_voltage();
+            readVoltage();
             voltage_alarm();
 
             drawScreen.updateVoltageScreenSaver(voltage, warning_alarm || critical_alarm);
@@ -509,7 +504,7 @@ void loop()
             drawScreen.voltage(menu_id, vbat_scale, warning_voltage, critical_voltage);
             do {
                 drawScreen.updateVoltage(voltage);
-                read_voltage();
+                readVoltage();
                 voltage_alarm();
                 //delay(100); // timeout delay
             }
@@ -570,8 +565,7 @@ void loop()
             if(menu_id < 0) {
                 menu_id = 3;
             }
-            beep(50); // beep & debounce
-            //delay(KEY_DEBOUNCE); // debounce
+            beep();
             do{
                 delay(150);// wait for button release
             }
@@ -614,8 +608,7 @@ void loop()
             if(menu_id < 0) {
                 menu_id = useReceiverB;
             }
-            beep(50); // beep & debounce
-            delay(KEY_DEBOUNCE); // debounce
+            beep();
         }
         while(in_menu);
 
@@ -628,11 +621,11 @@ void loop()
     if(state == STATE_MANUAL || state == STATE_SEEK)
     {
         // read rssi
-        wait_rssi_ready();
+        waitRssiReady();
         rssi = readRSSI();
         rssi_best = (rssi > rssi_best) ? rssi : rssi_best;
 
-        channel=channel_from_index(channelIndex); // get 0...48 index depending of current channel
+        channel=channelFromIndex(channelIndex); // get 0...48 index depending of current channel
         if(state == STATE_MANUAL) // MANUAL MODE
         {
 #ifdef USE_IR_EMITTER
@@ -645,8 +638,7 @@ void loop()
             if( digitalRead(PIN_BUTTON_UP) == LOW)        // channel UP
             {
                 time_screen_saver=millis();
-                beep(50); // beep & debounce
-                delay(KEY_DEBOUNCE); // debounce
+                beep();
                 channelIndex++;
                 channel++;
                 channel > CHANNEL_MAX ? channel = CHANNEL_MIN : false;
@@ -658,8 +650,7 @@ void loop()
             if( digitalRead(PIN_BUTTON_DOWN) == LOW) // channel DOWN
             {
                 time_screen_saver=millis();
-                beep(50); // beep & debounce
-                delay(KEY_DEBOUNCE); // debounce
+                beep();
                 channelIndex--;
                 channel--;
                 channel < CHANNEL_MIN ? channel = CHANNEL_MAX : false;
@@ -670,7 +661,7 @@ void loop()
             }
 
             if(!settings_orderby_channel) { // order by frequency
-                channelIndex = pgm_read_byte_near(channelList + channel);
+                channelIndex = pgm_read_byte_near(channelFreqOrderedIndex + channel);
             }
 
         }
@@ -689,9 +680,7 @@ void loop()
                     seek_found=1;
                     time_screen_saver=millis();
                     // beep twice as notice of lock
-                    beep(100);
-                    delay(100);
-                    beep(100);
+                    beep(2);
                 }
                 else
                 { // seeking itself
@@ -713,7 +702,7 @@ void loop()
                         rssi_best = 0;
                     }
                     rssi_seek_threshold = rssi_seek_threshold < 5 ? 5 : rssi_seek_threshold; // make sure we are not stopping on everyting
-                    channelIndex = pgm_read_byte_near(channelList + channel);
+                    channelIndex = pgm_read_byte_near(channelFreqOrderedIndex + channel);
                 }
             }
             else
@@ -728,8 +717,7 @@ void loop()
                 else {
                     seek_direction = -1;
                 }
-                beep(50); // beep & debounce
-                delay(KEY_DEBOUNCE); // debounce
+                beep();
                 force_seek=1;
                 seek_found=0;
                 time_screen_saver=0;
@@ -758,7 +746,7 @@ void loop()
         }
 
         // print bar for spectrum
-        wait_rssi_ready();
+        waitRssiReady();
         // value must be ready
         rssi = readRSSI();
 
@@ -813,22 +801,21 @@ void loop()
                     }
 #endif
                     state = EepromSettings.defaultState;
-                    beep(1000);
+                    beep(1, 1000);
                 }
             }
         }
         // new scan possible by press scan
         if (digitalRead(PIN_BUTTON_UP) == LOW) // force new full new scan
         {
-            beep(50); // beep & debounce
-            delay(KEY_DEBOUNCE); // debounce
+            beep();
             last_state=255; // force redraw by fake state change ;-)
             channel=CHANNEL_MIN;
             scan_start=1;
             rssi_best=0;
         }
         // update index after channel change
-        channelIndex = pgm_read_byte_near(channelList + channel);
+        channelIndex = pgm_read_byte_near(channelFreqOrderedIndex + channel);
     }
 
 
@@ -873,9 +860,7 @@ void loop()
                         in_menu = 0;
                         for (uint8_t loop=0;loop<10;loop++)
                         {
-                            #define RSSI_SETUP_BEEP 25
-                            beep(RSSI_SETUP_BEEP); // beep & debounce
-                            delay(RSSI_SETUP_BEEP); // debounce
+                            beep();
                         }
                         state=STATE_RSSI_SETUP;
                         break;
@@ -932,7 +917,7 @@ void loop()
                 menu_id = SETUP_MENU_MAX_ITEMS;
             }
 
-            beep(50); // beep & debounce
+            beep();
             do{
                 delay(150);// wait for button release
             }
@@ -954,16 +939,11 @@ void loop()
         if(first_tune)
         {
             first_tune=0;
-            #define UP_BEEP 100
-            beep(UP_BEEP);
-            delay(UP_BEEP);
-            beep(UP_BEEP);
-            delay(UP_BEEP);
-            beep(UP_BEEP);
+            beep(2);
         }
     }
 #ifdef USE_VOLTAGE_MONITORING
-    read_voltage();
+    readVoltage();
     voltage_alarm();
 #endif
 }
@@ -973,24 +953,33 @@ void loop()
 /*   SUB ROUTINES  */
 /*******************/
 
-void beep(uint16_t time)
+void beep(uint8_t count, uint16_t milliseconds)
 {
-    digitalWrite(PIN_LED, HIGH);
-    if(settings_beeps){
-        digitalWrite(PIN_BUZZER, LOW); // activate beep
+    for (uint8_t i = 0; i < count; i++) {
+        digitalWrite(PIN_LED, HIGH);
+        if (EepromSettings.beepEnabled) {
+            digitalWrite(PIN_BUZZER, LOW);
+        }
+
+        delay(milliseconds / 2);
+
+        digitalWrite(PIN_LED, LOW);
+        if (EepromSettings.beepEnabled) {
+            digitalWrite(PIN_BUZZER, HIGH);
+        }
+
+        delay(milliseconds / 2);
     }
-    delay(time/2);
-    digitalWrite(PIN_LED, LOW);
-    digitalWrite(PIN_BUZZER, HIGH);
 }
 
-uint8_t channel_from_index(uint8_t channelIndex)
+uint8_t channelFromIndex(uint8_t channelIndex)
 {
+
     uint8_t loop=0;
     uint8_t channel=0;
     for (loop=0;loop<=CHANNEL_MAX;loop++)
     {
-        if(pgm_read_byte_near(channelList + loop) == channelIndex)
+        if(pgm_read_byte_near(channelFreqOrderedIndex + loop) == channelIndex)
         {
             channel=loop;
             break;
@@ -999,7 +988,7 @@ uint8_t channel_from_index(uint8_t channelIndex)
     return (channel);
 }
 
-void wait_rssi_ready()
+void waitRssiReady()
 {
     // CHECK FOR MINIMUM DELAY
     // check if RSSI is stable after tune by checking the time
@@ -1142,9 +1131,7 @@ void setReceiver(uint8_t receiver) {
 #ifdef USE_IR_EMITTER
 void sendIRPayload() {
     // beep twice before transmitting.
-    beep(100);
-    delay(100);
-    beep(100);
+    beep(2);
     uint8_t check_sum = 2;
     Serial.write(2); // start of payload STX
     check_sum += channelIndex;
@@ -1162,7 +1149,7 @@ void sendIRPayload() {
 #endif
 
 #ifdef USE_VOLTAGE_MONITORING
-void read_voltage()
+void readVoltage()
 {
     uint16_t v = analogRead(PIN_VBAT);
     voltages_sum += v;
@@ -1193,40 +1180,40 @@ void voltage_alarm(){
             //continue playint the critical alarm
             if(millis() - CRITICAL_BEEP_EVERY_MSEC > last_beep){
                 //flip the beeper output
-                set_buzzer(beeping);
+                setBuzzer(beeping);
                 beeping = !beeping;
                 last_beep = millis();
                 beep_times++;
             }
             if(beep_times > (CRITICAL_BEEPS*2)) {
                 //stop the beeping if we already beeped enough times
-                clear_alarm();
+                clearAlarm();
                 time_last_vbat_alarm = millis();
             }
         } else if(warning_alarm) {
             //continue playint the warning alarm
             if(millis() - WARNING_BEEP_EVERY_MSEC > last_beep){
                 //flip the beeper output
-                set_buzzer(beeping);
+                setBuzzer(beeping);
                 beeping = !beeping;
                 last_beep = millis();
                 beep_times++;
             }
             if(beep_times > (WARNING_BEEPS*2)) {
                 //stop the beeping if we already beeped enough times
-                clear_alarm();
+                clearAlarm();
                 time_last_vbat_alarm = millis();
             }
         }
     }
 }
-void clear_alarm(){
+void clearAlarm(){
     //stop alarm sound when we are at menu etc
     // it might be problematic when were in the middle of a alarm sound
-    set_buzzer(false);
+    setBuzzer(false);
     beep_times = 0;
 }
-void set_buzzer(bool value){
+void setBuzzer(bool value){
     digitalWrite(PIN_LED, value);
     digitalWrite(PIN_BUZZER, !value);
 }
