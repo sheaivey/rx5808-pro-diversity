@@ -92,7 +92,7 @@ char screens::begin(const char *call_sign) {
     display.setTextColor(WHITE);
     display.setCursor(0,8*1+4);
     display.print(PSTR2("Power:"));
-    display.setCursor(display.width()-6*2,8*1+4);
+    display.setCursor(display.width()-6*3,8*1+4);
     display.print(PSTR2("OK"));
     display.setCursor(0,8*2+4);
 
@@ -101,7 +101,7 @@ char screens::begin(const char *call_sign) {
     display.print(PSTR2("Diversity:"));
     display.display();
     delay(250);
-    display.setCursor(display.width()-6*8,8*2+4);
+    display.setCursor(display.width()-6*9,8*2+4);
     if(isDiversity()) {
         display.print(PSTR2(" ENABLED"));
     }
