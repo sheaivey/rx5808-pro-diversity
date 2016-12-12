@@ -5,6 +5,7 @@
 #include <avr/pgmspace.h>
 
 #include "settings.h"
+#include "receiver.h"
 
 struct EepromSettings {
     uint32_t magic;
@@ -48,7 +49,7 @@ PROGMEM const struct {
     uint8_t orderByChannel = true;
 
     #ifdef USE_DIVERSITY
-    uint8_t diversityMode = useReceiverAuto;
+    uint8_t diversityMode = RECEIVER_AUTO;
     uint16_t rssiBMin = RSSI_MIN_VAL;
     uint16_t rssiBMax = RSSI_MAX_VAL;
     #endif

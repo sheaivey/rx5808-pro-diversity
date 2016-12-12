@@ -5,6 +5,8 @@
 #include "receiver.h"
 #include "channels.h"
 
+uint8_t activeReceiver = RECEIVER_A;
+
 inline void sendBit(uint8_t value);
 inline void sendSlaveSelect(uint8_t value);
 
@@ -28,53 +30,64 @@ inline void sendSlaveSelect(uint8_t value);
 //        R = 8
 //
 // Refer to RTC6715 datasheet for further details.
-void setChannelModule(uint8_t channel)
+void setChannel(uint8_t channel)
 {
-  sendSlaveSelect(LOW);
+    sendSlaveSelect(LOW);
 
-  // Clock in address (0x1)
-  sendBit(HIGH);
-  sendBit(LOW);
-  sendBit(LOW);
-  sendBit(LOW);
-
-  // Enable write.
-  sendBit(HIGH);
-
-  // Send channel data.
-  uint16_t channelData = pgm_read_word_near(channelTable + channel);
-  for (uint8_t i = 0; i < 16; i++) {
-    sendBit(channelData & 0x1);
-    channelData >>= 1;
-  }
-
-  // Remaining bits are blank.
-  for (uint8_t i = 0; i < 4; i++)
+    // Clock in address (0x1)
+    sendBit(HIGH);
+    sendBit(LOW);
+    sendBit(LOW);
     sendBit(LOW);
 
-  // Finished clocking data in
-  sendSlaveSelect(HIGH);
-  digitalWrite(PIN_SPI_SLAVE_SELECT, LOW);
-  digitalWrite(PIN_SPI_CLOCK, LOW);
-  digitalWrite(PIN_SPI_DATA, LOW);
+    // Enable write.
+    sendBit(HIGH);
+
+    // Send channel data.
+    uint16_t channelData = pgm_read_word_near(channelTable + channel);
+    for (uint8_t i = 0; i < 16; i++) {
+      sendBit(channelData & 0x1);
+      channelData >>= 1;
+    }
+
+    // Remaining bits are blank.
+    for (uint8_t i = 0; i < 4; i++)
+      sendBit(LOW);
+
+    // Finished clocking data in
+    sendSlaveSelect(HIGH);
+    digitalWrite(PIN_SPI_SLAVE_SELECT, LOW);
+    digitalWrite(PIN_SPI_CLOCK, LOW);
+    digitalWrite(PIN_SPI_DATA, LOW);
 }
 
 inline void sendBit(uint8_t value)
 {
-  digitalWrite(PIN_SPI_CLOCK, LOW);
-  delayMicroseconds(1);
+    digitalWrite(PIN_SPI_CLOCK, LOW);
+    delayMicroseconds(1);
 
-  digitalWrite(PIN_SPI_DATA, value);
-  delayMicroseconds(1);
-  digitalWrite(PIN_SPI_CLOCK, HIGH);
-  delayMicroseconds(1);
+    digitalWrite(PIN_SPI_DATA, value);
+    delayMicroseconds(1);
+    digitalWrite(PIN_SPI_CLOCK, HIGH);
+    delayMicroseconds(1);
 
-  digitalWrite(PIN_SPI_CLOCK, LOW);
-  delayMicroseconds(1);
-}
+    digitalWrite(PIN_SPI_CLOCK, LOW);
+    delayMicroseconds(1);
+    }
 
 inline void sendSlaveSelect(uint8_t value)
 {
-  digitalWrite(PIN_SPI_SLAVE_SELECT, value);
-  delayMicroseconds(1);
+    digitalWrite(PIN_SPI_SLAVE_SELECT, value);
+    delayMicroseconds(1);
+}
+
+uint16_t setActiveReceiver(uint8_t receiver) {
+    #ifdef USE_DIVERSITY
+        digitalWrite(PIN_LED_A, receiver == RECEIVER_A);
+        digitalWrite(PIN_LED_B, receiver == RECEIVER_B);
+    #else
+        digitalWrite(PIN_LED_A, HIGH);
+    #endif
+
+    activeReceiver = receiver;
 }

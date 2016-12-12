@@ -89,11 +89,6 @@ SOFTWARE.
     #define MIN_TUNE_TIME 35
 #endif
 
-#ifdef USE_DIVERSITY
-    #define useReceiverAuto 0
-    #define useReceiverB 2
-#endif
-
 // === Display Modules =========================================================
 
 #ifdef SH1106

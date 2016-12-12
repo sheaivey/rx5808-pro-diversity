@@ -26,6 +26,7 @@ SOFTWARE.
 
 #include "settings.h"
 #include "internal_settings.h"
+#include "receiver.h"
 
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
 
@@ -427,13 +428,13 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
     if(isDiversity()) {
         display.setCursor(70,18);
         switch(diversity_mode) {
-            case useReceiverAuto:
+            case RECEIVER_AUTO:
                 display.print(PSTR2("AUTO"));
                 break;
-            case useReceiverA:
+            case RECEIVER_A:
                 display.print(PSTR2("ANTENNA A"));
                 break;
-            case useReceiverB:
+            case RECEIVER_B:
                 display.print(PSTR2("ANTENNA B"));
                 break;
         }
@@ -460,7 +461,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
         #define RSSI_BAR_SIZE 119
         uint8_t rssi_scaled=map(rssiA, 1, 100, 3, RSSI_BAR_SIZE);
         display.fillRect(7 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
-        if(active_receiver == useReceiverA)
+        if(active_receiver == RECEIVER_A)
         {
             display.fillRect(7, display.height()-19, rssi_scaled, 9, WHITE);
         }
@@ -473,7 +474,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
         // read rssi B
         rssi_scaled=map(rssiB, 1, 100, 3, RSSI_BAR_SIZE);
         display.fillRect(7 + rssi_scaled, display.height()-9, (RSSI_BAR_SIZE-rssi_scaled), 9, BLACK);
-        if(active_receiver == useReceiverB)
+        if(active_receiver == RECEIVER_B)
         {
             display.fillRect(7, display.height()-9, rssi_scaled, 9, WHITE);
         }
@@ -544,16 +545,16 @@ void screens::diversity(uint8_t diversity_mode) {
     //selected
     display.fillRect(0, 10*diversity_mode+12, display.width(), 10, WHITE);
 
-    display.setTextColor(diversity_mode == useReceiverAuto ? BLACK : WHITE);
+    display.setTextColor(diversity_mode == RECEIVER_A ? BLACK : WHITE);
     display.setCursor(5,10*1+3);
+    display.print(PSTR2("RECEIVER A"));
+    display.setTextColor(diversity_mode == RECEIVER_B ? BLACK : WHITE);
+    display.setCursor(5,10*2+3);
+    display.print(PSTR2("RECEIVER B"));
+    display.setTextColor(diversity_mode == RECEIVER_AUTO ? BLACK : WHITE);
+    display.setCursor(5,10*3+3);
     display.print(PSTR2("AUTO"));
 
-    display.setTextColor(diversity_mode == useReceiverA ? BLACK : WHITE);
-    display.setCursor(5,10*2+3);
-    display.print(PSTR2("RECEIVER A"));
-    display.setTextColor(diversity_mode == useReceiverB ? BLACK : WHITE);
-    display.setCursor(5,10*3+3);
-    display.print(PSTR2("RECEIVER B"));
 
     // RSSI Strength
     display.setTextColor(WHITE);
@@ -570,7 +571,7 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
     uint8_t rssi_scaled=map(rssiA, 1, 100, 1, RSSI_BAR_SIZE);
 
     display.fillRect(18 + rssi_scaled, display.height()-19, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
-    if(active_receiver==useReceiverA)
+    if(active_receiver==RECEIVER_A)
     {
         display.fillRect(18, display.height()-19, rssi_scaled, 7, WHITE);
     }
@@ -583,7 +584,7 @@ void screens::updateDiversity(char active_receiver, uint8_t rssiA, uint8_t rssiB
     // read rssi B
     rssi_scaled=map(rssiB, 1, 100, 1, RSSI_BAR_SIZE);
     display.fillRect(18 + rssi_scaled, display.height()-9, (RSSI_BAR_SIZE-rssi_scaled), 7, BLACK);
-    if(active_receiver==useReceiverB)
+    if(active_receiver==RECEIVER_B)
     {
         display.fillRect(18, display.height()-9, rssi_scaled, 7, WHITE);
     }

@@ -47,9 +47,8 @@ screens drawScreen;
 char channel = 0;
 uint8_t channelIndex = 0;
 uint8_t rssi = 0;
-uint8_t active_receiver = useReceiverA;
 #ifdef USE_DIVERSITY
-    uint8_t diversity_mode = useReceiverAuto;
+    uint8_t diversity_mode = RECEIVER_AUTO;
     char diversity_check_count = 0; // used to decide when to change antennas.
 #endif
 uint8_t rssi_seek_threshold = RSSI_SEEK_TRESHOLD;
@@ -113,7 +112,7 @@ void setup()
     digitalWrite(PIN_LED, HIGH);
     digitalWrite(PIN_BUZZER, HIGH);
 
-    setReceiver(useReceiverA);
+    setActiveReceiver(RECEIVER_A);
     setupSettings();
 
     // Init Display
@@ -160,7 +159,7 @@ void setupSettings() {
 
     // Set channel ASAP for fast boot times.
     channelIndex = EepromSettings.channel;
-    setChannelModule(channelIndex);
+    setChannel(channelIndex);
     last_channel_index = channelIndex;
 
     state = EepromSettings.defaultState;
@@ -179,7 +178,7 @@ void setupSettings() {
     #ifdef USE_DIVERSITY
         // make sure we use receiver Auto when diveristy is unplugged.
         if(!isDiversity()) {
-            diversity_mode = useReceiverAuto;
+            diversity_mode = RECEIVER_AUTO;
         }
     #endif
 
@@ -476,7 +475,7 @@ void loop()
             rssi = readRSSI();
 
 #ifdef USE_DIVERSITY
-            drawScreen.updateScreenSaver(active_receiver, rssi, readRSSI(useReceiverA), readRSSI(useReceiverB));
+            drawScreen.updateScreenSaver(activeReceiver, rssi, readRSSI(RECEIVER_A), readRSSI(RECEIVER_B));
 #else
             drawScreen.updateScreenSaver(rssi);
 #endif
@@ -585,9 +584,8 @@ void loop()
             drawScreen.diversity(diversity_mode);
             do
             {
-                //delay(10); // timeout delay
                 readRSSI();
-                drawScreen.updateDiversity(active_receiver, readRSSI(useReceiverA), readRSSI(useReceiverB));
+                drawScreen.updateDiversity(activeReceiver, readRSSI(RECEIVER_A), readRSSI(RECEIVER_B));
             }
             while((digitalRead(PIN_BUTTON_MODE) == HIGH) && (digitalRead(PIN_BUTTON_UP) == HIGH) && (digitalRead(PIN_BUTTON_DOWN) == HIGH)); // wait for next mode or time out
 
@@ -602,11 +600,11 @@ void loop()
                 menu_id++;
             }
 
-            if(menu_id > useReceiverB) {
-                menu_id = 0;
-            }
             if(menu_id < 0) {
-                menu_id = useReceiverB;
+                menu_id = 2;
+            }
+            if(menu_id > 2) {
+                menu_id = 0;
             }
             beep();
         }
@@ -741,7 +739,7 @@ void loop()
         if(scan_start)
         {
             scan_start=0;
-            setChannelModule(channelIndex);
+            setChannel(channelIndex);
             last_channel_index=channelIndex;
         }
 
@@ -931,7 +929,7 @@ void loop()
     /*****************************/
     if(last_channel_index != channelIndex)         // tune channel on demand
     {
-        setChannelModule(channelIndex);
+        setChannel(channelIndex);
         last_channel_index=channelIndex;
         // keep time of tune to make sure that RSSI is stable when required
         time_of_tune=millis();
@@ -1058,7 +1056,7 @@ uint16_t readRSSI(char receiver)
     {
         switch(diversity_mode)
         {
-            case useReceiverAuto:
+            case RECEIVER_AUTO:
                 // select receiver
                 if((int)abs((float)(((float)rssiA - (float)rssiB) / (float)rssiB) * 100.0) >= DIVERSITY_CUTOVER)
                 {
@@ -1072,30 +1070,30 @@ uint16_t readRSSI(char receiver)
                     }
                     // have we reached the maximum number of checks to switch receivers?
                     if(diversity_check_count == 0 || diversity_check_count >= DIVERSITY_MAX_CHECKS) {
-                        receiver=(diversity_check_count == 0) ? useReceiverA : useReceiverB;
+                        receiver=(diversity_check_count == 0) ? RECEIVER_A : RECEIVER_B;
                     }
                     else {
-                        receiver=active_receiver;
+                        receiver=activeReceiver;
                     }
                 }
                 else {
-                    receiver=active_receiver;
+                    receiver=activeReceiver;
                 }
                 break;
-            case useReceiverB:
-                receiver=useReceiverB;
+            case RECEIVER_B:
+                receiver=RECEIVER_B;
                 break;
-            case useReceiverA:
+            case RECEIVER_A:
             default:
-                receiver=useReceiverA;
+                receiver=RECEIVER_A;
         }
         // set the antenna LED and switch the video
-        setReceiver(receiver);
+        setActiveReceiver(receiver);
     }
 #endif
 
 #ifdef USE_DIVERSITY
-    if(receiver == useReceiverA || state==STATE_RSSI_SETUP)
+    if(receiver == RECEIVER_A || state==STATE_RSSI_SETUP)
     {
 #endif
         rssi = rssiA;
@@ -1106,25 +1104,6 @@ uint16_t readRSSI(char receiver)
     }
 #endif
     return constrain(rssi,1,100); // clip values to only be within this range.
-}
-
-void setReceiver(uint8_t receiver) {
-#ifdef USE_DIVERSITY
-    if(receiver == useReceiverA)
-    {
-        digitalWrite(PIN_LED_B, LOW);
-        digitalWrite(PIN_LED_A, HIGH);
-    }
-    else
-    {
-        digitalWrite(PIN_LED_A, LOW);
-        digitalWrite(PIN_LED_B, HIGH);
-    }
-#else
-    digitalWrite(PIN_LED_A, HIGH);
-#endif
-
-    active_receiver = receiver;
 }
 
 
