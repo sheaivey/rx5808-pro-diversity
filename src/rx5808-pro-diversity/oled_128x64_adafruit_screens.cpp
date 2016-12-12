@@ -197,17 +197,17 @@ void screens::seekMode(uint8_t state) {
         drawTitleBox(PSTR2("AUTO SEEK MODE"));
     }
     display.setTextColor(WHITE);
-    display.drawLine(0, 20, display.width(), 20, WHITE);
-    display.drawLine(0, 32, display.width(), 32, WHITE);
+    display.drawFastHLine(0, 20, display.width(), WHITE);
+    display.drawFastHLine(0, 32, display.width(), WHITE);
     display.setCursor(5,12);
-    display.drawLine(97,11,97,20,WHITE);
+    display.drawFastVLine(97, 11, 9, WHITE);
     display.print(PSTR2("BAND:"));
     for(uint16_t i=0;i<8;i++) {
         display.setCursor(15*i+8,23);
         display.print((char) (i+'1'));
     }
-    display.drawLine(0, 36, display.width(), 36, WHITE);
-    display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
+    display.drawFastHLine(0, 36, display.width(), WHITE);
+    display.drawFastHLine(0, display.height() - 11, display.width(), WHITE);
     display.setCursor(2,display.height()-9);
 #ifdef USE_LBAND
     display.print(PSTR2("5362"));
@@ -307,9 +307,9 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
         rssi_scaled=map(rssi_seek_threshold, 1, 100, 1, 14);
 
         display.fillRect(1,display.height()-12-14,2,14,BLACK);
-        display.drawLine(1,display.height()-12-rssi_scaled,2,display.height()-12-rssi_scaled, WHITE);
+        display.drawFastHLine(1, display.height() - 12 - rssi_scaled, 2, WHITE);
         display.fillRect(display.width()-3,display.height()-12-14,2,14,BLACK);
-        display.drawLine(display.width()-3,display.height()-12-rssi_scaled,display.width(),display.height()-12-rssi_scaled, WHITE);
+        display.drawFastHLine(display.width() - 3, display.height() - 12 - rssi_scaled, 3, WHITE);
 
         if(locked) // search if not found
         {
@@ -344,9 +344,10 @@ void screens::bandScanMode(uint8_t state) {
         display.setCursor(5,12);
         display.print(PSTR2("Min:     Max:"));
     }
-    display.drawLine(0, 20, display.width(), 20, WHITE);
 
-    display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
+    display.drawFastHLine(0, 20, display.width(), WHITE);
+    display.drawFastHLine(0, display.height()-11, display.width(), WHITE);
+
     display.setCursor(2,display.height()-9);
 #ifdef USE_LBAND
     display.print(PSTR2("5362"));
@@ -519,7 +520,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
     }
 #ifdef USE_DIVERSITY
     else if(isDiversity()) {
-        display.drawLine(50,display.height()-10,110,display.height()-10,BLACK);
+        display.drawFastHLine(50, display.height() - 10, 60, BLACK);
     }
 #endif
 #ifndef USE_VOLTAGE_MONITORING
