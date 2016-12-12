@@ -6,84 +6,58 @@
 #include "channels.h"
 
 inline void sendBit(uint8_t value);
-inline void toggleSpi(uint8_t value);
+inline void sendSlaveSelect(uint8_t value);
 
+// Sends SPI command to receiver module to change frequency.
+//
+// Format is LSB first, with the following bits in order:
+//     4 bits - address
+//     1 bit  - read/write enable
+//    20 bits - data
+//
+// Address for frequency select (Synth Register B) is 0x1
+// Expected data is (LSB):
+//     7 bits - A counter divider ratio
+//      1 bit - seperator
+//    12 bits - N counter divder ratio
+//
+// Forumla for calculating N and A is:
+//    F_lo = 2 * (N * 32 + A) * (F_osc / R)
+//    where:
+//        F_osc = 8 Mhz
+//        R = 8
+//
+// Refer to RTC6715 datasheet for further details.
 void setChannelModule(uint8_t channel)
 {
-  uint8_t i;
-  uint16_t channelData;
+  sendSlaveSelect(LOW);
 
-  channelData = pgm_read_word_near(channelTable + channel);
-
-  // bit bash out 25 bits of data
-  // Order: A0-3, !R/W, D0-D19
-  // A0=0, A1=0, A2=0, A3=1, RW=0, D0-19=0
-  toggleSpi(HIGH);
-  delayMicroseconds(1);
-  toggleSpi(LOW);
-
-  sendBit(LOW);
-  sendBit(LOW);
-  sendBit(LOW);
-  sendBit(HIGH);
-
-  sendBit(LOW);
-
-  // remaining zeros
-  for (i = 20; i > 0; i--)
-    sendBit(LOW);
-
-  // Clock the data in
-  toggleSpi(HIGH);
-  delayMicroseconds(1);
-  toggleSpi(LOW);
-
-  // Second is the channel data from the lookup table
-  // 20 bytes of register data are sent, but the MSB 4 bits are zeros
-  // register address = 0x1, write, data0-15=channelData data15-19=0x0
-  toggleSpi(HIGH);
-  toggleSpi(LOW);
-
-  // Register 0x1
+  // Clock in address (0x1)
   sendBit(HIGH);
   sendBit(LOW);
   sendBit(LOW);
   sendBit(LOW);
 
-  // Write to register
+  // Enable write.
   sendBit(HIGH);
 
-  // D0-D15
-  //   note: loop runs backwards as more efficent on AVR
-  for (i = 16; i > 0; i--)
-  {
-    // Is bit high or low?
-    if (channelData & 0x1)
-    {
-      sendBit(HIGH);
-    }
-    else
-    {
-      sendBit(LOW);
-    }
-
-    // Shift bits along to check the next one
+  // Send channel data.
+  uint16_t channelData = pgm_read_word_near(channelTable + channel);
+  for (uint8_t i = 0; i < 16; i++) {
+    sendBit(channelData & 0x1);
     channelData >>= 1;
   }
 
-  // Remaining D16-D19
-  for (i = 4; i > 0; i--)
+  // Remaining bits are blank.
+  for (uint8_t i = 0; i < 4; i++)
     sendBit(LOW);
 
   // Finished clocking data in
-  toggleSpi(HIGH);
-  delayMicroseconds(1);
-
+  sendSlaveSelect(HIGH);
   digitalWrite(PIN_SPI_SLAVE_SELECT, LOW);
   digitalWrite(PIN_SPI_CLOCK, LOW);
   digitalWrite(PIN_SPI_DATA, LOW);
 }
-
 
 inline void sendBit(uint8_t value)
 {
@@ -99,9 +73,8 @@ inline void sendBit(uint8_t value)
   delayMicroseconds(1);
 }
 
-inline void toggleSpi(uint8_t value)
+inline void sendSlaveSelect(uint8_t value)
 {
-  delayMicroseconds(1);
   digitalWrite(PIN_SPI_SLAVE_SELECT, value);
   delayMicroseconds(1);
 }
