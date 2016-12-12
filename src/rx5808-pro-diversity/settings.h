@@ -51,6 +51,7 @@ SOFTWARE.
 // Local laws may prohibit the use of these frequencies use at your own risk!
 //#define USE_LBAND
 #define USE_BOOT_CHECK
+#define USE_DIM_ON_SCREENSAVER
 
 // Receiver Module version
 // used for tuning time

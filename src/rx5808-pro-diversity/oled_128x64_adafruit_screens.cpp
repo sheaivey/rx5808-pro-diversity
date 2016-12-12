@@ -121,6 +121,9 @@ char screens::begin(const char *call_sign) {
 }
 
 void screens::reset() {
+#ifdef USE_DIM_ON_SCREENSAVER
+    display.dim(false);
+#endif  
     display.clearDisplay();
     display.setCursor(0,0);
     display.setTextSize(1);
@@ -423,6 +426,9 @@ void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency, const 
 }
 void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency, const char *call_sign) {
     reset();
+#ifdef USE_DIM_ON_SCREENSAVER
+    display.dim(true);
+#endif
     display.setTextSize(6);
     display.setTextColor(WHITE);
     display.setCursor(0,0);
