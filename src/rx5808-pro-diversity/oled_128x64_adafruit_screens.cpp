@@ -84,6 +84,7 @@ char screens::begin(const char *call_sign) {
     // init done
     reset();
 
+#ifdef USE_BOOT_CHECK
     display.fillRect(0, 0, display.width(), 11,WHITE);
     display.setTextColor(BLACK);
     display.setCursor(((display.width() - (10*6)) / 2),2);
@@ -114,6 +115,8 @@ char screens::begin(const char *call_sign) {
     display.print(call_sign);
     display.display();
     delay(1250);
+#endif
+
     return 0; // no errors
 }
 
