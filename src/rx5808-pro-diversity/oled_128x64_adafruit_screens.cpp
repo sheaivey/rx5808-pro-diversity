@@ -37,6 +37,10 @@ SOFTWARE.
 #include <Wire.h>
 #include <SPI.h>
 
+#ifdef USE_BOOT_ANIMATION
+    #include "boot_animation.h"
+#endif
+
 // New version of PSTR that uses a temp buffer and returns char *
 // by Shea Ivey
 #define PSTR2(x) PSTRtoBuffer_P(PSTR(x))
@@ -64,6 +68,7 @@ screens::screens() {
 }
 
 char screens::begin(const char *call_sign) {
+	int offset=1;
     // Set the address of your OLED Display.
     // 128x64 ONLY!!
 #ifdef SH1106
@@ -81,43 +86,77 @@ char screens::begin(const char *call_sign) {
     display.display(); // show splash screen
     delay(3000);
 #endif
+
+#ifdef USE_BOOT_ANIMATION
+    for (int i = 0; i < BOOT_ANIMATION_REPEATS; i++) {
+        for (int frame = 0; frame < BOOT_ANIMATION_FRAMES; frame++) {
+            display.clearDisplay();
+            display.drawBitmap(0, 0, BOOT_ANIMATION_BITMAPS[frame], 128, 64, WHITE);
+            display.display();
+            delay(BOOT_ANIMATION_INTERVAL);
+        }
+    }
+#endif
+
     // init done
     reset();
 
+#ifdef USE_BOOT_CHECK
     display.fillRect(0, 0, display.width(), 11,WHITE);
     display.setTextColor(BLACK);
     display.setCursor(((display.width() - (10*6)) / 2),2);
     display.print(PSTR2("Boot Check"));
 
     display.setTextColor(WHITE);
-    display.setCursor(0,8*1+4);
+    display.setCursor(0,8*offset+4);
     display.print(PSTR2("Power:"));
-    display.setCursor(display.width()-6*2,8*1+4);
+    display.setCursor(display.width()-6*2,8*offset+4);
     display.print(PSTR2("OK"));
-    display.setCursor(0,8*2+4);
+	offset++;
+    display.setCursor(0,8*offset+4);
 
     display.display();
 #ifdef USE_DIVERSITY
     display.print(PSTR2("Diversity:"));
     display.display();
     delay(250);
-    display.setCursor(display.width()-6*8,8*2+4);
+    display.setCursor(display.width()-6*8,8*offset+4);
     if(isDiversity()) {
         display.print(PSTR2(" ENABLED"));
     }
     else {
         display.print(PSTR2("DISABLED"));
     }
+	offset++;
 #endif
+#if defined(USE_9BAND) || defined(USE_LBAND)
+    display.setCursor(0,8*offset+4);
+    display.print(PSTR2("BAND:"));
+	#ifdef USE_9BAND
+		display.setCursor(display.width()-4*8,8*offset+4);
+		display.print(PSTR2("72CH"));
+	#endif
+	#ifdef USE_LBAND
+		display.setCursor(display.width()-8*8,8*offset+4);
+		display.print(PSTR2("L"));
+	#endif
+	offset++
+#endif
+	offset++;
     display.setCursor(((display.width() - (strlen(call_sign)*12)) / 2),8*4+4);
     display.setTextSize(2);
     display.print(call_sign);
     display.display();
     delay(1250);
+#endif
+
     return 0; // no errors
 }
 
 void screens::reset() {
+#ifdef USE_DIM_ON_SCREENSAVER
+    display.dim(false);
+#endif  
     display.clearDisplay();
     display.setCursor(0,0);
     display.setTextSize(1);
@@ -197,17 +236,17 @@ void screens::seekMode(uint8_t state) {
         drawTitleBox(PSTR2("AUTO SEEK MODE"));
     }
     display.setTextColor(WHITE);
-    display.drawLine(0, 20, display.width(), 20, WHITE);
-    display.drawLine(0, 32, display.width(), 32, WHITE);
+    display.drawFastHLine(0, 20, display.width(), WHITE);
+    display.drawFastHLine(0, 32, display.width(), WHITE);
     display.setCursor(5,12);
-    display.drawLine(97,11,97,20,WHITE);
+    display.drawFastVLine(97, 11, 9, WHITE);
     display.print(PSTR2("BAND:"));
     for(uint16_t i=0;i<8;i++) {
         display.setCursor(15*i+8,23);
         display.print((char) (i+'1'));
     }
-    display.drawLine(0, 36, display.width(), 36, WHITE);
-    display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
+    display.drawFastHLine(0, 36, display.width(), WHITE);
+    display.drawFastHLine(0, display.height() - 11, display.width(), WHITE);
     display.setCursor(2,display.height()-9);
     display.print(PSTR2("CHANNEL_MIN_FRQ"));
     display.setCursor(55,display.height()-9);
@@ -306,9 +345,9 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
         rssi_scaled=map(rssi_seek_threshold, 1, 100, 1, 14);
 
         display.fillRect(1,display.height()-12-14,2,14,BLACK);
-        display.drawLine(1,display.height()-12-rssi_scaled,2,display.height()-12-rssi_scaled, WHITE);
+        display.drawFastHLine(1, display.height() - 12 - rssi_scaled, 2, WHITE);
         display.fillRect(display.width()-3,display.height()-12-14,2,14,BLACK);
-        display.drawLine(display.width()-3,display.height()-12-rssi_scaled,display.width(),display.height()-12-rssi_scaled, WHITE);
+        display.drawFastHLine(display.width() - 3, display.height() - 12 - rssi_scaled, 3, WHITE);
 
         if(locked) // search if not found
         {
@@ -343,9 +382,10 @@ void screens::bandScanMode(uint8_t state) {
         display.setCursor(5,12);
         display.print(PSTR2("Min:     Max:"));
     }
-    display.drawLine(0, 20, display.width(), 20, WHITE);
 
-    display.drawLine(0, display.height()-11, display.width(), display.height()-11, WHITE);
+    display.drawFastHLine(0, 20, display.width(), WHITE);
+    display.drawFastHLine(0, display.height()-11, display.width(), WHITE);
+
     display.setCursor(2,display.height()-9);
     display.print(PSTR2("CHANNEL_MIN_FRQ"));
     display.setCursor(55,display.height()-9);
@@ -424,6 +464,9 @@ void screens::screenSaver(uint8_t channelName, uint16_t channelFrequency, const 
 }
 void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t channelFrequency, const char *call_sign) {
     reset();
+#ifdef USE_DIM_ON_SCREENSAVER
+    display.dim(true);
+#endif
     display.setTextSize(6);
     display.setTextColor(WHITE);
     display.setCursor(0,0);
@@ -524,7 +567,7 @@ void screens::updateScreenSaver(char active_receiver, uint8_t rssi, uint8_t rssi
     }
 #ifdef USE_DIVERSITY
     else if(isDiversity()) {
-        display.drawLine(50,display.height()-10,110,display.height()-10,BLACK);
+        display.drawFastHLine(50, display.height() - 10, 60, BLACK);
     }
 #endif
 #ifndef USE_VOLTAGE_MONITORING
