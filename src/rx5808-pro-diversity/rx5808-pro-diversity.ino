@@ -152,6 +152,13 @@ void setupIo() {
     pinMode(PIN_SPI_SLAVE_SELECT, OUTPUT);
     pinMode(PIN_SPI_DATA, OUTPUT);
 	pinMode(PIN_SPI_CLOCK, OUTPUT);
+
+    // Enabe pull-up resistors on RSSI pins to help keep the receivers a little
+    // cooler.
+    digitalWrite(PIN_RSSI_A, HIGH);
+    #ifdef USE_DIVERSITY
+        digitalWrite(PIN_RSSI_B, HIGH);
+    #endif
 }
 
 void setupSettings() {
