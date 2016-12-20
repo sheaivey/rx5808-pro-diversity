@@ -5,6 +5,7 @@
 #include <avr/pgmspace.h>
 
 #include "settings.h"
+#include "internal_settings.h"
 #include "receiver.h"
 
 struct EepromSettings {

@@ -68,18 +68,18 @@ SOFTWARE.
 #define USE_IR_EMITTER
 #define USE_BOOT_LOGO
 
-// You can use any of the arduino analog pins to measure the voltage of the 
+// You can use any of the arduino analog pins to measure the voltage of the
 // battery. See additional configuration below.
 //#define USE_VOLTAGE_MONITORING
 
 // Choose if you wish to use 8 additional channels:
-//     5362 MHz 
-//     5399 MHz 
-//     5436 MHz 
-//     5473 MHz 
-//     5510 MHz 
-//     5547 MHz 
-//     5584 MHz 
+//     5362 MHz
+//     5399 MHz
+//     5436 MHz
+//     5473 MHz
+//     5510 MHz
+//     5547 MHz
+//     5584 MHz
 //     5621 MHz
 // Local laws may prohibit the use of these frequencies so use at your own risk!
 //#define USE_LBAND
@@ -104,9 +104,7 @@ SOFTWARE.
 #define PIN_SPI_CLOCK 12
 
 #define PIN_RSSI_A A6
-#define useReceiverA 1
 #define PIN_LED_A A0
-
 #ifdef USE_DIVERSITY
     #define PIN_LED_B A1
     #define PIN_RSSI_B A7
@@ -123,15 +121,15 @@ SOFTWARE.
 // === Diversity ===============================================================
 
 #ifdef USE_DIVERSITY
-    // RSSI strenth should be greater than the value below (percent) over the 
-    // other receiver before we switch. This pervents flicker when RSSI values 
+    // RSSI strenth should be greater than the value below (percent) over the
+    // other receiver before we switch. This pervents flicker when RSSI values
     // are close and delays diversity checks counter.
     #define DIVERSITY_CUTOVER 2
 
-    // Number of checks a receiver needs to win over the other to switch 
+    // Number of checks a receiver needs to win over the other to switch
     // receivers. This pervents rapid switching.
-    // 
-    // 1 to 10 is a good range. 1 being fast switching, 10 being slow 100ms to 
+    //
+    // 1 to 10 is a good range. 1 being fast switching, 10 being slow 100ms to
     // switch.
     #define DIVERSITY_MAX_CHECKS 5
 #endif
@@ -139,12 +137,12 @@ SOFTWARE.
 // === Voltage Monitoring ======================================================
 
 #ifdef USE_VOLTAGE_MONITORING
-    // You can use any Arduino analog input to measure battery voltage. Keep in 
-    // mind that A4 and A5 is used by OLED and A6 and A7 are used for measuring 
-    // RSSI. 
+    // You can use any Arduino analog input to measure battery voltage. Keep in
+    // mind that A4 and A5 is used by OLED and A6 and A7 are used for measuring
+    // RSSI.
     //
     // Use a voltage divider to lower the voltage to max 5V - values for max 13V
-    // (3s). You can use a 100nF capacitor near the Arduino pin to smooth the 
+    // (3s). You can use a 100nF capacitor near the Arduino pin to smooth the
     // voltage.
     //
     //           R1 = 5.6k
@@ -190,7 +188,7 @@ SOFTWARE.
 
 // === Misc ====================================================================
 
-// Key debounce delay in milliseconds. 
+// Key debounce delay in milliseconds.
 // Good values are in the range of 100-200ms.
 // Shorter values will make it more reactive, but may lead to double trigger.
 #define KEY_DEBOUNCE 200

@@ -545,15 +545,15 @@ void screens::diversity(uint8_t diversity_mode) {
     //selected
     display.fillRect(0, 10*diversity_mode+12, display.width(), 10, WHITE);
 
-    display.setTextColor(diversity_mode == RECEIVER_A ? BLACK : WHITE);
+    display.setTextColor(diversity_mode == DIVERSITY_AUTO ? BLACK : WHITE);
     display.setCursor(5,10*1+3);
-    display.print(PSTR2("RECEIVER A"));
-    display.setTextColor(diversity_mode == RECEIVER_B ? BLACK : WHITE);
-    display.setCursor(5,10*2+3);
-    display.print(PSTR2("RECEIVER B"));
-    display.setTextColor(diversity_mode == RECEIVER_AUTO ? BLACK : WHITE);
-    display.setCursor(5,10*3+3);
     display.print(PSTR2("AUTO"));
+    display.setTextColor(diversity_mode == DIVERSITY_FORCE_A ? BLACK : WHITE);
+    display.setCursor(5,10*2+3);
+    display.print(PSTR2("RECEIVER A"));
+    display.setTextColor(diversity_mode == DIVERSITY_FORCE_B ? BLACK : WHITE);
+    display.setCursor(5,10*3+3);
+    display.print(PSTR2("RECEIVER B"));
 
 
     // RSSI Strength

@@ -101,6 +101,7 @@ bool settings_beeps = true;
 bool settings_orderby_channel = true;
 
 void beep(uint8_t count = 1, uint16_t milliseconds = 100);
+uint8_t readRSSI(char receiver = -1);
 
 // === Setup ===================================================================
 
@@ -207,6 +208,9 @@ void loop()
     /*******************/
     uint8_t in_menu;
     uint8_t in_menu_time_out;
+
+    updateRssi();
+    rssi = rssiA;
 
     if (digitalRead(PIN_BUTTON_MODE) == LOW) // key pressed ?
     {
@@ -435,24 +439,21 @@ void loop()
                 EepromSettings.orderByChannel = settings_orderby_channel;
                 memcpy(EepromSettings.callSign, call_sign, sizeof(call_sign));
 
-#ifdef USE_DIVERSITY
-                EepromSettings.diversityMode = diversity_mode;
-#endif
+                #ifdef USE_DIVERSITY
+                    EepromSettings.diversityMode = diversity_mode;
+                #endif
 
-#ifdef USE_VOLTAGE_MONITORING
-                EepromSettings.vbatScale = vbat_scale;
-                EepromSettings.vbatWarning = warning_voltage;
-                EepromSettings.vbatCritical = critical_voltage;
-#endif
+                #ifdef USE_VOLTAGE_MONITORING
+                    EepromSettings.vbatScale = vbat_scale;
+                    EepromSettings.vbatWarning = warning_voltage;
+                    EepromSettings.vbatCritical = critical_voltage;
+                #endif
 
                 drawScreen.save(state_last_used, channelIndex, pgm_read_word_near(channelFreqTable + channelIndex), call_sign);
 
                 EepromSettings.save();
 
-                for (uint8_t loop=0;loop<5;loop++)
-                {
-                    beep(); // beep
-                }
+                beep(5);
                 delay(3000);
                 state=state_last_used; // return to saved function
                 force_menu_redraw=1; // we change the state twice, must force redraw of menu
@@ -482,7 +483,7 @@ void loop()
             rssi = readRSSI();
 
 #ifdef USE_DIVERSITY
-            drawScreen.updateScreenSaver(activeReceiver, rssi, readRSSI(RECEIVER_A), readRSSI(RECEIVER_B));
+            drawScreen.updateScreenSaver(activeReceiver, rssi, rssiA, rssiB);
 #else
             drawScreen.updateScreenSaver(rssi);
 #endif
@@ -592,7 +593,7 @@ void loop()
             do
             {
                 readRSSI();
-                drawScreen.updateDiversity(activeReceiver, readRSSI(RECEIVER_A), readRSSI(RECEIVER_B));
+                drawScreen.updateDiversity(activeReceiver, rssiA, rssiB);
             }
             while((digitalRead(PIN_BUTTON_MODE) == HIGH) && (digitalRead(PIN_BUTTON_UP) == HIGH) && (digitalRead(PIN_BUTTON_DOWN) == HIGH)); // wait for next mode or time out
 
@@ -613,7 +614,9 @@ void loop()
             if(menu_id > 2) {
                 menu_id = 0;
             }
+
             beep();
+            EepromSettings.diversityMode = menu_id;
         }
         while(in_menu);
 
@@ -626,7 +629,7 @@ void loop()
     if(state == STATE_MANUAL || state == STATE_SEEK)
     {
         // read rssi
-        waitRssiReady();
+        waitForStableRssi();
         rssi = readRSSI();
         rssi_best = (rssi > rssi_best) ? rssi : rssi_best;
 
@@ -751,7 +754,7 @@ void loop()
         }
 
         // print bar for spectrum
-        waitRssiReady();
+        waitForStableRssi();
         // value must be ready
         rssi = readRSSI();
 
@@ -993,124 +996,22 @@ uint8_t channelFromIndex(uint8_t channelIndex)
     return (channel);
 }
 
-void waitRssiReady()
+uint8_t readRSSI(char receiver)
 {
-    // CHECK FOR MINIMUM DELAY
-    // check if RSSI is stable after tune by checking the time
-    uint16_t tune_time = millis()-time_of_tune;
-    if(tune_time < MIN_TUNE_TIME)
-    {
-        // wait until tune time is full filled
-        delay(MIN_TUNE_TIME-tune_time);
-    }
-}
+    updateRssi();
+    #ifdef USE_DIVERSITY
+        switchDiversity();
+    #endif
 
-uint16_t readRSSI()
-{
-#ifdef USE_DIVERSITY
-    return readRSSI(-1);
-}
-uint16_t readRSSI(char receiver)
-{
-#endif
-    int rssi = 0;
-    int rssiA = 0;
-
-#ifdef USE_DIVERSITY
-    int rssiB = 0;
-#endif
-    for (uint8_t i = 0; i < RSSI_READS; i++)
-    {
-        rssiA += analogRead(PIN_RSSI_A);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
-
-#ifdef USE_DIVERSITY
-        rssiB += analogRead(PIN_RSSI_B);//random(RSSI_MAX_VAL-200, RSSI_MAX_VAL);//
-#endif
-    }
-    rssiA = rssiA/RSSI_READS; // average of RSSI_READS readings
-
-#ifdef USE_DIVERSITY
-    rssiB = rssiB/RSSI_READS; // average of RSSI_READS readings
-#endif
-    // special case for RSSI setup
-    if(state==STATE_RSSI_SETUP)
-    { // RSSI setup
-        if(rssiA < rssi_setup_min_a)
-        {
-            rssi_setup_min_a=rssiA;
+    #ifdef USE_DIVERSITY
+        if (activeReceiver == RECEIVER_A || state == STATE_RSSI_SETUP) {
+            return rssiA;
+        }  else {
+            return rssiB;
         }
-        if(rssiA > rssi_setup_max_a)
-        {
-            rssi_setup_max_a=rssiA;
-        }
-
-#ifdef USE_DIVERSITY
-        if(rssiB < rssi_setup_min_b)
-        {
-            rssi_setup_min_b=rssiB;
-        }
-        if(rssiB > rssi_setup_max_b)
-        {
-            rssi_setup_max_b=rssiB;
-        }
-#endif
-    }
-
-    rssiA = map(rssiA, rssi_min_a, rssi_max_a , 1, 100);   // scale from 1..100%
-#ifdef USE_DIVERSITY
-    rssiB = map(rssiB, rssi_min_b, rssi_max_b , 1, 100);   // scale from 1..100%
-    if(receiver == -1) // no receiver was chosen using diversity
-    {
-        switch(diversity_mode)
-        {
-            case RECEIVER_AUTO:
-                // select receiver
-                if((int)abs((float)(((float)rssiA - (float)rssiB) / (float)rssiB) * 100.0) >= DIVERSITY_CUTOVER)
-                {
-                    if(rssiA > rssiB && diversity_check_count > 0)
-                    {
-                        diversity_check_count--;
-                    }
-                    if(rssiA < rssiB && diversity_check_count < DIVERSITY_MAX_CHECKS)
-                    {
-                        diversity_check_count++;
-                    }
-                    // have we reached the maximum number of checks to switch receivers?
-                    if(diversity_check_count == 0 || diversity_check_count >= DIVERSITY_MAX_CHECKS) {
-                        receiver=(diversity_check_count == 0) ? RECEIVER_A : RECEIVER_B;
-                    }
-                    else {
-                        receiver=activeReceiver;
-                    }
-                }
-                else {
-                    receiver=activeReceiver;
-                }
-                break;
-            case RECEIVER_B:
-                receiver=RECEIVER_B;
-                break;
-            case RECEIVER_A:
-            default:
-                receiver=RECEIVER_A;
-        }
-        // set the antenna LED and switch the video
-        setActiveReceiver(receiver);
-    }
-#endif
-
-#ifdef USE_DIVERSITY
-    if(receiver == RECEIVER_A || state==STATE_RSSI_SETUP)
-    {
-#endif
-        rssi = rssiA;
-#ifdef USE_DIVERSITY
-    }
-    else {
-        rssi = rssiB;
-    }
-#endif
-    return constrain(rssi,1,100); // clip values to only be within this range.
+    #else
+        return rssiA;
+    #endif
 }
 
 
