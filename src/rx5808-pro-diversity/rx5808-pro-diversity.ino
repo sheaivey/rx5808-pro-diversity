@@ -214,28 +214,22 @@ void loop()
     updateButtons();
     rssi = rssiA;
 
-    if (digitalRead(PIN_BUTTON_MODE) == LOW) // key pressed ?
-    {
-#ifdef USE_VOLTAGE_MONITORING
-        clearAlarm();
-#endif
-        time_screen_saver=0;
-        beep(2); // beep & debounce
+    if (ButtonState[Button::MODE]) {
+        #ifdef USE_VOLTAGE_MONITORING
+            clearAlarm();
+        #endif
 
-        uint8_t press_time=0;
-        // on entry wait for release
-        while(digitalRead(PIN_BUTTON_MODE) == LOW && press_time < 10)
-        {
-            delay(100);
-            press_time++;
-        }
+        time_screen_saver=0;
+        //beep(2); // beep & debounce
+
+        // Weird divide by 10 here because press_time is in deciseconds.
+        uint8_t press_time = waitForButtonRelease(Button::MODE) / 100;
         #define MAX_MENU 4
         #define MENU_Y_SIZE 15
 
         char menu_id=state_last_used-1;
         // Show Mode Screen
-        if(state==STATE_SEEK_FOUND)
-        {
+        if(state==STATE_SEEK_FOUND) {
             state=STATE_SEEK;
         }
         in_menu=1;
@@ -350,14 +344,15 @@ void loop()
     { // reset debounce
         switch_count = 0;
     }
+
     /***********************/
     /*     Save buttom     */
     /***********************/
     // hardware save buttom support (if no display is used)
-    if(digitalRead(PIN_BUTTON_SAVE) == LOW)
-    {
-        state=STATE_SAVE;
+    if (ButtonState[Button::SAVE]) {
+        state = STATE_SAVE;
     }
+
     /***************************************/
     /*   Draw screen if mode has changed   */
     /***************************************/
