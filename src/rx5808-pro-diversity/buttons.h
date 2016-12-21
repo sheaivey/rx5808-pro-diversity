@@ -1,14 +1,18 @@
 #ifndef BUTTONS_H
 #define BUTTONS_H
 
-struct ButtonState {
-    bool up = false;
-    bool down = false;
-    bool mode = false;
-    bool save = false;
+#define BUTTON_COUNT 4
+
+enum Button {
+    UP,
+    DOWN,
+    MODE,
+    SAVE
 };
 
 void updateButtons();
-extern struct ButtonState ButtonState;
+unsigned long waitForButtonRelease(Button button);
+
+extern bool ButtonState[BUTTON_COUNT];
 
 #endif

@@ -4,54 +4,51 @@
 #include "buttons.h"
 #include "settings.h"
 
+
 struct ButtonHistory {
     unsigned long lastDebounceTime = 0;
     bool lastReading = false;
 };
 
-struct ButtonHistories {
-    struct ButtonHistory up;
-    struct ButtonHistory down;
-    struct ButtonHistory mode;
-    struct ButtonHistory save;
-};
 
-static bool readButton(
+static bool updateButton(
     const int pin,
     bool &debouncedState,
     struct ButtonHistory &history
 );
 
-static struct ButtonHistories histories;
-struct ButtonState ButtonState;
+
+static struct ButtonHistory histories[BUTTON_COUNT];
+bool ButtonState[BUTTON_COUNT];
+
 
 void updateButtons() {
-    ButtonState.up = readButton(
-        PIN_BUTTON_UP,
-        ButtonState.up,
-        histories.up
-    );
+    #define UPDATE_BUTTON(button) \
+        ButtonState[Button::button] = updateButton( \
+            PIN_BUTTON_ ## button, \
+            ButtonState[Button::button], \
+            histories[Button::button] \
+        );
 
-    ButtonState.down = readButton(
-        PIN_BUTTON_DOWN,
-        ButtonState.down,
-        histories.down
-    );
+    UPDATE_BUTTON(UP);
+    UPDATE_BUTTON(DOWN);
+    UPDATE_BUTTON(MODE);
+    UPDATE_BUTTON(SAVE);
 
-    ButtonState.mode = readButton(
-        PIN_BUTTON_MODE,
-        ButtonState.mode,
-        histories.mode
-    );
-
-    ButtonState.save = readButton(
-        PIN_BUTTON_SAVE,
-        ButtonState.save,
-        histories.save
-    );
+    #undef UPDATE_BUTTON
 }
 
-static bool readButton(
+unsigned long waitForButtonRelease(Button button) {
+    const unsigned long startTime = millis();
+
+    while (ButtonState[button])
+        updateButtons();
+
+    return millis() - startTime;
+}
+
+
+static bool updateButton(
     const int pin,
     bool &debouncedState,
     struct ButtonHistory &history
@@ -72,3 +69,4 @@ static bool readButton(
 
     return debouncedState;
 }
+
