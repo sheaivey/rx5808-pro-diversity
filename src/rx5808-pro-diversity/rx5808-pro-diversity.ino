@@ -41,6 +41,7 @@ SOFTWARE.
 #include "screens.h"
 #include "channels.h"
 #include "receiver.h"
+#include "buttons.h"
 
 screens drawScreen;
 
@@ -210,6 +211,7 @@ void loop()
     uint8_t in_menu_time_out;
 
     updateRssi();
+    updateButtons();
     rssi = rssiA;
 
     if (digitalRead(PIN_BUTTON_MODE) == LOW) // key pressed ?
@@ -338,7 +340,7 @@ void loop()
                 }
                 in_menu_time_out=50;
                 beep(); // beep & debounce
-                delay(KEY_DEBOUNCE); // debounce
+                delay(BUTTON_DEBOUNCE_DELAY); // debounce
             }
         } while(in_menu);
         last_state=255; // force redraw of current screen

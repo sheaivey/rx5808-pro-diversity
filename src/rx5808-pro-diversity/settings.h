@@ -191,7 +191,7 @@ SOFTWARE.
 // Key debounce delay in milliseconds.
 // Good values are in the range of 100-200ms.
 // Shorter values will make it more reactive, but may lead to double trigger.
-#define KEY_DEBOUNCE 200
+#define BUTTON_DEBOUNCE_DELAY 100
 
 // Seconds to wait before force entering screensaver
 #define SCREENSAVER_TIMEOUT 30
