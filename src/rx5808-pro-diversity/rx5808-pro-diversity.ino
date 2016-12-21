@@ -473,7 +473,7 @@ void loop()
 #endif
 #ifdef USE_VOLTAGE_MONITORING
             readVoltage();
-            voltage_alarm();
+            voltageAlarm();
             drawScreen.updateVoltageScreenSaver(voltage, warning_alarm || critical_alarm);
 #endif
         do{
@@ -487,7 +487,7 @@ void loop()
 
 #ifdef USE_VOLTAGE_MONITORING
             readVoltage();
-            voltage_alarm();
+            voltageAlarm();
 
             drawScreen.updateVoltageScreenSaver(voltage, warning_alarm || critical_alarm);
 #endif
@@ -509,7 +509,7 @@ void loop()
             do {
                 drawScreen.updateVoltage(voltage);
                 readVoltage();
-                voltage_alarm();
+                voltageAlarm();
                 //delay(100); // timeout delay
             }
             while((digitalRead(PIN_BUTTON_MODE) == HIGH) && (digitalRead(PIN_BUTTON_UP) == HIGH) && (digitalRead(PIN_BUTTON_DOWN) == HIGH)); // wait for next key press
@@ -949,7 +949,7 @@ void loop()
     }
 #ifdef USE_VOLTAGE_MONITORING
     readVoltage();
-    voltage_alarm();
+    voltageAlarm();
 #endif
 }
 
@@ -1058,7 +1058,7 @@ void readVoltage()
         warning_alarm = false;
     }
 }
-void voltage_alarm(){
+void voltageAlarm(){
     if(millis() > time_last_vbat_alarm + ALARM_EVERY_MSEC){
         if(critical_alarm){
             //continue playint the critical alarm
