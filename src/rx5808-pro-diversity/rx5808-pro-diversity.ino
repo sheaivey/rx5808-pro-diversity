@@ -211,10 +211,10 @@ void loop()
     uint8_t in_menu_time_out;
 
     updateRssi();
-    updateButtons();
+    ButtonState::update();
     rssi = rssiA;
 
-    if (ButtonState[Button::MODE]) {
+    if (ButtonState::get(Button::MODE)) {
         #ifdef USE_VOLTAGE_MONITORING
             clearAlarm();
         #endif
@@ -223,7 +223,7 @@ void loop()
         //beep(2); // beep & debounce
 
         // Weird divide by 10 here because press_time is in deciseconds.
-        uint8_t press_time = waitForButtonRelease(Button::MODE) / 100;
+        uint8_t press_time = ButtonState::waitForRelease(Button::MODE) / 100;
         #define MAX_MENU 4
         #define MENU_Y_SIZE 15
 
@@ -349,7 +349,7 @@ void loop()
     /*     Save buttom     */
     /***********************/
     // hardware save buttom support (if no display is used)
-    if (ButtonState[Button::SAVE]) {
+    if (ButtonState::get(Button::SAVE)) {
         state = STATE_SAVE;
     }
 

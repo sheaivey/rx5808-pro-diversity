@@ -11,46 +11,54 @@ struct ButtonHistory {
 };
 
 
-static bool updateButton(
+static const bool updateButton(
     const int pin,
-    bool &debouncedState,
+    bool &state,
     struct ButtonHistory &history
 );
 
 
-static struct ButtonHistory histories[BUTTON_COUNT];
-bool ButtonState[BUTTON_COUNT];
+static struct ButtonHistory histories[static_cast<size_t>(Button::COUNT)];
+static bool states[static_cast<size_t>(Button::COUNT)];
 
 
-void updateButtons() {
-    #define UPDATE_BUTTON(button) \
-        ButtonState[Button::button] = updateButton( \
-            PIN_BUTTON_ ## button, \
-            ButtonState[Button::button], \
-            histories[Button::button] \
-        );
+namespace ButtonState {
+    void update() {
+        #define UPDATE_BUTTON(button) \
+            states[static_cast<size_t>(Button::button)] = updateButton( \
+                PIN_BUTTON_ ## button, \
+                states[static_cast<size_t>(Button::button)], \
+                histories[static_cast<size_t>(Button::button)] \
+            );
 
-    UPDATE_BUTTON(UP);
-    UPDATE_BUTTON(DOWN);
-    UPDATE_BUTTON(MODE);
-    UPDATE_BUTTON(SAVE);
+        UPDATE_BUTTON(UP);
+        UPDATE_BUTTON(DOWN);
+        UPDATE_BUTTON(MODE);
+        UPDATE_BUTTON(SAVE);
 
-    #undef UPDATE_BUTTON
+        #undef UPDATE_BUTTON
+    }
+
+    const bool get(Button button) {
+        return states[static_cast<size_t>(button)];
+    }
+
+    unsigned long waitForRelease(Button button) {
+        const unsigned long startTime = millis();
+
+        while (get(button)) {
+            update();
+            delay(BUTTON_DEBOUNCE_DELAY);
+        }
+
+        return millis() - startTime;
+    }
 }
 
-unsigned long waitForButtonRelease(Button button) {
-    const unsigned long startTime = millis();
 
-    while (ButtonState[button])
-        updateButtons();
-
-    return millis() - startTime;
-}
-
-
-static bool updateButton(
+static const bool updateButton(
     const int pin,
-    bool &debouncedState,
+    bool &state,
     struct ButtonHistory &history
 ) {
     const int reading = !digitalRead(pin); // Invert as we use pull-ups.
@@ -62,11 +70,10 @@ static bool updateButton(
     history.lastReading = reading;
 
     if ((millis() - history.lastDebounceTime) >= BUTTON_DEBOUNCE_DELAY) {
-        if (reading != debouncedState) {
+        if (reading != state) {
             return reading;
         }
     }
 
-    return debouncedState;
+    return state;
 }
-

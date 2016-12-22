@@ -1,18 +1,25 @@
 #ifndef BUTTONS_H
 #define BUTTONS_H
 
-#define BUTTON_COUNT 4
 
-enum Button {
+#include <stdint.h>
+
+
+enum class Button : uint8_t {
     UP,
     DOWN,
     MODE,
-    SAVE
+    SAVE,
+    COUNT
 };
 
-void updateButtons();
-unsigned long waitForButtonRelease(Button button);
 
-extern bool ButtonState[BUTTON_COUNT];
+namespace ButtonState {
+    void update();
+
+    const bool get(Button button);
+    unsigned long waitForRelease(Button button);
+}
+
 
 #endif
