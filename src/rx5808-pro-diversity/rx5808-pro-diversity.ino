@@ -34,9 +34,9 @@ SOFTWARE.
 
 #include <avr/pgmspace.h>
 
-#include "settings/settings.h"
-#include "settings/internal_settings.h"
-#include "settings/eeprom_settings.h"
+#include "settings.h"
+#include "internal_settings.h"
+#include "eeprom_settings.h"
 
 #include "screens.h"
 #include "channels.h"

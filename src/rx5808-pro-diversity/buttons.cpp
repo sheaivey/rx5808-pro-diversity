@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 #include "buttons.h"
-#include "settings/settings.h"
+#include "settings.h"
 
 
 struct ButtonHistory {

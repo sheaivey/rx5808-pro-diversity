@@ -1,14 +1,12 @@
 #ifndef EEPROM_SETTINGS_H
 #define EEPROM_SETTINGS_H
 
-
 #include <stdint.h>
 #include <avr/pgmspace.h>
 
 #include "settings.h"
 #include "internal_settings.h"
-#include "../receiver.h"
-
+#include "receiver.h"
 
 struct EepromSettings {
     uint32_t magic;
@@ -64,8 +62,6 @@ PROGMEM const struct {
     #endif
 } EepromDefaults;
 
-
 extern struct EepromSettings EepromSettings;
-
 
 #endif
