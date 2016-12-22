@@ -1,8 +1,10 @@
 #ifndef RECEIVER_H
 #define RECEIVER_H
 
+
 #include <stdint.h>
-#include "settings.h"
+#include "settings/settings.h"
+
 
 #define RECEIVER_A 0
 #ifdef USE_DIVERSITY

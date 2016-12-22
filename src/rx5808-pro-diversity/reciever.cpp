@@ -1,12 +1,12 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 
-#include "settings.h"
-#include "eeprom_settings.h"
+#include "settings/settings.h"
+#include "settings/eeprom_settings.h"
 #include "receiver.h"
 #include "channels.h"
 
-uint8_t activeReceiver = RECEIVER_A;
+uint8_t activeReceiver = -1;
 
 uint8_t rssiA = 0;
 uint16_t rssiARaw = 0;
@@ -97,6 +97,9 @@ inline void sendSlaveSelect(uint8_t value)
 }
 
 void setActiveReceiver(uint8_t receiver) {
+    if (receiver == activeReceiver)
+        return;
+
     #ifdef USE_DIVERSITY
         digitalWrite(PIN_LED_A, receiver == RECEIVER_A);
         digitalWrite(PIN_LED_B, receiver == RECEIVER_B);
@@ -215,4 +218,12 @@ void switchDiversity() {
     }
 
     setActiveReceiver(bestReceiver);
+}
+
+void updateReceiver() {
+    updateRssi();
+
+    #ifdef USE_DIVERSITY
+        switchDiversity();
+    #endif
 }
