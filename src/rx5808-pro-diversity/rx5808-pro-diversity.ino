@@ -43,7 +43,9 @@ SOFTWARE.
 #include "channels.h"
 #include "receiver.h"
 #include "buttons.h"
+
 #include "state.h"
+#include "state_scan.h"
 
 
 #ifdef OLD_LOOP
@@ -202,11 +204,11 @@ void setupState() {
 
     StateMachine::registerTickFunc(
         StateMachine::State::SCAN,
-        tickScan);
+        StateScan::tick);
 
     StateMachine::registerEnterFunc(
         StateMachine::State::SCAN,
-        enterScan);
+        StateScan::enter);
 
     StateMachine::switchState(StateMachine::State::SCREENSAVER);
     #endif
@@ -221,21 +223,6 @@ void loop() {
     Receiver::update();
     ButtonState::update();
     StateMachine::tick();
-}
-
-void enterScan() {
-    drawScreen.seekMode(STATE_MANUAL);
-}
-
-void tickScan() {
-    drawScreen.updateSeekMode(
-        STATE_SEEK,
-        EepromSettings.channel,
-        EepromSettings.channel,
-        Receiver::rssiA,
-        0,
-        RSSI_SEEK_TRESHOLD,
-        false);
 }
 
 void enterScreensaver() {

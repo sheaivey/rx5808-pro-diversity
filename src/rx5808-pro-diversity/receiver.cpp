@@ -13,6 +13,7 @@ static void updateRssiLimits();
 
 namespace Receiver {
     uint8_t activeReceiver = RECEIVER_A;
+    uint8_t activeChannel = 0;
     uint32_t lastChannelSwitchTime = 0;
 
     uint8_t rssiA = 0;
@@ -29,6 +30,7 @@ namespace Receiver {
         ReceiverSpi::setSynthRegisterB(channelData);
 
         lastChannelSwitchTime = millis();
+        activeChannel = channel;
     }
 
     void setActiveReceiver(uint8_t receiver) {
@@ -53,6 +55,8 @@ namespace Receiver {
     }
 
     uint16_t updateRssi() {
+        waitForStableRssi();
+
         rssiARaw = 0;
         #ifdef USE_DIVERSITY
             rssiBRaw = 0;
