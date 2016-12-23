@@ -25,7 +25,7 @@ namespace StateScreensaver {
     void tick() {
         drawScreen.updateScreenSaver(
             Receiver::activeReceiver,
-            0,
+            Receiver::rssiA,
             Receiver::rssiA,
             Receiver::rssiB
         );
