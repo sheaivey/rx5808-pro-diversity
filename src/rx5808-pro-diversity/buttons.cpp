@@ -28,7 +28,7 @@ namespace ButtonState {
 
     void update() {
         #define UPDATE_BUTTON(button) \
-            states[static_cast<size_t>(Button::button)] = updateButton( \
+            updateButton( \
                 PIN_BUTTON_ ## button, \
                 states[static_cast<size_t>(Button::button)], \
                 histories[static_cast<size_t>(Button::button)] \
@@ -84,11 +84,10 @@ static const bool updateButton(
 
     history.lastReading = reading;
 
-    if ((millis() - history.lastDebounceTime) >= BUTTON_DEBOUNCE_DELAY) {
-        if (reading != state) {
-            return reading;
-        }
+    if (
+        reading != state &&
+        (millis() - history.lastDebounceTime) >= BUTTON_DEBOUNCE_DELAY
+    ) {
+        state = reading;
     }
-
-    return state;
 }
