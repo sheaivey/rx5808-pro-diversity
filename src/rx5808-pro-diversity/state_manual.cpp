@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <avr/pgmspace.h>
 
 #include "state_manual.h"
@@ -15,21 +16,37 @@ extern screens drawScreen;
 
 
 namespace StateManual {
+    static void onButtonChange();
+
+
     void enter() {
         drawScreen.seekMode(STATE_MANUAL);
+
+        ButtonState::registerChangeFunc(onButtonChange);
+    }
+
+    void exit() {
+        ButtonState::deregisterChangeFunc(onButtonChange);
     }
 
     void tick() {
         drawScreen.updateSeekMode(
             STATE_MANUAL,
             Receiver::activeChannel,
-            Receiver::activeChannel,
+            pgm_read_word_near(
+                channelFreqOrderedIndex + Receiver::activeChannel
+            ),
             Receiver::rssiA,
             pgm_read_word_near(channelFreqTable + Receiver::activeChannel),
             RSSI_SEEK_TRESHOLD,
             true
         );
 
+        if ((millis() - ButtonState::lastPressTime) > 1000)
+            onButtonChange();
+    }
+
+    static void onButtonChange() {
         if (ButtonState::get(Button::UP)) {
             Receiver::setChannel(
                 (Receiver::activeChannel + 1) % CHANNEL_MAX_INDEX

@@ -210,6 +210,9 @@ void setupState() {
     StateMachine::registerEnterFunc(
         StateMachine::State::MANUAL,
         StateManual::enter);
+    StateMachine::registerExitFunc(
+        StateMachine::State::MANUAL,
+        StateManual::exit);
 
     StateMachine::switchState(StateMachine::State::SCREENSAVER);
     #endif

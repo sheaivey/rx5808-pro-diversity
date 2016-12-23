@@ -4,6 +4,7 @@
 
 namespace StateManual {
     void enter();
+    void exit();
     void tick();
 }
 
