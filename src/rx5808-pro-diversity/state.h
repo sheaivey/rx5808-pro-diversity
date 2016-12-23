@@ -3,9 +3,10 @@
 
 
 namespace StateMachine {
-  #define STATE_COUNT 3
+  #define STATE_COUNT 4
   enum class State {
       BOOT,
+      MANUAL,
       SCAN,
       SCREENSAVER
   };

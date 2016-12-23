@@ -46,6 +46,7 @@ SOFTWARE.
 
 #include "state.h"
 #include "state_scan.h"
+#include "state_manual.h"
 #include "state_screensaver.h"
 
 
@@ -192,7 +193,6 @@ void setupState() {
     StateMachine::registerTickFunc(
         StateMachine::State::SCREENSAVER,
         StateScreensaver::tick);
-
     StateMachine::registerEnterFunc(
         StateMachine::State::SCREENSAVER,
         StateScreensaver::enter);
@@ -200,10 +200,16 @@ void setupState() {
     StateMachine::registerTickFunc(
         StateMachine::State::SCAN,
         StateScan::tick);
-
     StateMachine::registerEnterFunc(
         StateMachine::State::SCAN,
         StateScan::enter);
+
+    StateMachine::registerTickFunc(
+        StateMachine::State::MANUAL,
+        StateManual::tick);
+    StateMachine::registerEnterFunc(
+        StateMachine::State::MANUAL,
+        StateManual::enter);
 
     StateMachine::switchState(StateMachine::State::SCREENSAVER);
     #endif

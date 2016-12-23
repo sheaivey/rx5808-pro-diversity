@@ -7,7 +7,7 @@ static StateMachine::TickFunc tickFuncs[STATE_COUNT] = { nullptr };
 
 
 namespace StateMachine {
-    State currentState = State::SCAN;
+    State currentState = State::MANUAL;
     State lastState = currentState;
 
 
