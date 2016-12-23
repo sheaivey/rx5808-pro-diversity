@@ -17,6 +17,7 @@ static uint8_t orderedChanelIndex = 0;
 
 namespace StateScan {
     void enter() {
+        orderedChanelIndex = 0;
         drawScreen.bandScanMode(STATE_SCAN);
     }
 
