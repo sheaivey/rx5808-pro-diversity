@@ -16,6 +16,7 @@ namespace StateMachine {
 
 
   extern State currentState;
+  extern State lastState;
 
 
   void registerEnterFunc(State state, EnterFunc func);

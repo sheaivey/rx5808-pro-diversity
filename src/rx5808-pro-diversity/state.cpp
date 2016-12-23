@@ -7,7 +7,8 @@ static StateMachine::TickFunc tickFuncs[STATE_COUNT] = { nullptr };
 
 
 namespace StateMachine {
-    State currentState = State::BOOT;
+    State currentState = State::SCAN;
+    State lastState = currentState;
 
 
     void registerEnterFunc(State state, EnterFunc func) {
@@ -24,6 +25,7 @@ namespace StateMachine {
         if (func)
             func();
 
+        lastState = currentState;
         currentState = newState;
     }
 
