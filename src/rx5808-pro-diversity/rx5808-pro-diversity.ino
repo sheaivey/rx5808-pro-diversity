@@ -46,6 +46,7 @@ SOFTWARE.
 
 #include "state.h"
 #include "state_scan.h"
+#include "state_screensaver.h"
 
 
 #ifdef OLD_LOOP
@@ -112,12 +113,6 @@ uint8_t readRSSI(char receiver = -1);
 
 
 #ifndef OLD_LOOP
-
-
-void enterScreensaver();
-void tickScreensaver();
-void enterScan();
-void tickScan();
 
 
 screens drawScreen;
@@ -196,11 +191,11 @@ void setupState() {
     #ifndef OLD_LOOP
     StateMachine::registerTickFunc(
         StateMachine::State::SCREENSAVER,
-        tickScreensaver);
+        StateScreensaver::tick);
 
     StateMachine::registerEnterFunc(
         StateMachine::State::SCREENSAVER,
-        enterScreensaver);
+        StateScreensaver::enter);
 
     StateMachine::registerTickFunc(
         StateMachine::State::SCAN,
@@ -223,27 +218,14 @@ void loop() {
     Receiver::update();
     ButtonState::update();
     StateMachine::tick();
-}
 
-void enterScreensaver() {
-    drawScreen.screenSaver(
-        0,
-        pgm_read_byte_near(channelNames + EepromSettings.channel),
-        pgm_read_word_near(channelFreqTable + EepromSettings.channel),
-        nullptr
-    );
-}
-
-void tickScreensaver() {
-    drawScreen.updateScreenSaver(
-        Receiver::activeReceiver,
-        0,
-        Receiver::rssiA,
-        Receiver::rssiB
-    );
-
-    if (ButtonState::any())
-        StateMachine::switchState(StateMachine::State::SCAN);
+    if (
+        StateMachine::currentState != StateMachine::State::SCREENSAVER
+        && (millis() - ButtonState::lastPressTime) >
+            (SCREENSAVER_TIMEOUT * 1000)
+    ) {
+        StateMachine::switchState(StateMachine::State::SCREENSAVER);
+    }
 }
 
 
