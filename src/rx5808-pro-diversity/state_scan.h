@@ -4,6 +4,7 @@
 
 namespace StateScan {
     void enter();
+    void exit();
     void tick();
 }
 

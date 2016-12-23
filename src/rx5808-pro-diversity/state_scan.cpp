@@ -13,12 +13,18 @@
 extern screens drawScreen;
 
 static uint8_t orderedChanelIndex = 0;
+static uint8_t lastChannelIndex = 0;
 
 
 namespace StateScan {
     void enter() {
         orderedChanelIndex = 0;
+        lastChannelIndex = Receiver::activeChannel;
         drawScreen.bandScanMode(STATE_SCAN);
+    }
+
+    void exit() {
+        Receiver::setChannel(lastChannelIndex);
     }
 
     void tick() {

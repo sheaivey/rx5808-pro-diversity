@@ -203,6 +203,9 @@ void setupState() {
     StateMachine::registerEnterFunc(
         StateMachine::State::SCAN,
         StateScan::enter);
+    StateMachine::registerExitFunc(
+        StateMachine::State::SCAN,
+        StateScan::exit);
 
     StateMachine::registerTickFunc(
         StateMachine::State::MANUAL,
