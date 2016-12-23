@@ -31,6 +31,6 @@ namespace StateScreensaver {
         );
 
         if (ButtonState::any())
-            StateMachine::switchState(StateMachine::State::SCAN);
+            StateMachine::switchState(StateMachine::lastState);
     }
 }
