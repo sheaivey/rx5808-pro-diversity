@@ -114,7 +114,7 @@ void setup()
     digitalWrite(PIN_LED, HIGH);
     digitalWrite(PIN_BUZZER, HIGH);
 
-    setActiveReceiver(RECEIVER_A);
+    Receiver::setActiveReceiver(RECEIVER_A);
     setupSettings();
 
     // Init Display
@@ -168,7 +168,7 @@ void setupSettings() {
 
     // Set channel ASAP for fast boot times.
     channelIndex = EepromSettings.channel;
-    setChannel(channelIndex);
+    Receiver::setChannel(channelIndex);
     last_channel_index = channelIndex;
 
     state = EepromSettings.defaultState;
@@ -210,9 +210,9 @@ void loop()
     uint8_t in_menu;
     uint8_t in_menu_time_out;
 
-    updateRssi();
+    Receiver::updateRssi();
     ButtonState::update();
-    rssi = rssiA;
+    rssi = Receiver::rssiA;
 
     if (ButtonState::get(Button::MODE)) {
         #ifdef USE_VOLTAGE_MONITORING
@@ -480,7 +480,12 @@ void loop()
             rssi = readRSSI();
 
 #ifdef USE_DIVERSITY
-            drawScreen.updateScreenSaver(activeReceiver, rssi, rssiA, rssiB);
+            drawScreen.updateScreenSaver(
+                Receiver::activeReceiver,
+                rssi,
+                Receiver::rssiA,
+                Receiver::rssiB
+            );
 #else
             drawScreen.updateScreenSaver(rssi);
 #endif
@@ -590,7 +595,11 @@ void loop()
             do
             {
                 readRSSI();
-                drawScreen.updateDiversity(activeReceiver, rssiA, rssiB);
+                drawScreen.updateDiversity(
+                    Receiver::activeReceiver,
+                    Receiver::rssiA,
+                    Receiver::rssiB
+                );
             }
             while((digitalRead(PIN_BUTTON_MODE) == HIGH) && (digitalRead(PIN_BUTTON_UP) == HIGH) && (digitalRead(PIN_BUTTON_DOWN) == HIGH)); // wait for next mode or time out
 
@@ -626,7 +635,7 @@ void loop()
     if(state == STATE_MANUAL || state == STATE_SEEK)
     {
         // read rssi
-        waitForStableRssi();
+        Receiver::waitForStableRssi();
         rssi = readRSSI();
         rssi_best = (rssi > rssi_best) ? rssi : rssi_best;
 
@@ -746,12 +755,12 @@ void loop()
         if(scan_start)
         {
             scan_start=0;
-            setChannel(channelIndex);
+            Receiver::setChannel(channelIndex);
             last_channel_index=channelIndex;
         }
 
         // print bar for spectrum
-        waitForStableRssi();
+        Receiver::waitForStableRssi();
         // value must be ready
         rssi = readRSSI();
 
@@ -936,7 +945,7 @@ void loop()
     /*****************************/
     if(last_channel_index != channelIndex)         // tune channel on demand
     {
-        setChannel(channelIndex);
+        Receiver::setChannel(channelIndex);
         last_channel_index=channelIndex;
         // keep time of tune to make sure that RSSI is stable when required
         time_of_tune=millis();
@@ -995,19 +1004,19 @@ uint8_t channelFromIndex(uint8_t channelIndex)
 
 uint8_t readRSSI(char receiver)
 {
-    updateRssi();
+    Receiver::updateRssi();
     #ifdef USE_DIVERSITY
-        switchDiversity();
+        Receiver::switchDiversity();
     #endif
 
     #ifdef USE_DIVERSITY
-        if (activeReceiver == RECEIVER_A || state == STATE_RSSI_SETUP) {
-            return rssiA;
+        if (Receiver::activeReceiver == RECEIVER_A || state == STATE_RSSI_SETUP) {
+            return Receiver::rssiA;
         }  else {
-            return rssiB;
+            return Receiver::rssiB;
         }
     #else
-        return rssiA;
+        return Receiver::rssiA;
     #endif
 }
 
