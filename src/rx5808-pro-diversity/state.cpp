@@ -2,8 +2,9 @@
 #include "state.h"
 
 
-static StateMachine::EnterFunc enterFuncs[STATE_COUNT] = { nullptr };
-static StateMachine::TickFunc tickFuncs[STATE_COUNT] = { nullptr };
+static StateMachine::HookFunc enterFuncs[STATE_COUNT] = { nullptr };
+static StateMachine::HookFunc tickFuncs[STATE_COUNT] = { nullptr };
+static StateMachine::HookFunc exitFuncs[STATE_COUNT] = { nullptr };
 
 
 namespace StateMachine {
@@ -11,27 +12,36 @@ namespace StateMachine {
     State lastState = currentState;
 
 
-    void registerEnterFunc(State state, EnterFunc func) {
+    void registerEnterFunc(State state, HookFunc func) {
         enterFuncs[static_cast<size_t>(state)] = func;
     }
 
-    void registerTickFunc(State state, TickFunc func) {
+    void registerTickFunc(State state, HookFunc func) {
         tickFuncs[static_cast<size_t>(state)] = func;
+    }
+
+    void registerExitFunc(State state, HookFunc func) {
+        exitFuncs[static_cast<size_t>(state)] = func;
     }
 
 
     void switchState(State newState) {
-        const EnterFunc func = enterFuncs[static_cast<size_t>(newState)];
-        if (func)
-            func();
-
         lastState = currentState;
         currentState = newState;
+
+        const HookFunc exitFunc = exitFuncs[static_cast<size_t>(newState)];
+        const HookFunc enterFunc = enterFuncs[static_cast<size_t>(newState)];
+
+        if (exitFunc)
+            exitFunc();
+
+        if (enterFunc)
+            enterFunc();
     }
 
 
     void tick() {
-        const TickFunc func = tickFuncs[static_cast<size_t>(currentState)];
+        const HookFunc func = tickFuncs[static_cast<size_t>(currentState)];
         if (func)
             func();
     }

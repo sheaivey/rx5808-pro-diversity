@@ -12,16 +12,16 @@ namespace StateMachine {
   };
 
 
-  typedef void(*EnterFunc)();
-  typedef void(*TickFunc)();
+  typedef void(*HookFunc)();
 
 
   extern State currentState;
   extern State lastState;
 
 
-  void registerEnterFunc(State state, EnterFunc func);
-  void registerTickFunc(State state, TickFunc func);
+  void registerEnterFunc(State state, HookFunc func);
+  void registerExitFunc(State state, HookFunc func);
+  void registerTickFunc(State state, HookFunc func);
 
   void switchState(State newState);
 
