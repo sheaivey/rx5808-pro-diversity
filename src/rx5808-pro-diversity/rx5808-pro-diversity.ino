@@ -48,6 +48,7 @@ SOFTWARE.
 #include "state_scan.h"
 #include "state_manual.h"
 #include "state_screensaver.h"
+#include "state_auto.h"
 
 
 #ifdef OLD_LOOP
@@ -216,6 +217,16 @@ void setupState() {
     StateMachine::registerExitFunc(
         StateMachine::State::MANUAL,
         StateManual::exit);
+
+    StateMachine::registerTickFunc(
+        StateMachine::State::AUTO,
+        StateAuto::tick);
+    StateMachine::registerEnterFunc(
+        StateMachine::State::AUTO,
+        StateAuto::enter);
+    StateMachine::registerExitFunc(
+        StateMachine::State::AUTO,
+        StateAuto::exit);
 
     StateMachine::switchState(StateMachine::State::SCREENSAVER);
     #endif

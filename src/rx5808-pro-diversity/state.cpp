@@ -8,7 +8,7 @@ static StateMachine::HookFunc exitFuncs[STATE_COUNT] = { nullptr };
 
 
 namespace StateMachine {
-    State currentState = State::MANUAL;
+    State currentState = State::AUTO;
     State lastState = currentState;
 
 
@@ -26,11 +26,11 @@ namespace StateMachine {
 
 
     void switchState(State newState) {
+        const HookFunc exitFunc = exitFuncs[static_cast<size_t>(currentState)];
+        const HookFunc enterFunc = enterFuncs[static_cast<size_t>(newState)];
+
         lastState = currentState;
         currentState = newState;
-
-        const HookFunc exitFunc = exitFuncs[static_cast<size_t>(newState)];
-        const HookFunc enterFunc = enterFuncs[static_cast<size_t>(newState)];
 
         if (exitFunc)
             exitFunc();
