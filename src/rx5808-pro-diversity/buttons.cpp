@@ -18,8 +18,8 @@ static const bool updateButton(
 );
 
 
-static struct ButtonHistory histories[static_cast<size_t>(Button::COUNT)];
-static bool states[static_cast<size_t>(Button::COUNT)];
+static struct ButtonHistory histories[BUTTON_COUNT];
+static bool states[BUTTON_COUNT];
 
 
 namespace ButtonState {
@@ -41,6 +41,15 @@ namespace ButtonState {
 
     const bool get(Button button) {
         return states[static_cast<size_t>(button)];
+    }
+
+    const bool any() {
+        for (uint8_t i = 0; i < BUTTON_COUNT; i++) {
+            if (states[i])
+                return true;
+        }
+
+        return false;
     }
 
     unsigned long waitForRelease(Button button) {

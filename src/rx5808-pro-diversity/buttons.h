@@ -12,12 +12,14 @@ enum class Button : uint8_t {
     SAVE,
     COUNT
 };
+#define BUTTON_COUNT static_cast<uint8_t>(Button::COUNT)
 
 
 namespace ButtonState {
     void update();
 
     const bool get(Button button);
+    const bool any();
     unsigned long waitForRelease(Button button);
 }
 
