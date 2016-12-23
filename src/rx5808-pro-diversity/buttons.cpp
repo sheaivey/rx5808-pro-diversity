@@ -23,6 +23,9 @@ static bool states[BUTTON_COUNT];
 
 
 namespace ButtonState {
+    uint32_t lastPressTime = 0;
+
+
     void update() {
         #define UPDATE_BUTTON(button) \
             states[static_cast<size_t>(Button::button)] = updateButton( \
@@ -35,6 +38,9 @@ namespace ButtonState {
         UPDATE_BUTTON(DOWN);
         UPDATE_BUTTON(MODE);
         UPDATE_BUTTON(SAVE);
+
+        if (any())
+            lastPressTime = millis();
 
         #undef UPDATE_BUTTON
     }

@@ -16,6 +16,9 @@ enum class Button : uint8_t {
 
 
 namespace ButtonState {
+    extern uint32_t lastPressTime;
+
+
     void update();
 
     const bool get(Button button);
