@@ -114,6 +114,8 @@ uint8_t readRSSI(char receiver = -1);
 
 void enterScreensaver();
 void tickScreensaver();
+void enterScan();
+void tickScan();
 
 
 screens drawScreen;
@@ -198,6 +200,14 @@ void setupState() {
         StateMachine::State::SCREENSAVER,
         enterScreensaver);
 
+    StateMachine::registerTickFunc(
+        StateMachine::State::SCAN,
+        tickScan);
+
+    StateMachine::registerEnterFunc(
+        StateMachine::State::SCAN,
+        enterScan);
+
     StateMachine::switchState(StateMachine::State::SCREENSAVER);
     #endif
 }
@@ -213,6 +223,20 @@ void loop() {
     StateMachine::tick();
 }
 
+void enterScan() {
+    drawScreen.seekMode(STATE_MANUAL);
+}
+
+void tickScan() {
+    drawScreen.updateSeekMode(
+        STATE_SEEK,
+        EepromSettings.channel,
+        EepromSettings.channel,
+        Receiver::rssiA,
+        0,
+        RSSI_SEEK_TRESHOLD,
+        false);
+}
 
 void enterScreensaver() {
     drawScreen.screenSaver(
@@ -230,6 +254,9 @@ void tickScreensaver() {
         Receiver::rssiA,
         Receiver::rssiB
     );
+
+    if (ButtonState::any())
+        StateMachine::switchState(StateMachine::State::SCAN);
 }
 
 
