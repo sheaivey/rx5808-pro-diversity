@@ -5,6 +5,9 @@
 #include <stdint.h>
 
 
+#define BUTTON_HOOKS_MAX 8
+
+
 enum class Button : uint8_t {
     UP,
     DOWN,
@@ -16,6 +19,9 @@ enum class Button : uint8_t {
 
 
 namespace ButtonState {
+    typedef void(*ChangeFunc)();
+
+
     extern uint32_t lastPressTime;
 
 
@@ -24,6 +30,9 @@ namespace ButtonState {
     const bool get(Button button);
     const bool any();
     unsigned long waitForRelease(Button button);
+
+    void registerChangeFunc(ChangeFunc func);
+    void deregisterChangeFunc(ChangeFunc func);
 }
 
 

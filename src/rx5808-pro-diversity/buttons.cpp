@@ -21,8 +21,12 @@ static const bool updateButton(
 static struct ButtonHistory histories[BUTTON_COUNT];
 static bool states[BUTTON_COUNT];
 
+static bool needCallChangeFuncs = false;
+static ButtonState::ChangeFunc changeFuncs[BUTTON_HOOKS_MAX] = { nullptr };
+
 
 namespace ButtonState {
+    static void runChangeFuncs();
     uint32_t lastPressTime = 0;
 
 
@@ -39,8 +43,12 @@ namespace ButtonState {
         UPDATE_BUTTON(MODE);
         UPDATE_BUTTON(SAVE);
 
-        if (any())
+        // HACK: this is super gross, better way of doing it?
+        if (needCallChangeFuncs) {
+            runChangeFuncs();
+            needCallChangeFuncs = false;
             lastPressTime = millis();
+        }
 
         #undef UPDATE_BUTTON
     }
@@ -68,6 +76,32 @@ namespace ButtonState {
 
         return millis() - startTime;
     }
+
+    void registerChangeFunc(ChangeFunc func) {
+        for (uint8_t i = 0; i < BUTTON_HOOKS_MAX; i++) {
+            if (changeFuncs[i] == nullptr) {
+                changeFuncs[i] = func;
+                return;
+            }
+        }
+    }
+
+    void deregisterChangeFunc(ChangeFunc func) {
+        for (uint8_t i = 0; i < BUTTON_HOOKS_MAX; i++) {
+            if (changeFuncs[i] == func) {
+                changeFuncs[i] = nullptr;
+                return;
+            }
+        }
+    }
+
+    static void runChangeFuncs() {
+        for (uint8_t i = 0; i < BUTTON_HOOKS_MAX; i++) {
+            if (changeFuncs[i] != nullptr) {
+                changeFuncs[i]();
+            }
+        }
+    }
 }
 
 
@@ -89,5 +123,6 @@ static const bool updateButton(
         (millis() - history.lastDebounceTime) >= BUTTON_DEBOUNCE_DELAY
     ) {
         state = reading;
+        needCallChangeFuncs = true;
     }
 }
