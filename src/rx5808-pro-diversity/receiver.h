@@ -32,6 +32,8 @@ namespace Receiver {
         void setDiversityMode(uint8_t mode);
         void switchDiversity();
     #endif
+
+    void update();
 }
 
 

@@ -32,6 +32,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+
 #include <avr/pgmspace.h>
 
 #include "settings.h"
@@ -42,9 +43,11 @@ SOFTWARE.
 #include "channels.h"
 #include "receiver.h"
 #include "buttons.h"
+#include "state.h"
 
+
+#ifdef OLD_LOOP
 screens drawScreen;
-
 char channel = 0;
 uint8_t channelIndex = 0;
 uint8_t rssi = 0;
@@ -103,12 +106,27 @@ bool settings_orderby_channel = true;
 
 void beep(uint8_t count = 1, uint16_t milliseconds = 100);
 uint8_t readRSSI(char receiver = -1);
+#endif
+
+
+#ifndef OLD_LOOP
+
+
+void enterScreensaver();
+void tickScreensaver();
+
+
+screens drawScreen;
+
+
+#endif
+
 
 // === Setup ===================================================================
 
 void setup()
 {
-    setupIo();
+    setupPins();
 
     // Enable buzzer and LED for duration of setup process.
     digitalWrite(PIN_LED, HIGH);
@@ -118,7 +136,7 @@ void setup()
     setupSettings();
 
     // Init Display
-    if (drawScreen.begin(call_sign) > 0) {
+    if (drawScreen.begin(nullptr) > 0) {
         haltWithError();
     }
 
@@ -130,9 +148,11 @@ void setup()
     // Setup complete.
     digitalWrite(PIN_LED, LOW);
     digitalWrite(PIN_BUZZER, LOW);
+
+    setupState();
 }
 
-void setupIo() {
+void setupPins() {
     pinMode(PIN_LED, OUTPUT);
     pinMode(PIN_BUZZER, OUTPUT);
 
@@ -165,43 +185,57 @@ void setupIo() {
 
 void setupSettings() {
     EepromSettings.load();
+    Receiver::setChannel(EepromSettings.channel);
+}
 
-    // Set channel ASAP for fast boot times.
-    channelIndex = EepromSettings.channel;
-    Receiver::setChannel(channelIndex);
-    last_channel_index = channelIndex;
+void setupState() {
+    #ifndef OLD_LOOP
+    StateMachine::registerTickFunc(
+        StateMachine::State::SCREENSAVER,
+        tickScreensaver);
 
-    state = EepromSettings.defaultState;
-    settings_beeps = EepromSettings.beepEnabled;
-    settings_orderby_channel = EepromSettings.orderByChannel;
-    memcpy(call_sign, EepromSettings.callSign, sizeof(call_sign));
+    StateMachine::registerEnterFunc(
+        StateMachine::State::SCREENSAVER,
+        enterScreensaver);
 
-    rssi_min_a = EepromSettings.rssiAMin;
-    rssi_max_a = EepromSettings.rssiAMax;
-    #ifdef USE_DIVERSITY
-        diversity_mode = EepromSettings.diversityMode;
-        rssi_min_b = EepromSettings.rssiBMin;
-        rssi_max_b = EepromSettings.rssiBMax;
+    StateMachine::switchState(StateMachine::State::SCREENSAVER);
     #endif
-
-    #ifdef USE_DIVERSITY
-        // make sure we use receiver Auto when diveristy is unplugged.
-        if(!isDiversity()) {
-            diversity_mode = RECEIVER_AUTO;
-        }
-    #endif
-
-    #ifdef USE_VOLTAGE_MONITORING
-        vbat_scale = EepromSettings.vbatScale;
-        warning_voltage = EepromSettings.vbatWarning;
-        critical_voltage = EepromSettings.vbatCritical;
-    #endif
-
-    force_menu_redraw = 1;
 }
 
 // === Main Loop ===============================================================
 
+#ifndef OLD_LOOP
+
+
+void loop() {
+    Receiver::update();
+    ButtonState::update();
+    StateMachine::tick();
+}
+
+
+void enterScreensaver() {
+    drawScreen.screenSaver(
+        0,
+        pgm_read_byte_near(channelNames + EepromSettings.channel),
+        pgm_read_word_near(channelFreqTable + EepromSettings.channel),
+        nullptr
+    );
+}
+
+void tickScreensaver() {
+    drawScreen.updateScreenSaver(
+        Receiver::activeReceiver,
+        0,
+        Receiver::rssiA,
+        Receiver::rssiB
+    );
+}
+
+
+#endif
+
+#ifdef OLD_LOOP
 void loop()
 {
     /*******************/
@@ -961,6 +995,7 @@ void loop()
     voltageAlarm();
 #endif
 }
+#endif
 
 /*###########################################################################*/
 /*******************/
@@ -986,6 +1021,7 @@ void beep(uint8_t count, uint16_t milliseconds)
     }
 }
 
+#ifdef OLD_LOOP
 uint8_t channelFromIndex(uint8_t channelIndex)
 {
 
@@ -1110,6 +1146,7 @@ void setBuzzer(bool value){
     digitalWrite(PIN_LED, value);
     digitalWrite(PIN_BUZZER, !value);
 }
+#endif
 #endif
 
 void haltWithError() {

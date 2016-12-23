@@ -133,6 +133,14 @@ namespace Receiver {
 
         setActiveReceiver(bestReceiver);
     }
+
+    void update() {
+        updateRssi();
+
+        #ifdef USE_DIVERSITY
+            switchDiversity();
+        #endif
+    }
 }
 
 
