@@ -1,11 +1,10 @@
 # ![Logo](media/logo.png)
 
-Manufactured version of this project can be found at [La Forge FPV](www.laforgefpv.com)
-
-# Introduction
 The main goal of this project is to add diversity to an already amazing feature set. Please see the following video for a quick intro of the project.
 
-[![Video](http://img.youtube.com/vi/NwnQCUikqvI/0.jpg)](http://www.youtube.com/watch?v=NwnQCUikqvI)
+<p align="center">
+    <a href="https://www.youtube.com/watch?v=NwnQCUikqvI"><img src="https://img.youtube.com/vi/NwnQCUikqvI/0.jpg"></a>
+</p>
 
 The code is also now backward compatible with the original rx5808-pro schematic minus diversity and dip switch mode. For details on updating click [here](/docs/diy-arduino-nano.md).
 
@@ -73,6 +72,8 @@ When powering on for the first time it is best to calibrate your RSSI modules. N
 5. Once all 3 scans are complete you will be returned to the last home screen. You should now be able to have accurate RSSI readings and also auto scan to active channels.
 
 ## Hardware
+A great manufactured version of this project can be found at [La Forge FPV](http://www.laforgefpv.com).
+
 This project is centered around the rx5808 5.8ghz receiver module which can be found at a number of online stores.
 
 I have modified the original schematics to incorporate the diversity setup.
