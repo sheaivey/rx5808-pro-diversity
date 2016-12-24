@@ -1,6 +1,8 @@
+# ![Logo](media/logo.png)
+
 Manufactured version of this project can be found at [La Forge FPV](www.laforgefpv.com)
 
-#Introduction
+# Introduction
 The main goal of this project is to add diversity to an already amazing feature set. Please see the following video for a quick intro of the project.
 
 [![Video](http://img.youtube.com/vi/NwnQCUikqvI/0.jpg)](http://www.youtube.com/watch?v=NwnQCUikqvI)
@@ -25,7 +27,7 @@ Donations help show the developer your appreciation for all their hard work. A l
 6. [License](#license)
 
 
-##Features
+## Features
 - **User control** - 3 Button navigation, up, down, select.
 - **Manual Mode** - Set channel manual
 - **Search Mode** - Search next channel based on RSSI
@@ -34,18 +36,17 @@ Donations help show the developer your appreciation for all their hard work. A l
 - **Save channel** - Startup with last saved channel
 - **Beeper** - Acustic feedback on important actions
 - **Save RSSI range** - RSSI voltage may vary per part
-- *(NEW)* **Quick Save** - From any home press and hold select for 1 second.
-- *(NEW)* **Diversity** - Receiver select and monitor.
-- *(NEW)* **Led Status** - Power, button pressed, active antenna.
-- *(NEW)* **Race Band** - Added band C/Immersion Race for a total of 40 supported channels.
-- *(NEW)* **Backward Compatibility** - Use this code with your existing setup.
-- *(NEW)* **OLED Version** - Use a 128x64 OLED Display instead of TV_OUT.
-- *(NEW)* **Setup Menu** - Creating menu for toggling settings.
-- *(NEW)* **Voltage Alarm** - you can now use the built in buzzer for monitoring voltage
-- *(REMOVED)* ~~**DIP mode** - Set channel by extern DIP switch~~
+- **Quick Save** - From any home press and hold select for 1 second.
+- **Diversity** - Receiver select and monitor.
+- **Led Status** - Power, button pressed, active antenna.
+- **Race Band** - Added band C/Immersion Race for a total of 40 supported channels.
+- **Backward Compatibility** - Use this code with your existing setup.
+- **OLED Version** - Use a 128x64 OLED Display instead of TV_OUT.
+- **Setup Menu** - Creating menu for toggling settings.
+- **Voltage Alarm** - you can now use the built in buzzer for monitoring voltage
 
-##Usage
-####Screens
+## Usage
+#### Screens
 
 ![TVOut Screens](docs/img/screens-tvout.jpg "TVOut Screens")
 
@@ -62,7 +63,7 @@ Donations help show the developer your appreciation for all their hard work. A l
     5. **Voltage Alarm** - Change the warning/alarm voltage and calibration value.
     6. **Save & Exit**
 
-####Initial Setup
+#### Initial Setup
 When powering on for the first time it is best to calibrate your RSSI modules. No two modules have the same RSSI min and max readings. To calibrate follow these steps below. You can repeat this process as many times as needed.
 
 1. Power on your receiver and transmitter and place them about 5 to 20 feet apart from one another. (For best results remove antennas to calibrate each module on a level playing field.)
@@ -71,7 +72,7 @@ When powering on for the first time it is best to calibrate your RSSI modules. N
 4. Now that you are in the RSSI calibration screen, the receiver will scan all channels 3 times getting the min and max RSSI strength.
 5. Once all 3 scans are complete you will be returned to the last home screen. You should now be able to have accurate RSSI readings and also auto scan to active channels.
 
-##Hardware
+## Hardware
 This project is centered around the rx5808 5.8ghz receiver module which can be found at a number of online stores.
 
 I have modified the original schematics to incorporate the diversity setup.
@@ -89,7 +90,7 @@ For more information on specific hardware implementations:
 3. [rx5808 SPI modification](/docs/rx5808-spi-mod.md)
 6. [Voltage Monitoring](/docs/voltage-monitoring.md)
 
-##Software
+## Software
 The major software changes are centered around the diversity menu. This required removing the dip switch mode from the origional project. Within the diversity menu you will find RSSI signal strength for each receiver and the ability to select which mode the receivers are operating in (Auto, Receiver A, Receiver B).
 
 The following values control how often we switch receiver in diversity auto mode.
@@ -123,13 +124,13 @@ If check_counter is DIVERSITY_MAX_CHECKS
 The two percent helps prevent rapid video switching when both RSSI are close in value.
 ![diversity example](docs/img/diversity-example.jpg)
 
-##Contributing
+## Contributing
 Any contributions are welcome!
 
 Please follow [CONTRIBUTING.md](CONTRIBUTING.md) for standard practices regarding this repo.
 
-##License & Recognition
-####Recognition
+## License & Recognition
+#### Recognition
 - SPI driver based on fs_skyrf_58g-main.c Written by Simon Chambers
 - TVOUT by Myles Metzel
 - Scanner by Johann Hermen (der-Frickler.net)
@@ -143,7 +144,7 @@ Please follow [CONTRIBUTING.md](CONTRIBUTING.md) for standard practices regardin
 - DIY Throughole board and documentation. by RCDaddy
 - Voltage monitoring by kabturek
 
-####License
+#### License
 The MIT License (MIT)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
