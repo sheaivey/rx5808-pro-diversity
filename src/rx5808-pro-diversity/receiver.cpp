@@ -2,7 +2,7 @@
 #include <avr/pgmspace.h>
 
 #include "settings.h"
-#include "eeprom_settings.h"
+#include "settings_eeprom.h"
 #include "receiver.h"
 #include "receiver_spi.h"
 #include "channels.h"

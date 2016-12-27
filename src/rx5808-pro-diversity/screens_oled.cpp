@@ -25,7 +25,7 @@ SOFTWARE.
 */
 
 #include "settings.h"
-#include "internal_settings.h"
+#include "settings_internal.h"
 #include "receiver.h"
 
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
@@ -106,7 +106,7 @@ char screens::begin(const char *call_sign) {
 void screens::reset() {
 #ifdef USE_DIM_ON_SCREENSAVER
     display.dim(false);
-#endif  
+#endif
     display.clearDisplay();
     display.setCursor(0,0);
     display.setTextSize(1);

@@ -3,8 +3,8 @@
 #include "state_scan.h"
 
 #include "settings.h"
-#include "internal_settings.h"
-#include "eeprom_settings.h"
+#include "settings_internal.h"
+#include "settings_eeprom.h"
 #include "receiver.h"
 #include "channels.h"
 #include "screens.h"

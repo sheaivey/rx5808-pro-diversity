@@ -27,7 +27,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include "settings.h"
-#include "internal_settings.h"
+#include "settings_internal.h"
 
 #ifdef TVOUT_SCREENS
 #include "screens.h" // function headers
@@ -215,7 +215,7 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
 
     rssi_scaled=map(rssi, 1, 100, 1, SCANNER_BAR_MINI_SIZE);
 
- 
+
 #ifdef USE_LBAND
     // clear last bar
     TV.draw_rect((channel * 5/2)+4, (TV_ROWS - TV_SCANNER_OFFSET - SCANNER_BAR_MINI_SIZE), 2, SCANNER_BAR_MINI_SIZE , BLACK, BLACK);
