@@ -26,8 +26,7 @@ namespace Receiver {
 
     void setChannel(uint8_t channel)
     {
-        uint16_t channelData = pgm_read_word_near(channelTable + channel);
-        ReceiverSpi::setSynthRegisterB(channelData);
+        ReceiverSpi::setSynthRegisterB(Channels::getSynthRegisterB(channel));
 
         lastChannelSwitchTime = millis();
         activeChannel = channel;

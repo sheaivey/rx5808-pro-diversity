@@ -33,11 +33,9 @@ namespace StateManual {
         drawScreen.updateSeekMode(
             STATE_MANUAL,
             Receiver::activeChannel,
-            pgm_read_word_near(
-                channelFreqOrderedIndex + Receiver::activeChannel
-            ),
+            Channels::getOrderedIndex(Receiver::activeChannel),
             Receiver::rssiA,
-            pgm_read_word_near(channelFreqTable + Receiver::activeChannel),
+            Channels::getFrequency(Receiver::activeChannel),
             RSSI_SEEK_TRESHOLD,
             true
         );

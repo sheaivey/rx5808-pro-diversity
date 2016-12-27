@@ -28,27 +28,18 @@ namespace StateScan {
     }
 
     void tick() {
-        uint8_t channelName = pgm_read_byte(
-            channelNames + Receiver::activeChannel
-        );
-
-        uint16_t channelFreq = pgm_read_byte(
-            channelFreqTable + Receiver::activeChannel
-        );
-
         drawScreen.updateBandScanMode(
             false,
             orderedChanelIndex,
             Receiver::rssiA,
-            channelName,
-            channelFreq,
+            Channels::getName(Receiver::activeChannel),
+            Channels::getFrequency(Receiver::activeChannel),
             EepromSettings.rssiAMin,
             EepromSettings.rssiAMax);
 
         orderedChanelIndex = (orderedChanelIndex + 1) % CHANNEL_MAX_INDEX;
-        uint8_t realChannelIndex = pgm_read_byte(
-            channelFreqOrderedIndex + orderedChanelIndex
-        );
+        uint8_t realChannelIndex = Channels::getOrderedIndex(
+            orderedChanelIndex);
 
         Receiver::setChannel(realChannelIndex);
     }

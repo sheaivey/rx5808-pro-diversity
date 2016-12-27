@@ -16,8 +16,8 @@ namespace StateScreensaver {
     void enter() {
         drawScreen.screenSaver(
             0,
-            pgm_read_byte_near(channelNames + Receiver::activeChannel),
-            pgm_read_word_near(channelFreqTable + Receiver::activeChannel),
+            Channels::getName(Receiver::activeChannel),
+            Channels::getFrequency(Receiver::activeChannel),
             nullptr
         );
     }
