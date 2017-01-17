@@ -2,10 +2,16 @@
 #define STATE_SCAN_H
 
 
-namespace StateScan {
-    void enter();
-    void exit();
-    void tick();
+#include "state.h"
+
+
+namespace StateMachine {
+    class ScanStateHandler : public StateMachine::StateHandler {
+        public:
+            void onEnter();
+            void onExit();
+            void onTick();
+    };
 }
 
 

@@ -2,10 +2,16 @@
 #define STATE_MANUAL_H
 
 
-namespace StateManual {
-    void enter();
-    void exit();
-    void tick();
+#include "state.h"
+
+
+namespace StateMachine {
+    class ManualStateHandler : public StateMachine::StateHandler {
+        public:
+            void onEnter();
+            void onExit();
+            void onTick();
+    };
 }
 
 

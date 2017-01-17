@@ -149,8 +149,6 @@ void setup()
     // Setup complete.
     digitalWrite(PIN_LED, LOW);
     digitalWrite(PIN_BUZZER, LOW);
-
-    setupState();
 }
 
 void setupPins() {
@@ -187,49 +185,6 @@ void setupPins() {
 void setupSettings() {
     EepromSettings.load();
     Receiver::setChannel(EepromSettings.channel);
-}
-
-void setupState() {
-    #ifndef OLD_LOOP
-    StateMachine::registerTickFunc(
-        StateMachine::State::SCREENSAVER,
-        StateScreensaver::tick);
-    StateMachine::registerEnterFunc(
-        StateMachine::State::SCREENSAVER,
-        StateScreensaver::enter);
-
-    StateMachine::registerTickFunc(
-        StateMachine::State::SCAN,
-        StateScan::tick);
-    StateMachine::registerEnterFunc(
-        StateMachine::State::SCAN,
-        StateScan::enter);
-    StateMachine::registerExitFunc(
-        StateMachine::State::SCAN,
-        StateScan::exit);
-
-    StateMachine::registerTickFunc(
-        StateMachine::State::MANUAL,
-        StateManual::tick);
-    StateMachine::registerEnterFunc(
-        StateMachine::State::MANUAL,
-        StateManual::enter);
-    StateMachine::registerExitFunc(
-        StateMachine::State::MANUAL,
-        StateManual::exit);
-
-    StateMachine::registerTickFunc(
-        StateMachine::State::AUTO,
-        StateAuto::tick);
-    StateMachine::registerEnterFunc(
-        StateMachine::State::AUTO,
-        StateAuto::enter);
-    StateMachine::registerExitFunc(
-        StateMachine::State::AUTO,
-        StateAuto::exit);
-
-    StateMachine::switchState(StateMachine::State::SCREENSAVER);
-    #endif
 }
 
 // === Main Loop ===============================================================

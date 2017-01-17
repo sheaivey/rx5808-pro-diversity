@@ -2,10 +2,16 @@
 #define STATE_AUTO_H
 
 
-namespace StateAuto {
-    void enter();
-    void exit();
-    void tick();
+#include "state.h"
+
+
+namespace StateMachine {
+    class AutoStateHandler : public StateMachine::StateHandler {
+        public:
+            void onEnter();
+            void onExit();
+            void onTick();
+    };
 }
 
 

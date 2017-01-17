@@ -1,48 +1,53 @@
 #include <stddef.h>
+
 #include "state.h"
 
-
-static StateMachine::HookFunc enterFuncs[STATE_COUNT] = { nullptr };
-static StateMachine::HookFunc tickFuncs[STATE_COUNT] = { nullptr };
-static StateMachine::HookFunc exitFuncs[STATE_COUNT] = { nullptr };
+#include "state_screensaver.h"
+#include "state_scan.h"
+#include "state_manual.h"
+#include "state_auto.h"
 
 
 namespace StateMachine {
-    State currentState = State::AUTO;
+    static ScreensaverStateHandler screensaverHandler;
+    static ManualStateHandler manualHandler;
+    static ScanStateHandler scanHandler;
+    static AutoStateHandler autoHandler;
+
+    static StateHandler* handlers[STATE_COUNT] = {
+        nullptr,
+        &manualHandler,
+        &scanHandler,
+        &autoHandler,
+        &screensaverHandler
+    };
+
+    State currentState = State::SCREENSAVER;
     State lastState = currentState;
 
-
-    void registerEnterFunc(State state, HookFunc func) {
-        enterFuncs[static_cast<size_t>(state)] = func;
-    }
-
-    void registerTickFunc(State state, HookFunc func) {
-        tickFuncs[static_cast<size_t>(state)] = func;
-    }
-
-    void registerExitFunc(State state, HookFunc func) {
-        exitFuncs[static_cast<size_t>(state)] = func;
-    }
+    static StateHandler* currentHandler =
+        handlers[static_cast<size_t>(currentState)];
 
 
     void switchState(State newState) {
-        const HookFunc exitFunc = exitFuncs[static_cast<size_t>(currentState)];
-        const HookFunc enterFunc = enterFuncs[static_cast<size_t>(newState)];
+        StateHandler* lastHandler =
+            handlers[static_cast<size_t>(currentState)];
+        StateHandler* newHandler =
+            handlers[static_cast<size_t>(newState)];
+
+        if (lastHandler)
+            lastHandler->onExit();
 
         lastState = currentState;
         currentState = newState;
+        currentHandler = newHandler;
 
-        if (exitFunc)
-            exitFunc();
-
-        if (enterFunc)
-            enterFunc();
+        if (newHandler)
+            lastHandler->onEnter();
     }
 
-
     void tick() {
-        const HookFunc func = tickFuncs[static_cast<size_t>(currentState)];
-        if (func)
-            func();
+        if (currentHandler)
+            currentHandler->onTick();
     }
 }

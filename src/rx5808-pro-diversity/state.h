@@ -3,30 +3,28 @@
 
 
 namespace StateMachine {
-  #define STATE_COUNT 5
-  enum class State {
-      BOOT,
-      MANUAL,
-      SCAN,
-      AUTO,
-      SCREENSAVER
-  };
+    #define STATE_COUNT 5
+    enum class State {
+        BOOT,
+        MANUAL,
+        SCAN,
+        AUTO,
+        SCREENSAVER
+    };
 
+    class StateHandler {
+        public:
+            virtual void onEnter() {};
+            virtual void onTick() {};
+            virtual void onExit() {};
+    };
 
-  typedef void(*HookFunc)();
+    extern State currentState;
+    extern State lastState;
 
+    void switchState(State newState);
 
-  extern State currentState;
-  extern State lastState;
-
-
-  void registerEnterFunc(State state, HookFunc func);
-  void registerExitFunc(State state, HookFunc func);
-  void registerTickFunc(State state, HookFunc func);
-
-  void switchState(State newState);
-
-  void tick();
+    void tick();
 }
 
 

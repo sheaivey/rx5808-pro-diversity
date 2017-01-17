@@ -2,9 +2,15 @@
 #define STATE_SCREENSAVER_H
 
 
-namespace StateScreensaver {
-    void enter();
-    void tick();
+#include "state.h"
+
+
+namespace StateMachine {
+    class ScreensaverStateHandler : public StateMachine::StateHandler {
+        public:
+            void onEnter();
+            void onTick();
+    };
 }
 
 

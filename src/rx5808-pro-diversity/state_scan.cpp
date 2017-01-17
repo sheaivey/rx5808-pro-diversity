@@ -16,31 +16,29 @@ static uint8_t orderedChanelIndex = 0;
 static uint8_t lastChannelIndex = 0;
 
 
-namespace StateScan {
-    void enter() {
-        orderedChanelIndex = 0;
-        lastChannelIndex = Receiver::activeChannel;
-        drawScreen.bandScanMode(STATE_SCAN);
-    }
+void StateMachine::ScanStateHandler::onEnter() {
+    orderedChanelIndex = 0;
+    lastChannelIndex = Receiver::activeChannel;
+    drawScreen.bandScanMode(STATE_SCAN);
+}
 
-    void exit() {
-        Receiver::setChannel(lastChannelIndex);
-    }
+void StateMachine::ScanStateHandler::onExit() {
+    Receiver::setChannel(lastChannelIndex);
+}
 
-    void tick() {
-        drawScreen.updateBandScanMode(
-            false,
-            orderedChanelIndex,
-            Receiver::rssiA,
-            Channels::getName(Receiver::activeChannel),
-            Channels::getFrequency(Receiver::activeChannel),
-            EepromSettings.rssiAMin,
-            EepromSettings.rssiAMax);
+void StateMachine::ScanStateHandler::onTick() {
+    drawScreen.updateBandScanMode(
+        false,
+        orderedChanelIndex,
+        Receiver::rssiA,
+        Channels::getName(Receiver::activeChannel),
+        Channels::getFrequency(Receiver::activeChannel),
+        EepromSettings.rssiAMin,
+        EepromSettings.rssiAMax);
 
-        orderedChanelIndex = (orderedChanelIndex + 1) % CHANNEL_MAX_INDEX;
-        uint8_t realChannelIndex = Channels::getOrderedIndex(
-            orderedChanelIndex);
+    orderedChanelIndex = (orderedChanelIndex + 1) % CHANNEL_MAX_INDEX;
+    uint8_t realChannelIndex = Channels::getOrderedIndex(
+        orderedChanelIndex);
 
-        Receiver::setChannel(realChannelIndex);
-    }
+    Receiver::setChannel(realChannelIndex);
 }

@@ -15,44 +15,43 @@
 extern screens drawScreen;
 
 
-namespace StateManual {
-    static void onButtonChange();
+static void onButtonChange();
 
 
-    void enter() {
-        drawScreen.seekMode(STATE_MANUAL);
+void StateMachine::ManualStateHandler::onEnter() {
+    drawScreen.seekMode(STATE_MANUAL);
 
-        ButtonState::registerChangeFunc(onButtonChange);
-    }
+    ButtonState::registerChangeFunc(onButtonChange);
+}
 
-    void exit() {
-        ButtonState::deregisterChangeFunc(onButtonChange);
-    }
+void StateMachine::ManualStateHandler::onExit() {
+    ButtonState::deregisterChangeFunc(onButtonChange);
+}
 
-    void tick() {
-        drawScreen.updateSeekMode(
-            STATE_MANUAL,
-            Receiver::activeChannel,
-            Channels::getOrderedIndex(Receiver::activeChannel),
-            Receiver::rssiA,
-            Channels::getFrequency(Receiver::activeChannel),
-            RSSI_SEEK_TRESHOLD,
-            true
+void StateMachine::ManualStateHandler::onTick() {
+    drawScreen.updateSeekMode(
+        STATE_MANUAL,
+        Receiver::activeChannel,
+        Channels::getOrderedIndex(Receiver::activeChannel),
+        Receiver::rssiA,
+        Channels::getFrequency(Receiver::activeChannel),
+        RSSI_SEEK_TRESHOLD,
+        true
+    );
+
+    if ((millis() - ButtonState::lastPressTime) > 1000)
+        onButtonChange();
+}
+
+
+static void onButtonChange() {
+    if (ButtonState::get(Button::UP)) {
+        Receiver::setChannel(
+            (Receiver::activeChannel + 1) % CHANNEL_MAX_INDEX
         );
-
-        if ((millis() - ButtonState::lastPressTime) > 1000)
-            onButtonChange();
-    }
-
-    static void onButtonChange() {
-        if (ButtonState::get(Button::UP)) {
-            Receiver::setChannel(
-                (Receiver::activeChannel + 1) % CHANNEL_MAX_INDEX
-            );
-        } else if (ButtonState::get(Button::DOWN)) {
-            Receiver::setChannel(
-                (Receiver::activeChannel - 1) % CHANNEL_MAX_INDEX
-            );
-        }
+    } else if (ButtonState::get(Button::DOWN)) {
+        Receiver::setChannel(
+            (Receiver::activeChannel - 1) % CHANNEL_MAX_INDEX
+        );
     }
 }
