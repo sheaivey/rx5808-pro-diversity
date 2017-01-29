@@ -66,7 +66,7 @@ SOFTWARE.
 
 #define USE_DIVERSITY
 #define USE_IR_EMITTER
-#define USE_BOOT_LOGO
+//#define USE_BOOT_LOGO
 
 // You can use any of the arduino analog pins to measure the voltage of the
 // battery. See additional configuration below.
@@ -83,7 +83,7 @@ SOFTWARE.
 //     5621 MHz
 // Local laws may prohibit the use of these frequencies so use at your own risk!
 //#define USE_LBAND
-#define USE_BOOT_CHECK
+//#define USE_BOOT_CHECK
 #define USE_DIM_ON_SCREENSAVER
 
 // === Pins ====================================================================

@@ -149,6 +149,9 @@ void setup()
     // Setup complete.
     digitalWrite(PIN_LED, LOW);
     digitalWrite(PIN_BUZZER, LOW);
+
+    // Switch to initial state.
+    StateMachine::switchState(StateMachine::State::MANUAL);
 }
 
 void setupPins() {

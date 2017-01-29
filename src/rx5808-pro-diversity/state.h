@@ -23,7 +23,6 @@ namespace StateMachine {
     extern State lastState;
 
     void switchState(State newState);
-
     void tick();
 }
 

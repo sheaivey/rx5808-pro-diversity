@@ -22,7 +22,7 @@ namespace StateMachine {
         &screensaverHandler
     };
 
-    State currentState = State::SCREENSAVER;
+    State currentState = State::BOOT;
     State lastState = currentState;
 
     static StateHandler* currentHandler =
@@ -35,15 +35,15 @@ namespace StateMachine {
         StateHandler* newHandler =
             handlers[static_cast<size_t>(newState)];
 
-        if (lastHandler)
+        if (lastHandler != nullptr)
             lastHandler->onExit();
 
         lastState = currentState;
         currentState = newState;
         currentHandler = newHandler;
 
-        if (newHandler)
-            lastHandler->onEnter();
+        if (newHandler != nullptr)
+            newHandler->onEnter();
     }
 
     void tick() {
