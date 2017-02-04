@@ -40,8 +40,8 @@ SOFTWARE.
 // uncomment depending on the display you are using.
 // this is an issue with the arduino preprocessor
 #ifdef TVOUT_SCREENS
-    #include <TVout.h>
-    #include <fontALL.h>
+    // #include <TVout.h>
+    // #include <fontALL.h>
 #endif
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
 
@@ -174,12 +174,12 @@ uint8_t rssi_setup_run=0;
 	int vbat_scale = VBAT_SCALE;
 	uint8_t warning_voltage = WARNING_VOLTAGE;
 	uint8_t critical_voltage = CRITICAL_VOLTAGE;
-boolean critical_alarm = false;
-boolean warning_alarm = false;
-uint8_t beep_times = 0;
-boolean beeping = false;
+	boolean critical_alarm = false;
+	boolean warning_alarm = false;
+	uint8_t beep_times = 0;
+	boolean beeping = false;
 	unsigned long time_last_vbat_alarm = 0;
-unsigned long last_beep = 0;
+	unsigned long next_beep = 0;
 
 	#define VBAT_SMOOTH 8
 	#define VBAT_PRESCALER 16
@@ -442,7 +442,7 @@ void loop()
                 /*********************/
                 /*   Menu handler   */
                 /*********************/
-                if(digitalRead(buttonUp) == LOW) {
+                if(digitalRead(buttonDown) == LOW) {
                     menu_id--;
 #ifdef USE_DIVERSITY
                     if(!isDiversity() && menu_id == 3) { // make sure we back up two menu slots.
@@ -454,7 +454,7 @@ void loop()
                     }
 #endif
                 }
-                else if(digitalRead(buttonDown) == LOW) {
+                else if(digitalRead(buttonUp) == LOW) {
                     menu_id++;
                 }
 
@@ -1032,7 +1032,7 @@ if(state == STATE_VOLTAGE) {
                         break;
                 }
             }
-            else if(digitalRead(buttonUp) == LOW) {
+            else if(digitalRead(buttonDown) == LOW) {
                 if(editing == -1) {
                     menu_id--;
 #ifdef TVOUT_SCREENS
@@ -1047,7 +1047,7 @@ if(state == STATE_VOLTAGE) {
                 }
 
             }
-            else if(digitalRead(buttonDown) == LOW) {
+            else if(digitalRead(buttonUp) == LOW) {
                 if(editing == -1) {
                     menu_id++;
 
@@ -1434,13 +1434,13 @@ void SERIAL_ENABLE_HIGH()
 		voltages_sum -= voltages[voltage_reading_index];
 		voltages[voltage_reading_index++] = v;
 		voltage_reading_index %= VBAT_SMOOTH;
-		#if VBAT_SMOOTH == VBAT_PRESCALER
+#if VBAT_SMOOTH == VBAT_PRESCALER
 		voltage = voltages_sum / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
-		#elif VBAT_SMOOTH < VBAT_PRESCALER
+#elif VBAT_SMOOTH < VBAT_PRESCALER
 		voltage = (voltages_sum * (VBAT_PRESCALER/VBAT_SMOOTH)) / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
-		#else
+#else
 		voltage = ((voltages_sum /VBAT_SMOOTH) * VBAT_PRESCALER) / vbat_scale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
-		#endif
+#endif
 		if(voltage <= critical_voltage) {
 			critical_alarm = true;
 			warning_alarm = false;
@@ -1456,11 +1456,11 @@ void SERIAL_ENABLE_HIGH()
 		if(millis() > time_last_vbat_alarm + ALARM_EVERY_MSEC){
 			if(critical_alarm){
 				//continue playint the critical alarm
-				if(millis() - CRITICAL_BEEP_EVERY_MSEC > last_beep){
+				if(millis() > next_beep){
 					//flip the beeper output
 					set_buzzer(beeping);
 					beeping = !beeping;
-					last_beep = millis();
+					next_beep = millis() + CRITICAL_BEEP_EVERY_MSEC;
 					beep_times++;
 				}
 				if(beep_times > (CRITICAL_BEEPS*2)) {
@@ -1470,11 +1470,11 @@ void SERIAL_ENABLE_HIGH()
 				}
 			} else if(warning_alarm) {
 				//continue playint the warning alarm
-				if(millis() - WARNING_BEEP_EVERY_MSEC > last_beep){
+				if(millis() > next_beep){
 					//flip the beeper output
 					set_buzzer(beeping);
 					beeping = !beeping;
-					last_beep = millis();
+					next_beep = millis() + WARNING_BEEP_EVERY_MSEC;
 					beep_times++;
 				}
 				if(beep_times > (WARNING_BEEPS*2)) {
@@ -1496,3 +1496,12 @@ void SERIAL_ENABLE_HIGH()
 		digitalWrite(buzzer, !value);
 	}
 #endif
+// calculate the frequency to bit bang payload
+uint16_t freq_to_reg(uint16_t f)
+{
+    uint16_t tf, N, A;
+    tf = (f - 479) / 2;
+    N = tf / 32;
+    A = tf % 32;
+    return (N<<7) + A;
+}

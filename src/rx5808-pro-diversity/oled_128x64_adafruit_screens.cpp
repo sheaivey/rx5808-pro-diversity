@@ -140,7 +140,7 @@ char screens::begin(const char *call_sign) {
 		display.setCursor(display.width()-8*8,8*offset+4);
 		display.print(PSTR2("L"));
 	#endif
-	offset++
+	offset++;
 #endif
 	offset++;
     display.setCursor(((display.width() - (strlen(call_sign)*12)) / 2),8*4+4);
@@ -248,7 +248,7 @@ void screens::seekMode(uint8_t state) {
     display.drawFastHLine(0, 36, display.width(), WHITE);
     display.drawFastHLine(0, display.height() - 11, display.width(), WHITE);
     display.setCursor(2,display.height()-9);
-    display.print(PSTR2("CHANNEL_MIN_FRQ"));
+    display.print(PSTR2(CHANNEL_MIN_FRQ));
     display.setCursor(55,display.height()-9);
     display.print(PSTR2("5800"));
     display.setCursor(display.width()-25,display.height()-9);
@@ -313,34 +313,15 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
     display.fillRect(1, 33, rssi_scaled, 3, WHITE);
 
     rssi_scaled=map(rssi, 1, 100, 1, 14);
-#if defined(USE_9BAND) && defined(USE_LBAND)
-    display.fillRect((channel*3)+4,display.height()-12-14,7/5,14-rssi_scaled,BLACK);
-    display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),7/5,rssi_scaled,WHITE);
-#elif defined(USE_9BAND)
-    display.fillRect((channel*3)+4,display.height()-12-14,49/30,14-rssi_scaled,BLACK);
-    display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),49/30,rssi_scaled,WHITE);
-#elif defined(USE_LBAND)
-    display.fillRect((channel*3)+4,display.height()-12-14,5/2,14-rssi_scaled,BLACK);
-    display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),5/2,rssi_scaled,WHITE);
-#else
-    display.fillRect((channel*3)+4,display.height()-12-14,3,14-rssi_scaled,BLACK);
-    display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),3,rssi_scaled,WHITE);
-#endif    
+    display.fillRect((channel*3)+4,display.height()-12-14,DECAL_AFF,14-rssi_scaled,BLACK);
+    display.fillRect((channel*3)+4,(display.height()-12-rssi_scaled),DECAL_AFF,rssi_scaled,WHITE);
     
     // handling for seek mode after screen and RSSI has been fully processed
     if(state == STATE_SEEK) //
     { // SEEK MODE
        
         // Show Scan Position
-#if defined(USE_9BAND) && defined(USE_LBAND)
-        display.fillRect((channel*7/5)+4+scan_position,display.height()-12-14,1,14,BLACK);
-#elif defined(USE_9BAND)
-        display.fillRect((channel*49/30)+4+scan_position,display.height()-12-14,1,14,BLACK);
-#elif defined(USE_LBAND)
-        display.fillRect((channel*5/2)+4+scan_position,display.height()-12-14,1,14,BLACK);
-#else
-        display.fillRect((channel*3)+4+scan_position,display.height()-12-14,1,14,BLACK);
-#endif
+        display.fillRect((channel*DECAL_AFF)+4+scan_position,display.height()-12-14,1,14,BLACK);
 
         rssi_scaled=map(rssi_seek_threshold, 1, 100, 1, 14);
 
@@ -387,7 +368,7 @@ void screens::bandScanMode(uint8_t state) {
     display.drawFastHLine(0, display.height()-11, display.width(), WHITE);
 
     display.setCursor(2,display.height()-9);
-    display.print(PSTR2("CHANNEL_MIN_FRQ"));
+    display.print(PSTR2(CHANNEL_MIN_FRQ));
     display.setCursor(55,display.height()-9);
     display.print(PSTR2("5800"));
     display.setCursor(display.width()-25,display.height()-9);
@@ -402,27 +383,10 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
     uint16_t hight = (display.height()-12-rssi_scaled);
     if(channel != last_channel) // only updated on changes
     {
-#if defined(USE_9BAND) && defined(USE_LBAND)
-     	display.fillRect((channel*7/5)+4,display.height()-12-30,7/5,30-rssi_scaled,BLACK);
-        display.fillRect((channel*7/5)+4,hight,7/5,rssi_scaled,WHITE);
+     	display.fillRect((channel*DECAL_AFF)+4,display.height()-12-30,DECAL_AFF,30-rssi_scaled,BLACK);
+        display.fillRect((channel*DECAL_AFF)+4,hight,DECAL_AFF,rssi_scaled,WHITE);
         // Show Scan Position
-        display.fillRect((channel*7/5)+4+3,display.height()-12-30,1,30,BLACK);	
-#elif defined(USE_9BAND)
-     	display.fillRect((channel*49/30)+4,display.height()-12-30,49/30,30-rssi_scaled,BLACK);
-        display.fillRect((channel*49/30)+4,hight,49/30,rssi_scaled,WHITE);
-        // Show Scan Position
-        display.fillRect((channel*49/30)+4+3,display.height()-12-30,1,30,BLACK);	
-#elif defined(USE_LBAND)
-     	display.fillRect((channel*5/2)+4,display.height()-12-30,5/2,30-rssi_scaled,BLACK);
-        display.fillRect((channel*5/2)+4,hight,5/2,rssi_scaled,WHITE);
-        // Show Scan Position
-        display.fillRect((channel*5/2)+4+3,display.height()-12-30,1,30,BLACK);	
-#else
-        display.fillRect((channel*3)+4,display.height()-12-30,3,30-rssi_scaled,BLACK);
-        display.fillRect((channel*3)+4,hight,3,rssi_scaled,WHITE);
-        // Show Scan Position
-        display.fillRect((channel*3)+4+3,display.height()-12-30,1,30,BLACK);
-#endif
+        display.fillRect((channel*DECAL_AFF)+4+3,display.height()-12-30,1,30,BLACK);	
     }
     if(!in_setup) {
         if (rssi > RSSI_SEEK_TRESHOLD) {

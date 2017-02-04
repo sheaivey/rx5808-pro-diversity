@@ -30,20 +30,20 @@ SOFTWARE.
 
 // Choose the display you will be using
 // you will also have to uncomment the includes in the main project.
-#define TVOUT_SCREENS
-//#define OLED_128x64_ADAFRUIT_SCREENS
+//#define TVOUT_SCREENS
+#define OLED_128x64_ADAFRUIT_SCREENS
 
 // use the library from https://github.com/badzz/Adafruit_SH1106 before enabling
 //#define SH1106
 
 // this will be displayed on the screensaver.
 // Up to 10 letters
-#define CALL_SIGN "CALL SIGN"
+#define CALL_SIGN "TIPOUIC  "
 
 // Feature Toggles
 #define USE_DIVERSITY
 #define USE_IR_EMITTER
-//#define USE_FLIP_SCREEN
+#define USE_FLIP_SCREEN
 
 // Pick one boot logo style only (or none)!
 // Use boot logo provided by Adafruit library.
@@ -52,19 +52,19 @@ SOFTWARE.
 // below.
 // NOTE: This takes up quite a lot of program memory space so you may need to
 //       limit the number of frames you have, or disable some other features.
-#define USE_BOOT_ANIMATION
-#define USE_BOOT_CHECK
-#define USE_DIM_ON_SCREENSAVER
+//	#define USE_BOOT_ANIMATION
+	#define USE_BOOT_CHECK
+	#define USE_DIM_ON_SCREENSAVER
 
 
 // You can use any of the arduino analog pins to measure the voltage of the battery
-//#define USE_VOLTAGE_MONITORING
+#define USE_VOLTAGE_MONITORING
 
 // Choose if you wish to use 8 additional Channels 
 // 5362 MHz 5399 MHz 5436 MHz 5473 MHz 5510 MHz 5547 MHz 5584 MHz 5621 MHz
 // Local laws may prohibit the use of these frequencies use at your own risk!
 #define USE_LBAND
-//#define USE_9BAND
+#define USE_9BAND
 
 // Switch the receivers faster - uses direct port manipulations instead of using arduino helper functions.
 // WARNING You can safely enable this only when using A0 and A1 for receivers
@@ -153,13 +153,21 @@ SOFTWARE.
 #endif
 
 // this two are minimum required
-#define buttonUp 2
+#define buttonsUp 2
 #define buttonMode 3
 // optional comfort buttons
-#define buttonDown 4
+#define buttonsDown 4
 #define buttonSave 5
 // Buzzer
 #define buzzer 6
+
+#ifdef USE_FLIP_SCREEN
+	#define buttonUp buttonsDown
+	#define buttonDown buttonsUp
+#else
+	#define buttonUp buttonsUp
+	#define buttonDown buttonsDown
+#endif
 
 // key debounce delay in ms
 // NOTE: good values are in the range of 100-200ms
@@ -207,20 +215,24 @@ SOFTWARE.
 #define CHANNEL_MIN_INDEX 0
 #if defined(USE_9BAND) &&  defined( USE_LBAND)
 	#define CHANNEL_MAX_INDEX 79
-	#define CHANNEL_MAX 679
-	#define CHANNEL_MIN_FRQ 5325
+	#define CHANNEL_MAX 79
+	#define CHANNEL_MIN_FRQ "5325"
+	#define DECAL_AFF 7/5
 #elif defined(USE_9BAND)
 	#define CHANNEL_MAX_INDEX 63
 	#define CHANNEL_MAX 63
-	#define CHANNEL_MIN_FRQ 5325
+	#define CHANNEL_MIN_FRQ "5325"
+	#define DECAL_AFF 49/30
 #elif defined(USE_LBAND)
 	#define CHANNEL_MAX_INDEX 47
 	#define CHANNEL_MAX 47
-	#define CHANNEL_MIN_FRQ 5362
+	#define CHANNEL_MIN_FRQ "5362"
+	#define DECAL_AFF 5/2
 #else
     #define CHANNEL_MAX_INDEX 39
     #define CHANNEL_MAX 39
-	#define CHANNEL_MIN_FRQ 5645
+	#define CHANNEL_MIN_FRQ "5645"
+	#define DECAL_AFF 3
 #endif
 
 #ifdef rx5808
