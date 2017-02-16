@@ -177,6 +177,8 @@ static void updateRssiLimits() {
 static void writeSerialData() {
     uint16_t timeSinceWrite = millis() - Receiver::lastSerialWriteTime;
     if (timeSinceWrite >= 20) {
+        Serial.print(Receiver::activeChannel, DEC);
+        Serial.print("\t");
         Serial.print(Receiver::rssiA, DEC);
         Serial.print("\t");
         Serial.print(Receiver::rssiARaw, DEC);
