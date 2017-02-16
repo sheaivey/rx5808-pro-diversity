@@ -146,6 +146,10 @@ void setup()
         Serial.begin(9600);
     #endif
 
+    #ifdef USE_SERIAL_OUT
+        Serial.begin(250000);
+    #endif
+
     // Setup complete.
     digitalWrite(PIN_LED, LOW);
     digitalWrite(PIN_BUZZER, LOW);

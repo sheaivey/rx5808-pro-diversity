@@ -9,6 +9,7 @@
 
 
 static void updateRssiLimits();
+static void writeSerialData();
 
 
 namespace Receiver {
@@ -21,6 +22,10 @@ namespace Receiver {
     #ifdef USE_DIVERSITY
         uint8_t rssiB = 0;
         uint16_t rssiBRaw = 0;
+    #endif
+
+    #ifdef USE_SERIAL_OUT
+        static uint32_t lastSerialWriteTime = 0;
     #endif
 
 
@@ -140,6 +145,10 @@ namespace Receiver {
     void update() {
         updateRssi();
 
+        #ifdef USE_SERIAL_OUT
+            writeSerialData();
+        #endif
+
         #ifdef USE_DIVERSITY
             switchDiversity();
         #endif
@@ -163,4 +172,19 @@ static void updateRssiLimits() {
         if (Receiver::rssiBRaw < EepromSettings.rssiBMin)
             EepromSettings.rssiBMin = Receiver::rssiBRaw;
     #endif
+}
+
+static void writeSerialData() {
+    uint16_t timeSinceWrite = millis() - Receiver::lastSerialWriteTime;
+    if (timeSinceWrite >= 20) {
+        Serial.print(Receiver::rssiA, DEC);
+        Serial.print("\t");
+        Serial.print(Receiver::rssiARaw, DEC);
+        Serial.print("\t");
+        Serial.print(Receiver::rssiB, DEC);
+        Serial.print("\t");
+        Serial.println(Receiver::rssiBRaw, DEC);
+
+        Receiver::lastSerialWriteTime = millis();
+    }
 }
