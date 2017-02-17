@@ -60,11 +60,12 @@ namespace StateMachine {
             // 100% on how to decouple them at this stage
             static long lastDraw = 0;
             if (currentHandler
-                && Ui::needUpdate
+                && Ui::shouldDrawUpdate
                 && millis() > lastDraw + OLED_FRAMERATE
             ) {
                 currentHandler->onUpdateDraw();
                 lastDraw = millis();
+                Ui::shouldDrawUpdate = false;
             }
         }
     }
