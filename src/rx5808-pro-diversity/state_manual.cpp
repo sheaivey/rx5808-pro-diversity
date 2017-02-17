@@ -8,18 +8,18 @@
 #include "settings_eeprom.h"
 #include "receiver.h"
 #include "channels.h"
-#include "screens.h"
+/*#include "screens.h"*/
 #include "buttons.h"
 
 
-extern screens drawScreen;
+//extern screens drawScreen;
 
 
 static void onButtonChange();
 
 
 void StateMachine::ManualStateHandler::onEnter() {
-    drawScreen.seekMode(STATE_MANUAL);
+    //drawScreen.seekMode(STATE_MANUAL);
 
     ButtonState::registerChangeFunc(onButtonChange);
 }
@@ -29,7 +29,7 @@ void StateMachine::ManualStateHandler::onExit() {
 }
 
 void StateMachine::ManualStateHandler::onTick() {
-    drawScreen.updateSeekMode(
+    /*drawScreen.updateSeekMode(
         STATE_MANUAL,
         Receiver::activeChannel,
         Channels::getOrderedIndex(Receiver::activeChannel),
@@ -37,7 +37,7 @@ void StateMachine::ManualStateHandler::onTick() {
         Channels::getFrequency(Receiver::activeChannel),
         RSSI_SEEK_TRESHOLD,
         true
-    );
+    );*/
 
     if ((millis() - ButtonState::lastPressTime) > 1000)
         onButtonChange();

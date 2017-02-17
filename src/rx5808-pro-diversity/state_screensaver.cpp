@@ -4,31 +4,31 @@
 
 #include "receiver.h"
 #include "channels.h"
-#include "screens.h"
+/*#include "screens.h"*/
 #include "buttons.h"
 #include "state.h"
 
 
-extern screens drawScreen;
+//extern screens drawScreen;
 
 
 void StateMachine::ScreensaverStateHandler::onEnter() {
-    drawScreen.screenSaver(
+    /*drawScreen.screenSaver(
             0,
             Channels::getName(Receiver::activeChannel),
             Channels::getFrequency(Receiver::activeChannel),
             nullptr
-        );
+        );*/
 }
 
 void StateMachine::ScreensaverStateHandler::onTick() {
-    drawScreen.updateScreenSaver(
+    /*drawScreen.updateScreenSaver(
             Receiver::activeReceiver,
             Receiver::rssiA,
             Receiver::rssiA,
             Receiver::rssiB
-        );
+        );*/
 
-        if (ButtonState::any())
-            StateMachine::switchState(StateMachine::lastState);
+    if (ButtonState::any())
+        StateMachine::switchState(StateMachine::lastState);
 }

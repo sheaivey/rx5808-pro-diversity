@@ -39,7 +39,7 @@ SOFTWARE.
 #include "settings_internal.h"
 #include "settings_eeprom.h"
 
-#include "screens.h"
+//#include "screens.h"
 #include "channels.h"
 #include "receiver.h"
 #include "buttons.h"
@@ -50,9 +50,11 @@ SOFTWARE.
 #include "state_screensaver.h"
 #include "state_auto.h"
 
+#include "ui.h"
+
 
 #ifdef OLD_LOOP
-screens drawScreen;
+//screens drawScreen;
 char channel = 0;
 uint8_t channelIndex = 0;
 uint8_t rssi = 0;
@@ -117,7 +119,7 @@ uint8_t readRSSI(char receiver = -1);
 #ifndef OLD_LOOP
 
 
-screens drawScreen;
+//screens drawScreen;
 
 
 #endif
@@ -137,9 +139,11 @@ void setup()
     setupSettings();
 
     // Init Display
-    if (drawScreen.begin(nullptr) > 0) {
+    /*if (drawScreen.begin(nullptr) > 0) {
         haltWithError();
-    }
+    }*/
+
+    Ui::setup();
 
     #ifdef USE_IR_EMITTER
         // Used to Transmit IR Payloads
@@ -155,7 +159,7 @@ void setup()
     digitalWrite(PIN_BUZZER, LOW);
 
     // Switch to initial state.
-    StateMachine::switchState(StateMachine::State::MANUAL);
+    StateMachine::switchState(StateMachine::State::MENU);
 }
 
 void setupPins() {
@@ -203,6 +207,7 @@ void loop() {
     Receiver::update();
     ButtonState::update();
     StateMachine::tick();
+    Ui::update();
 
     if (
         StateMachine::currentState != StateMachine::State::SCREENSAVER

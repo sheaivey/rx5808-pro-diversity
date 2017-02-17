@@ -21,15 +21,13 @@ static bool scanning = true;
 static ScanDirection direction = ScanDirection::UP;
 static bool forceNext = false;
 
-extern screens drawScreen;
-
 
 static void onButtonChange();
 
 
 void StateMachine::AutoStateHandler::onEnter() {
     ButtonState::registerChangeFunc(onButtonChange);
-    drawScreen.seekMode(STATE_SEEK);
+    //drawScreen.seekMode(STATE_SEEK);
 }
 
 void StateMachine::AutoStateHandler::onExit() {
@@ -37,7 +35,7 @@ void StateMachine::AutoStateHandler::onExit() {
 }
 
 void StateMachine::AutoStateHandler::onTick() {
-    drawScreen.updateSeekMode(
+    /*drawScreen.updateSeekMode(
         STATE_SEEK,
         Receiver::activeChannel,
         Channels::getOrderedIndex(Receiver::activeChannel),
@@ -45,7 +43,7 @@ void StateMachine::AutoStateHandler::onTick() {
         Channels::getFrequency(Receiver::activeChannel),
         RSSI_SEEK_TRESHOLD,
         !scanning
-    );
+    );*/
 
     if (scanning) {
         if (!forceNext && Receiver::rssiA >= RSSI_SEEK_TRESHOLD)
