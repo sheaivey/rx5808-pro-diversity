@@ -186,9 +186,9 @@ static void drawRssiGraph() {
 
         Ui::display.drawLine(
             (60 + 4) + ((i - 1) * 4),
-            32 - barHeightLastA,
+            32 - (30 - barHeightLastA),
             (60 + 4) + ((i) * 4),
-            32 - barHeightA,
+            32 - (30 - barHeightA),
             WHITE
         );
 
@@ -200,9 +200,9 @@ static void drawRssiGraph() {
 
         Ui::display.drawLine(
             (60 + 4) + ((i - 1) * 4),
-            SCREEN_HEIGHT - barHeightLastB,
+            SCREEN_HEIGHT - (30 - barHeightLastB),
             (60 + 4) + ((i) * 4),
-            SCREEN_HEIGHT -  barHeightB,
+            SCREEN_HEIGHT -  (30 - barHeightB),
             WHITE
         );
     }
