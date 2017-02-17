@@ -8,6 +8,8 @@
 #include "state_auto.h"
 #include "state_menu.h"
 
+#include "ui.h"
+
 
 namespace StateMachine {
     static ScreensaverStateHandler screensaverHandler;
@@ -45,12 +47,20 @@ namespace StateMachine {
         currentState = newState;
         currentHandler = newHandler;
 
-        if (newHandler != nullptr)
+        if (newHandler != nullptr) {
             newHandler->onEnter();
+            newHandler->onInitialDraw();
+        }
     }
 
     void tick() {
-        if (currentHandler)
+        if (currentHandler) {
             currentHandler->onTick();
+
+            // FIXME: This should probably be handled in the UI module but not
+            // 100% on how to decouple them at this stage
+            if (currentHandler &&Ui::needUpdate)
+                currentHandler->onUpdateDraw();
+        }
     }
 }

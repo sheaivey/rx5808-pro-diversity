@@ -15,6 +15,9 @@ namespace StateMachine {
 
     class StateHandler {
         public:
+            virtual void onInitialDraw() {};
+            virtual void onUpdateDraw() {};
+
             virtual void onEnter() {};
             virtual void onTick() {};
             virtual void onExit() {};
