@@ -6,15 +6,72 @@
 
 // Channels to sent to the SPI registers
 static const uint16_t channelTable[] PROGMEM = {
-    0x2A05, 0x299B, 0x2991, 0x2987, 0x291D, 0x2913, 0x2909, 0x289F, // A
-    0x2903, 0x290C, 0x2916, 0x291F, 0x2989, 0x2992, 0x299C, 0x2A05, // B
-    0x2895, 0x288B, 0x2881, 0x2817, 0x2A0F, 0x2A19, 0x2A83, 0x2A8D, // E
-    0x2906, 0x2910, 0x291A, 0x2984, 0x298E, 0x2998, 0x2A02, 0x2A0C, // F / Airwave
-    0x281D, 0x288F, 0x2902, 0x2914, 0x2987, 0x2999, 0x2A0C, 0x2A1E  // C / Immersion Raceband
-#ifdef USE_LBAND
-    ,
-    0x2609, 0x261C, 0x268E, 0x2701, 0x2713, 0x2786, 0x2798, 0x280B  // D / 5.3
-#endif
+    #define _CHANNEL_REG_FLO(f) ((f - 479) / 2)
+    #define _CHANNEL_REG_N(f) (_CHANNEL_REG_FLO(f) / 32)
+    #define _CHANNEL_REG_A(f) (_CHANNEL_REG_FLO(f) % 32)
+    #define CHANNEL_REG(f) (_CHANNEL_REG_N(f) << 7) | _CHANNEL_REG_A(f)
+
+    // A
+    CHANNEL_REG(5865),
+    CHANNEL_REG(5845),
+    CHANNEL_REG(5825),
+    CHANNEL_REG(5805),
+    CHANNEL_REG(5785),
+    CHANNEL_REG(5765),
+    CHANNEL_REG(5745),
+    CHANNEL_REG(5725),
+
+    // B
+    CHANNEL_REG(5733),
+    CHANNEL_REG(5752),
+    CHANNEL_REG(5771),
+    CHANNEL_REG(5790),
+    CHANNEL_REG(5809),
+    CHANNEL_REG(5828),
+    CHANNEL_REG(5847),
+    CHANNEL_REG(5866),
+
+    // E
+    CHANNEL_REG(5705),
+    CHANNEL_REG(5685),
+    CHANNEL_REG(5665),
+    CHANNEL_REG(5645),
+    CHANNEL_REG(5885),
+    CHANNEL_REG(5905),
+    CHANNEL_REG(5925),
+    CHANNEL_REG(5945),
+
+    // F
+    CHANNEL_REG(5740),
+    CHANNEL_REG(5760),
+    CHANNEL_REG(5780),
+    CHANNEL_REG(5800),
+    CHANNEL_REG(5820),
+    CHANNEL_REG(5840),
+    CHANNEL_REG(5860),
+    CHANNEL_REG(5880),
+
+    // C / R
+    CHANNEL_REG(5658),
+    CHANNEL_REG(5695),
+    CHANNEL_REG(5732),
+    CHANNEL_REG(5769),
+    CHANNEL_REG(5806),
+    CHANNEL_REG(5843),
+    CHANNEL_REG(5880),
+    CHANNEL_REG(5917)
+
+    #ifdef USE_LBAND
+        ,
+        CHANNEL_REG(5362),
+        CHANNEL_REG(5399),
+        CHANNEL_REG(5436),
+        CHANNEL_REG(5473),
+        CHANNEL_REG(5510),
+        CHANNEL_REG(5547),
+        CHANNEL_REG(5584),
+        CHANNEL_REG(5621),
+    #endif
 };
 
 // Channels with their Mhz Values
