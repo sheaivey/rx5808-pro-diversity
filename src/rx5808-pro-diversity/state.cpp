@@ -6,6 +6,7 @@
 #include "state_scan.h"
 #include "state_manual.h"
 #include "state_auto.h"
+#include "state_menu.h"
 
 
 namespace StateMachine {
@@ -13,13 +14,15 @@ namespace StateMachine {
     static ManualStateHandler manualHandler;
     static ScanStateHandler scanHandler;
     static AutoStateHandler autoHandler;
+    static MenuStateHandler menuHandler;
 
     static StateHandler* handlers[STATE_COUNT] = {
         nullptr,
         &manualHandler,
         &scanHandler,
         &autoHandler,
-        &screensaverHandler
+        &screensaverHandler,
+        &menuHandler
     };
 
     State currentState = State::BOOT;

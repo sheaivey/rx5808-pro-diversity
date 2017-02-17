@@ -3,13 +3,14 @@
 
 
 namespace StateMachine {
-    #define STATE_COUNT 5
+    #define STATE_COUNT 6
     enum class State {
         BOOT,
         MANUAL,
         SCAN,
         AUTO,
-        SCREENSAVER
+        SCREENSAVER,
+        MENU
     };
 
     class StateHandler {
