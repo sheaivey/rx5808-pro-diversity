@@ -33,7 +33,6 @@ namespace StateMachine {
     static StateHandler* currentHandler =
         handlers[static_cast<size_t>(currentState)];
 
-
     void switchState(State newState) {
         StateHandler* lastHandler =
             handlers[static_cast<size_t>(currentState)];
@@ -59,8 +58,14 @@ namespace StateMachine {
 
             // FIXME: This should probably be handled in the UI module but not
             // 100% on how to decouple them at this stage
-            if (currentHandler &&Ui::needUpdate)
+            static uint16_t lastDraw = 0;
+            if (currentHandler
+                && Ui::needUpdate
+                && millis() > lastDraw + OLED_FRAMERATE
+            ) {
                 currentHandler->onUpdateDraw();
+                lastDraw = millis();
+            }
         }
     }
 }

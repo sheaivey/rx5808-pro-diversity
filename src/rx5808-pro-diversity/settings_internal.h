@@ -99,6 +99,8 @@ SOFTWARE.
   #define OLED_CLASS Adafruit_SSD1306
 #endif
 
+#define OLED_FRAMERATE 1000 / 20
+
 // === Misc ====================================================================
 
 #ifdef USE_VOLTAGE_MONITORING
