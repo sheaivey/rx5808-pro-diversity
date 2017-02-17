@@ -21,7 +21,6 @@ static bool scanning = true;
 static ScanDirection direction = ScanDirection::UP;
 static bool forceNext = false;
 
-
 static void onButtonChange();
 
 
@@ -83,12 +82,18 @@ static void onButtonChange() {
 static void drawChannelText();
 static void drawFrequencyText();
 static void drawScanBar();
+static void drawRssiGraph();
 
 
 void StateMachine::AutoStateHandler::onInitialDraw() {
     Ui::clear();
 
     Ui::display.drawFastVLine(59, 0, SCREEN_HEIGHT, WHITE);
+    Ui::display.drawFastVLine(60, 0, SCREEN_HEIGHT, WHITE);
+    Ui::display.drawFastVLine(61, 0, SCREEN_HEIGHT, WHITE);
+    Ui::display.drawFastVLine(SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT, WHITE);
+
+    //Ui::display.drawFastHLine(60, 32, SCREEN_WIDTH - 60, WHITE);
 
     Ui::display.drawRoundRect(
         0,
@@ -102,6 +107,7 @@ void StateMachine::AutoStateHandler::onInitialDraw() {
     drawChannelText();
     drawFrequencyText();
     drawScanBar();
+    drawRssiGraph();
 
     Ui::needDisplay();
 }
@@ -128,9 +134,17 @@ void StateMachine::AutoStateHandler::onUpdateDraw() {
         5
     );
 
+    Ui::clearRect(
+        62,
+        0,
+        SCREEN_WIDTH - 62 - 1,
+        SCREEN_HEIGHT
+    );
+
     drawChannelText();
     drawFrequencyText();
     drawScanBar();
+    drawRssiGraph();
 
     Ui::needDisplay();
 }
@@ -160,4 +174,90 @@ static void drawScanBar() {
         5,
         WHITE
     );
+}
+
+static void drawRssiGraph() {
+    for (uint8_t i = 1; i < 16; i++) {
+        float barPercentLastA = Receiver::rssiALast[i - 1] / 100.0f;
+        int barHeightLastA = 30 * barPercentLastA / 2;
+
+        float barPercentA = Receiver::rssiALast[i] / 100.0f;
+        int barHeightA = 30 * barPercentA / 2;
+
+        Ui::display.drawLine(
+            (60 + 4) + ((i - 1) * 4),
+            32 - barHeightLastA,
+            (60 + 4) + ((i) * 4),
+            32 - barHeightA,
+            WHITE
+        );
+
+        float barPercentLastB = Receiver::rssiBLast[i - 1] / 100.0f;
+        int barHeightLastB = 30 * barPercentLastB;
+
+        float barPercentB = Receiver::rssiBLast[i] / 100.0f;
+        int barHeightB = 30 * barPercentB;
+
+        Ui::display.drawLine(
+            (60 + 4) + ((i - 1) * 4),
+            SCREEN_HEIGHT - barHeightLastB,
+            (60 + 4) + ((i) * 4),
+            SCREEN_HEIGHT -  barHeightB,
+            WHITE
+        );
+    }
+
+    for (int i = 0; i <= 64; i += 4) {
+         Ui::display.drawFastHLine(60 + i, 32, 2, WHITE);
+    }
+
+    Ui::display.setTextSize(2);
+
+    if (Receiver::activeReceiver == RECEIVER_A) {
+        Ui::display.fillRoundRect(
+            61,
+            7,
+            CHAR_WIDTH * 2 + 2 + 2,
+            32 - 7 - 7,
+            2,
+            WHITE
+        );
+    } else {
+        Ui::display.drawRoundRect(
+            61,
+            7,
+            CHAR_WIDTH * 2 + 2 + 2,
+            32 - 7 - 7,
+            2,
+            WHITE
+        );
+    }
+
+    if (Receiver::activeReceiver == RECEIVER_B) {
+        Ui::display.fillRoundRect(
+            61,
+            32 + 7,
+            CHAR_WIDTH * 2 + 2 + 2,
+            32 - 7 - 7,
+            2,
+            WHITE
+        );
+    } else {
+        Ui::display.drawRoundRect(
+            61,
+            32 + 7,
+            CHAR_WIDTH * 2 + 2 + 2,
+            32 - 7 - 7,
+            2,
+            WHITE
+        );
+    }
+
+    Ui::display.setTextColor(INVERSE);
+
+    Ui::display.setCursor(63, 16 - CHAR_HEIGHT);
+    Ui::display.print("A");
+
+    Ui::display.setCursor(63, 48 - CHAR_HEIGHT);
+    Ui::display.print("B");
 }
