@@ -72,6 +72,11 @@ static const uint16_t channelTable[] PROGMEM = {
         CHANNEL_REG(5584),
         CHANNEL_REG(5621),
     #endif
+
+    #undef _CHANNEL_REG_FLO
+    #undef _CHANNEL_REG_A
+    #undef _CHANNEL_REG_N
+    #undef CHANNEL_REG
 };
 
 // Channels with their Mhz Values
