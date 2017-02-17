@@ -49,10 +49,14 @@ void StateMachine::AutoStateHandler::onTick() {
         if (!forceNext && Receiver::rssiA >= RSSI_SEEK_TRESHOLD)
             scanning = false;
 
-        Receiver::setChannel(
-            (Receiver::activeChannel + static_cast<int8_t>(direction))
-                % CHANNEL_MAX_INDEX
-        );
+        int nextChannel = Receiver::activeChannel
+            + static_cast<int8_t>(direction);
+        if (nextChannel < 0)
+            nextChannel = CHANNEL_MAX_INDEX;
+        if (nextChannel > CHANNEL_MAX_INDEX)
+            nextChannel = 0;
+
+        Receiver::setChannel(nextChannel);
 
         if (forceNext)
             forceNext = false;
