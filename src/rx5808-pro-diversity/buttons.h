@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 
-#define BUTTON_HOOKS_MAX 8
+#define BUTTON_HOOKS_MAX 4
 
 
 enum class Button : uint8_t {
