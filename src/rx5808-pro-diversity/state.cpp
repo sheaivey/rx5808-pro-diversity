@@ -58,7 +58,7 @@ namespace StateMachine {
 
             // FIXME: This should probably be handled in the UI module but not
             // 100% on how to decouple them at this stage
-            static uint16_t lastDraw = 0;
+            static long lastDraw = 0;
             if (currentHandler
                 && Ui::needUpdate
                 && millis() > lastDraw + OLED_FRAMERATE
