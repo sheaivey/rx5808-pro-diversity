@@ -32,18 +32,75 @@ static const uint16_t channelFreqTable[] PROGMEM = {
 #endif
 };
 
-// Do coding as simple hex value to save memory.
+
+
+// Encode channel names as an 8-bit value where:
+//      0b00000111 = channel number (zero-indexed)
+//      0b11111000 = channel letter (offset from 'A' character)
 static const uint8_t channelNames[] PROGMEM = {
-    0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8, // A
-    0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, // B
-    0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, // E
-    0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, // F / Airwave
-#ifdef USE_LBAND
-    0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, // C / Immersion Raceband
-    0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8  // D / 5.3
-#else
-    0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8  // C / Immersion Raceband
-#endif
+    #define CHANNEL_NAME(l, n) \
+    (uint8_t) ((l - 65) << 3) | (n - 1)
+
+    CHANNEL_NAME('A', 1),
+    CHANNEL_NAME('A', 2),
+    CHANNEL_NAME('A', 3),
+    CHANNEL_NAME('A', 4),
+    CHANNEL_NAME('A', 5),
+    CHANNEL_NAME('A', 6),
+    CHANNEL_NAME('A', 7),
+    CHANNEL_NAME('A', 8),
+
+    CHANNEL_NAME('B', 1),
+    CHANNEL_NAME('B', 2),
+    CHANNEL_NAME('B', 3),
+    CHANNEL_NAME('B', 4),
+    CHANNEL_NAME('B', 5),
+    CHANNEL_NAME('B', 6),
+    CHANNEL_NAME('B', 7),
+    CHANNEL_NAME('B', 8),
+
+    CHANNEL_NAME('E', 1),
+    CHANNEL_NAME('E', 2),
+    CHANNEL_NAME('E', 3),
+    CHANNEL_NAME('E', 4),
+    CHANNEL_NAME('E', 5),
+    CHANNEL_NAME('E', 6),
+    CHANNEL_NAME('E', 7),
+    CHANNEL_NAME('E', 8),
+
+    // a.k.a Airwave
+    CHANNEL_NAME('F', 1),
+    CHANNEL_NAME('F', 2),
+    CHANNEL_NAME('F', 3),
+    CHANNEL_NAME('F', 4),
+    CHANNEL_NAME('F', 5),
+    CHANNEL_NAME('F', 6),
+    CHANNEL_NAME('F', 7),
+    CHANNEL_NAME('F', 8),
+
+    // C / Immersion Raceband
+    CHANNEL_NAME('R', 1),
+    CHANNEL_NAME('R', 2),
+    CHANNEL_NAME('R', 3),
+    CHANNEL_NAME('R', 4),
+    CHANNEL_NAME('R', 5),
+    CHANNEL_NAME('R', 6),
+    CHANNEL_NAME('R', 7),
+    CHANNEL_NAME('R', 8)
+
+    #ifdef USE_LBAND
+        , // This comma is important.
+        CHANNEL_NAME('L', 1),
+        CHANNEL_NAME('L', 2),
+        CHANNEL_NAME('L', 3),
+        CHANNEL_NAME('L', 4),
+        CHANNEL_NAME('L', 5),
+        CHANNEL_NAME('L', 6),
+        CHANNEL_NAME('L', 7),
+        CHANNEL_NAME('L', 8)
+    #endif
+
+    #undef CHANNEL_NAME
 };
 
 // All Channels of the above List ordered by Mhz
@@ -68,8 +125,14 @@ namespace Channels {
         return pgm_read_word_near(channelFreqTable + index);
     }
 
-    const uint8_t getName(uint8_t index) {
-        return pgm_read_byte_near(channelNames + index);
+    // Returns channel name as a string.
+    //      dest[] must be at least 3-bytes.
+    void getName(uint8_t index, char dest[]) {
+        uint8_t encodedName = pgm_read_byte_near(channelNames + index);
+
+        dest[0] = 65 + (encodedName >> 3);
+        dest[1] = 48 + (encodedName & (255 >> (8 - 3))) + 1;
+        dest[2] = '\0';
     }
 
     const uint8_t getOrderedIndex(uint8_t index) {

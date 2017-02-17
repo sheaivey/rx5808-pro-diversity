@@ -149,7 +149,11 @@ static void drawChannelText() {
     Ui::display.setTextSize(5);
     Ui::display.setTextColor(WHITE);
     Ui::display.setCursor(0, 0);
-    Ui::display.print(Channels::getName(Receiver::activeChannel), HEX);
+
+    char channelName[3];
+    Channels::getName(Receiver::activeChannel, channelName);
+
+    Ui::display.print(channelName);
 }
 
 static void drawFrequencyText() {
