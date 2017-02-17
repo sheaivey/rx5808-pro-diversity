@@ -34,69 +34,30 @@ static const uint16_t channelFreqTable[] PROGMEM = {
 //      0b00000111 = channel number (zero-indexed)
 //      0b11111000 = channel letter (offset from 'A' character)
 static const uint8_t channelNames[] PROGMEM = {
-    #define CHANNEL_NAME(l, n) \
-    (uint8_t) ((l - 65) << 3) | (n - 1)
+    #define _CHANNEL_NAMES(l) (uint8_t) ((l - 65) << 3)
+    #define CHANNEL_NAMES(l) \
+        _CHANNEL_NAMES(l) | 0, \
+        _CHANNEL_NAMES(l) | 1, \
+        _CHANNEL_NAMES(l) | 2, \
+        _CHANNEL_NAMES(l) | 3, \
+        _CHANNEL_NAMES(l) | 4, \
+        _CHANNEL_NAMES(l) | 5, \
+        _CHANNEL_NAMES(l) | 6, \
+        _CHANNEL_NAMES(l) | 7
 
-    CHANNEL_NAME('A', 1),
-    CHANNEL_NAME('A', 2),
-    CHANNEL_NAME('A', 3),
-    CHANNEL_NAME('A', 4),
-    CHANNEL_NAME('A', 5),
-    CHANNEL_NAME('A', 6),
-    CHANNEL_NAME('A', 7),
-    CHANNEL_NAME('A', 8),
-
-    CHANNEL_NAME('B', 1),
-    CHANNEL_NAME('B', 2),
-    CHANNEL_NAME('B', 3),
-    CHANNEL_NAME('B', 4),
-    CHANNEL_NAME('B', 5),
-    CHANNEL_NAME('B', 6),
-    CHANNEL_NAME('B', 7),
-    CHANNEL_NAME('B', 8),
-
-    CHANNEL_NAME('E', 1),
-    CHANNEL_NAME('E', 2),
-    CHANNEL_NAME('E', 3),
-    CHANNEL_NAME('E', 4),
-    CHANNEL_NAME('E', 5),
-    CHANNEL_NAME('E', 6),
-    CHANNEL_NAME('E', 7),
-    CHANNEL_NAME('E', 8),
-
-    // a.k.a Airwave
-    CHANNEL_NAME('F', 1),
-    CHANNEL_NAME('F', 2),
-    CHANNEL_NAME('F', 3),
-    CHANNEL_NAME('F', 4),
-    CHANNEL_NAME('F', 5),
-    CHANNEL_NAME('F', 6),
-    CHANNEL_NAME('F', 7),
-    CHANNEL_NAME('F', 8),
-
-    // C / Immersion Raceband
-    CHANNEL_NAME('R', 1),
-    CHANNEL_NAME('R', 2),
-    CHANNEL_NAME('R', 3),
-    CHANNEL_NAME('R', 4),
-    CHANNEL_NAME('R', 5),
-    CHANNEL_NAME('R', 6),
-    CHANNEL_NAME('R', 7),
-    CHANNEL_NAME('R', 8)
+    CHANNEL_NAMES('A'),
+    CHANNEL_NAMES('B'),
+    CHANNEL_NAMES('E'),
+    CHANNEL_NAMES('F'), // a.k.a Airwave
+    CHANNEL_NAMES('R')  // C / Immersion Raceband
 
     #ifdef USE_LBAND
         ,
-        CHANNEL_NAME('L', 1),
-        CHANNEL_NAME('L', 2),
-        CHANNEL_NAME('L', 3),
-        CHANNEL_NAME('L', 4),
-        CHANNEL_NAME('L', 5),
-        CHANNEL_NAME('L', 6),
-        CHANNEL_NAME('L', 7),
-        CHANNEL_NAME('L', 8)
+        CHANNEL_NAMES('L')
     #endif
 
-    #undef CHANNEL_NAME
+    #undef CHANNEL_NAMES
+    #undef _CHANNEL_NAMES
 };
 
 // All Channels of the above List ordered by Mhz
