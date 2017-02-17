@@ -89,11 +89,7 @@ void StateMachine::AutoStateHandler::onInitialDraw() {
     Ui::clear();
 
     Ui::display.drawFastVLine(59, 0, SCREEN_HEIGHT, WHITE);
-    Ui::display.drawFastVLine(60, 0, SCREEN_HEIGHT, WHITE);
-    Ui::display.drawFastVLine(61, 0, SCREEN_HEIGHT, WHITE);
     Ui::display.drawFastVLine(SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT, WHITE);
-
-    //Ui::display.drawFastHLine(60, 32, SCREEN_WIDTH - 60, WHITE);
 
     Ui::display.drawRoundRect(
         0,
@@ -215,7 +211,7 @@ static void drawRssiGraph() {
 
     if (Receiver::activeReceiver == RECEIVER_A) {
         Ui::display.fillRoundRect(
-            61,
+            59,
             7,
             CHAR_WIDTH * 2 + 2 + 2,
             32 - 7 - 7,
@@ -223,8 +219,17 @@ static void drawRssiGraph() {
             WHITE
         );
     } else {
+        Ui::display.fillRoundRect(
+            59,
+            7,
+            CHAR_WIDTH * 2 + 2 + 2,
+            32 - 7 - 7,
+            2,
+            BLACK
+        );
+
         Ui::display.drawRoundRect(
-            61,
+            59,
             7,
             CHAR_WIDTH * 2 + 2 + 2,
             32 - 7 - 7,
@@ -235,7 +240,7 @@ static void drawRssiGraph() {
 
     if (Receiver::activeReceiver == RECEIVER_B) {
         Ui::display.fillRoundRect(
-            61,
+            59,
             32 + 7,
             CHAR_WIDTH * 2 + 2 + 2,
             32 - 7 - 7,
@@ -243,8 +248,17 @@ static void drawRssiGraph() {
             WHITE
         );
     } else {
+        Ui::display.fillRoundRect(
+            59,
+            7,
+            CHAR_WIDTH * 2 + 2 + 2,
+            32 - 7 - 7,
+            2,
+            BLACK
+        );
+
         Ui::display.drawRoundRect(
-            61,
+            59,
             32 + 7,
             CHAR_WIDTH * 2 + 2 + 2,
             32 - 7 - 7,
@@ -255,9 +269,9 @@ static void drawRssiGraph() {
 
     Ui::display.setTextColor(INVERSE);
 
-    Ui::display.setCursor(63, 16 - CHAR_HEIGHT);
+    Ui::display.setCursor(61, 16 - CHAR_HEIGHT);
     Ui::display.print("A");
 
-    Ui::display.setCursor(63, 48 - CHAR_HEIGHT);
+    Ui::display.setCursor(61, 48 - CHAR_HEIGHT);
     Ui::display.print("B");
 }
