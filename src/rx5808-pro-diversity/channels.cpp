@@ -10,11 +10,10 @@ static const uint16_t channelTable[] PROGMEM = {
     0x2903, 0x290C, 0x2916, 0x291F, 0x2989, 0x2992, 0x299C, 0x2A05, // B
     0x2895, 0x288B, 0x2881, 0x2817, 0x2A0F, 0x2A19, 0x2A83, 0x2A8D, // E
     0x2906, 0x2910, 0x291A, 0x2984, 0x298E, 0x2998, 0x2A02, 0x2A0C, // F / Airwave
-#ifdef USE_LBAND
-    0x281D, 0x288F, 0x2902, 0x2914, 0x2987, 0x2999, 0x2A0C, 0x2A1E,
-    0x2609, 0x261C, 0x268E, 0x2701, 0x2713, 0x2786, 0x2798, 0x280B  // D / 5.3
-#else
     0x281D, 0x288F, 0x2902, 0x2914, 0x2987, 0x2999, 0x2A0C, 0x2A1E  // C / Immersion Raceband
+#ifdef USE_LBAND
+    ,
+    0x2609, 0x261C, 0x268E, 0x2701, 0x2713, 0x2786, 0x2798, 0x280B  // D / 5.3
 #endif
 };
 
@@ -24,15 +23,12 @@ static const uint16_t channelFreqTable[] PROGMEM = {
     5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866, // B
     5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945, // E
     5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880, // F / Airwave
-#ifdef USE_LBAND
-    5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917, // C / Immersion Raceband
-    5362, 5399, 5436, 5473, 5510, 5547, 5584, 5621  // D / 5.3
-#else
     5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917  // C / Immersion Raceband
+#ifdef USE_LBAND
+    ,
+    5362, 5399, 5436, 5473, 5510, 5547, 5584, 5621  // D / 5.3
 #endif
 };
-
-
 
 // Encode channel names as an 8-bit value where:
 //      0b00000111 = channel number (zero-indexed)
@@ -89,7 +85,7 @@ static const uint8_t channelNames[] PROGMEM = {
     CHANNEL_NAME('R', 8)
 
     #ifdef USE_LBAND
-        , // This comma is important.
+        ,
         CHANNEL_NAME('L', 1),
         CHANNEL_NAME('L', 2),
         CHANNEL_NAME('L', 3),
