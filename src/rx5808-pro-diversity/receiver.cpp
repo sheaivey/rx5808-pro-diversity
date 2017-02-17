@@ -19,9 +19,11 @@ namespace Receiver {
 
     uint8_t rssiA = 0;
     uint16_t rssiARaw = 0;
+    uint8_t rssiALast[16] = { 0 };
     #ifdef USE_DIVERSITY
         uint8_t rssiB = 0;
         uint16_t rssiBRaw = 0;
+        uint8_t rssiBLast[16] = { 0 };
     #endif
 
     #ifdef USE_SERIAL_OUT
@@ -86,6 +88,12 @@ namespace Receiver {
             EepromSettings.rssiAMax,
             1,
             100);
+
+        for (uint8_t i = 0; i < 15; i++) {
+            rssiALast[i] = rssiALast[i + 1];
+        }
+        rssiALast[15] = rssiA;
+
         #ifdef USE_DIVERSITY
             rssiB = map(
                 rssiBRaw,
@@ -93,6 +101,11 @@ namespace Receiver {
                 EepromSettings.rssiBMax,
                 1,
                 100);
+
+            for (uint8_t i = 0; i < 15; i++) {
+                rssiBLast[i] = rssiBLast[i + 1];
+            }
+            rssiBLast[15] = rssiB;
         #endif
     }
 

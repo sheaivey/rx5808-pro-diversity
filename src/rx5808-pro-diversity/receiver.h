@@ -21,8 +21,10 @@ namespace Receiver {
     extern uint8_t activeReceiver;
     extern uint8_t activeChannel;
     extern uint8_t rssiA;
+    extern uint8_t rssiALast[16];
     #ifdef USE_DIVERSITY
         extern uint8_t rssiB;
+        extern uint8_t rssiBLast[16];
     #endif
 
     void setChannel(uint8_t channel);
