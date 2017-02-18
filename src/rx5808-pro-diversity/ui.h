@@ -29,8 +29,10 @@ namespace Ui {
     void update();
 
     void drawTitle(const char* title);
+    void drawDashedHLine(const int x, const int y, const int w, const int step);
     void clear();
-    void clearRect(int x, int y, int w, int h);
+    void clearRect(const int x, const int y, const int w, const int h);
+
 
     void needUpdate();
     void needDisplay();

@@ -41,11 +41,22 @@ namespace Ui {
         display.print(title);
     }
 
+    void drawDashedHLine(
+        const int x,
+        const int y,
+        const int w,
+        const int step
+    ) {
+        for (int i = 0; i <= w; i += step) {
+            Ui::display.drawFastHLine(x + i, y, step / 2, WHITE);
+        }
+    }
+
     void clear() {
         display.clearDisplay();
     }
 
-    void clearRect(int x, int y, int w, int h) {
+    void clearRect(const int x, const int y, const int w, const int h) {
         display.fillRect(x, y, w, h, BLACK);
     }
 
