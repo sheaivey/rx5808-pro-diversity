@@ -26,7 +26,6 @@ static void onButtonChange();
 
 void StateMachine::AutoStateHandler::onEnter() {
     ButtonState::registerChangeFunc(onButtonChange);
-    //drawScreen.seekMode(STATE_SEEK);
 }
 
 void StateMachine::AutoStateHandler::onExit() {
@@ -34,16 +33,6 @@ void StateMachine::AutoStateHandler::onExit() {
 }
 
 void StateMachine::AutoStateHandler::onTick() {
-    /*drawScreen.updateSeekMode(
-        STATE_SEEK,
-        Receiver::activeChannel,
-        Channels::getOrderedIndex(Receiver::activeChannel),
-        Receiver::rssiA,
-        Channels::getFrequency(Receiver::activeChannel),
-        RSSI_SEEK_TRESHOLD,
-        !scanning
-    );*/
-
     if (scanning) {
         if (!forceNext && Receiver::rssiA >= RSSI_SEEK_TRESHOLD)
             scanning = false;
@@ -59,9 +48,9 @@ void StateMachine::AutoStateHandler::onTick() {
 
         if (forceNext)
             forceNext = false;
-
-        Ui::needUpdate();
     }
+
+    Ui::needUpdate();
 }
 
 
@@ -78,7 +67,7 @@ static void onButtonChange() {
 }
 
 
-
+static void drawBorders();
 static void drawChannelText();
 static void drawFrequencyText();
 static void drawScanBar();
@@ -88,17 +77,7 @@ static void drawRssiGraph();
 void StateMachine::AutoStateHandler::onInitialDraw() {
     Ui::clear();
 
-    Ui::display.drawFastVLine(59, 0, SCREEN_HEIGHT, WHITE);
-    Ui::display.drawFastVLine(SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT, WHITE);
-
-    Ui::display.drawRoundRect(
-        0,
-        (CHAR_HEIGHT * 5) + 4,
-        56,
-        7,
-        2,
-        WHITE
-    );
+    drawBorders();
 
     drawChannelText();
     drawFrequencyText();
@@ -130,19 +109,27 @@ void StateMachine::AutoStateHandler::onUpdateDraw() {
         5
     );
 
-    Ui::clearRect(
-        62,
-        0,
-        SCREEN_WIDTH - 62 - 1,
-        SCREEN_HEIGHT
-    );
-
     drawChannelText();
     drawFrequencyText();
     drawScanBar();
     drawRssiGraph();
 
     Ui::needDisplay();
+}
+
+
+static void drawBorders() {
+    Ui::display.drawFastVLine(59, 0, SCREEN_HEIGHT, WHITE);
+    Ui::display.drawFastVLine(SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT, WHITE);
+
+    Ui::display.drawRoundRect(
+        0,
+        (CHAR_HEIGHT * 5) + 4,
+        56,
+        7,
+        2,
+        WHITE
+    );
 }
 
 static void drawChannelText() {
@@ -165,53 +152,78 @@ static void drawFrequencyText() {
 }
 
 static void drawScanBar() {
-    float scanPercent = Receiver::activeChannel / (float) (CHANNELS_SIZE - 1);
+    int scanWidth = Receiver::activeChannel * 54 / (CHANNELS_SIZE - 1);
 
     Ui::display.fillRect(
         1,
         (CHAR_HEIGHT * 5) + 4 + 1,
-        54 * scanPercent,
+        scanWidth,
         5,
         WHITE
     );
 }
 
+static void drawGraph(
+    const uint8_t data[],
+    const uint8_t dataSize,
+    const uint8_t dataScale,
+    const int x,
+    const int y,
+    const int w,
+    const int h
+) {
+    #define SCALE_DATAPOINT(p) (p * h / dataScale)
+    #define CLAMP_DATAPOINT(p) \
+        (p > dataScale) ? dataScale : ((p < 0) ? 0 : p);
+
+    Ui::clearRect(x, y, w - 1, h + 1);
+
+    const uint8_t xScaler = w / dataSize;
+    const uint8_t xScalarMissing = w % dataSize;
+
+    for (uint8_t i = 0; i < dataSize - 1; i++) {
+        const uint8_t dataPoint = CLAMP_DATAPOINT(data[i]);
+        const uint8_t dataPointNext = CLAMP_DATAPOINT(data[i + 1]);
+
+        // Need to invert the heights so it shows the right way on he screen.
+        const uint8_t dataPointHeight = h - SCALE_DATAPOINT(dataPoint);
+        const uint8_t dataPointNextHeight = h - SCALE_DATAPOINT(dataPointNext);
+
+        Ui::display.drawLine(
+            x + (i) * xScaler,
+            y + dataPointHeight,
+            x + (i + 1) * xScaler + (i == dataSize - 2 ? xScalarMissing : 0),
+            y + dataPointNextHeight,
+            WHITE
+        );
+    }
+
+    #undef SCALE_DATAPOINT
+    #undef CLAMP_DATAPOINT
+}
+
 static void drawRssiGraph() {
-    for (uint8_t i = 1; i < 16; i++) {
-        float barPercentLastA = Receiver::rssiALast[i - 1] / 100.0f;
-        int barHeightLastA = 30 * barPercentLastA / 2;
+    drawGraph(
+        Receiver::rssiALast,
+        RECEIVER_LAST_DATA_SIZE,
+        100,
+        62,
+        0,
+        66,
+        30
+    );
 
-        float barPercentA = Receiver::rssiALast[i] / 100.0f;
-        int barHeightA = 30 * barPercentA / 2;
+    drawGraph(
+        Receiver::rssiBLast,
+        RECEIVER_LAST_DATA_SIZE,
+        100,
+        62,
+        34,
+        66,
+        30
+    );
 
-        Ui::display.drawLine(
-            (60 + 4) + ((i - 1) * 4),
-            32 - (30 - barHeightLastA),
-            (60 + 4) + ((i) * 4),
-            32 - (30 - barHeightA),
-            WHITE
-        );
-
-        float barPercentLastB = Receiver::rssiBLast[i - 1] / 100.0f;
-        int barHeightLastB = 30 * barPercentLastB;
-
-        float barPercentB = Receiver::rssiBLast[i] / 100.0f;
-        int barHeightB = 30 * barPercentB;
-
-        Ui::display.drawLine(
-            (60 + 4) + ((i - 1) * 4),
-            SCREEN_HEIGHT - (30 - barHeightLastB),
-            (60 + 4) + ((i) * 4),
-            SCREEN_HEIGHT -  (30 - barHeightB),
-            WHITE
-        );
-    }
-
-    for (int i = 0; i <= 64; i += 4) {
-         Ui::display.drawFastHLine(60 + i, 32, 2, WHITE);
-    }
-
-    Ui::display.setTextSize(2);
+    Ui::drawDashedHLine(60, 32, 64, 8);
 
     if (Receiver::activeReceiver == RECEIVER_A) {
         Ui::display.fillRoundRect(
