@@ -13,7 +13,11 @@ namespace Ui {
             void drawUpdate();
 
             void reset();
-            void addItem(const char* text, MenuHandler handler);
+            void addItem(
+                const char* text,
+                const unsigned char* icon,
+                MenuHandler handler
+            );
 
             void selectNextItem();
             void selectPreviousItem();

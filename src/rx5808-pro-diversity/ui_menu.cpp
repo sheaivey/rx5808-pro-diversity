@@ -13,40 +13,85 @@ namespace Ui {
 struct MenuItem {
     const char* text = nullptr;
     Ui::MenuHandler handler = nullptr;
+    const unsigned char* icon = nullptr;
 };
 
 
 static MenuItem menuItems[MENU_ITEMS_MAX];
 static int activeItems = 0;
-static int selectedItem = 2;
+static int selectedItem = 0;
 
 
 void Ui::MenuComponent::drawInitial() {
-    for (int i = 0; i < activeItems; i++) {
-        const MenuItem* item = &menuItems[i];
+    const MenuItem* item = &menuItems[selectedItem];
+    const uint8_t charLen = strlen(item->text);
 
-        if (i == selectedItem) {
-            Ui::display.fillRect(0, 11 + i * (8 + 2), SCREEN_WIDTH, 9, WHITE);
-            Ui::display.fillTriangle(
-                0, 11 + i * (8 + 2) + 0,
-                8, 11 + i * (8 + 2) + 0,
-                0, 11 + i * (8 + 2) + 8,
-                BLACK
-            );
+    Ui::display.setTextSize(2);
+    Ui::display.setTextColor(WHITE);
+    Ui::display.setCursor(
+        SCREEN_WIDTH / 2 - (charLen * ((CHAR_WIDTH + 1) * 2)) / 2,
+        SCREEN_HEIGHT - (CHAR_HEIGHT + 2) * 2
+    );
+    Ui::display.print(item->text);
 
-            Ui::display.setTextColor(BLACK);
-            Ui::display.setCursor(10, 11 + i * (8 + 2) + 1);
-        } else {
-            Ui::display.setCursor(0, 11 + i * (8 + 2) + 1);
-            Ui::display.setTextColor(WHITE);
-        }
+    if (item->icon) {
+        Ui::clearRect(
+            SCREEN_WIDTH / 2 - 32 / 2,
+            7,
+            32,
+            32
+        );
 
-        Ui::display.print(item->text);
+        Ui::display.drawBitmap(
+            SCREEN_WIDTH / 2 - 32 / 2,
+            7,
+            item->icon,
+            32,
+            32,
+            WHITE
+        );
     }
+
+    #define TRIANGLE_SIZE 4
+    #define TRIANGLE_MARGIN 2
+
+    Ui::display.fillTriangle(
+        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE),
+        SCREEN_HEIGHT / 2 + TRIANGLE_MARGIN,
+
+        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE / 2),
+        SCREEN_HEIGHT / 2 + TRIANGLE_MARGIN + (TRIANGLE_SIZE),
+
+        SCREEN_WIDTH - 1,
+        SCREEN_HEIGHT / 2 + TRIANGLE_MARGIN,
+
+        WHITE
+    );
+
+    Ui::display.fillTriangle(
+        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE),
+        SCREEN_HEIGHT / 2 - TRIANGLE_MARGIN,
+
+        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE / 2),
+        SCREEN_HEIGHT / 2 - TRIANGLE_MARGIN - (TRIANGLE_SIZE),
+
+        SCREEN_WIDTH - 1,
+        SCREEN_HEIGHT / 2 - TRIANGLE_MARGIN,
+
+        WHITE
+    );
+
+    #undef TRIANGLE_SIZE
+    #undef TRIANGLE_MARGIN
 }
 
 void Ui::MenuComponent::drawUpdate() {
-    Ui::display.fillRect(0, 11, SCREEN_WIDTH, 10 * activeItems, 0);
+    Ui::clearRect(
+        0,
+        SCREEN_HEIGHT - (CHAR_HEIGHT + 2) * 2,
+        SCREEN_WIDTH,
+        (CHAR_HEIGHT + 2) * 2
+    );
     this->drawInitial();
 }
 
@@ -56,8 +101,13 @@ void Ui::MenuComponent::reset() {
     selectedItem = 0;
 }
 
-void Ui::MenuComponent::addItem(const char* text, Ui::MenuHandler handler) {
+void Ui::MenuComponent::addItem(
+    const char* text,
+    const unsigned char* icon,
+    Ui::MenuHandler handler
+) {
     menuItems[activeItems].text = text;
+    menuItems[activeItems].icon = icon;
     menuItems[activeItems].handler = handler;
 
     activeItems++;
