@@ -16,15 +16,18 @@
   #define DIVERSITY_FORCE_B 2
 #endif
 
+#define RECEIVER_LAST_DELAY 50
+#define RECEIVER_LAST_DATA_SIZE 16
+
 
 namespace Receiver {
     extern uint8_t activeReceiver;
     extern uint8_t activeChannel;
     extern uint8_t rssiA;
-    extern uint8_t rssiALast[16];
+    extern uint8_t rssiALast[RECEIVER_LAST_DATA_SIZE];
     #ifdef USE_DIVERSITY
         extern uint8_t rssiB;
-        extern uint8_t rssiBLast[16];
+        extern uint8_t rssiBLast[RECEIVER_LAST_DATA_SIZE];
     #endif
 
     void setChannel(uint8_t channel);

@@ -19,11 +19,11 @@ namespace Receiver {
 
     uint8_t rssiA = 0;
     uint16_t rssiARaw = 0;
-    uint8_t rssiALast[16] = { 0 };
+    uint8_t rssiALast[RECEIVER_LAST_DATA_SIZE] = { 0 };
     #ifdef USE_DIVERSITY
         uint8_t rssiB = 0;
         uint16_t rssiBRaw = 0;
-        uint8_t rssiBLast[16] = { 0 };
+        uint8_t rssiBLast[RECEIVER_LAST_DATA_SIZE] = { 0 };
     #endif
     uint32_t lastRssiLogTime = 0;
 
@@ -99,8 +99,8 @@ namespace Receiver {
                 100);
         #endif
 
-        if (millis() >= lastRssiLogTime + 25) {
-            for (uint8_t i = 0; i < 15; i++) {
+        if (millis() >= lastRssiLogTime + RECEIVER_LAST_DELAY) {
+            for (uint8_t i = 0; i < RECEIVER_LAST_DATA_SIZE - 1; i++) {
                 rssiALast[i] = rssiALast[i + 1];
 
                 #ifdef USE_DIVERSITY
@@ -108,9 +108,9 @@ namespace Receiver {
                 #endif
             }
 
-            rssiALast[15] = rssiA;
+            rssiALast[RECEIVER_LAST_DATA_SIZE - 1] = rssiA;
             #ifdef USE_DIVERSITY
-                rssiBLast[15] = rssiB;
+                rssiBLast[RECEIVER_LAST_DATA_SIZE - 1] = rssiB;
             #endif
 
             lastRssiLogTime = millis();
