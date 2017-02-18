@@ -39,8 +39,8 @@ struct EepromSettings {
 
 PROGMEM const struct {
     uint32_t magic = EEPROM_MAGIC;
-    uint8_t channel = CHANNEL_MIN_INDEX;
-    uint8_t defaultState = START_STATE;
+    uint8_t channel = 0;
+    uint8_t defaultState = 0;
 
     uint16_t rssiAMin = RSSI_MIN_VAL;
     uint16_t rssiAMax = RSSI_MAX_VAL;

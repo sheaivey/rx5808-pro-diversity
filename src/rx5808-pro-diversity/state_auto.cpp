@@ -51,8 +51,8 @@ void StateMachine::AutoStateHandler::onTick() {
         int nextChannel = Receiver::activeChannel
             + static_cast<int8_t>(direction);
         if (nextChannel < 0)
-            nextChannel = CHANNEL_MAX_INDEX;
-        if (nextChannel > CHANNEL_MAX_INDEX)
+            nextChannel = CHANNELS_SIZE - 1;
+        if (nextChannel >= CHANNELS_SIZE)
             nextChannel = 0;
 
         Receiver::setChannel(nextChannel);
@@ -165,7 +165,7 @@ static void drawFrequencyText() {
 }
 
 static void drawScanBar() {
-    float scanPercent = Receiver::activeChannel / (float) CHANNEL_MAX_INDEX;
+    float scanPercent = Receiver::activeChannel / (float) (CHANNELS_SIZE - 1);
 
     Ui::display.fillRect(
         1,

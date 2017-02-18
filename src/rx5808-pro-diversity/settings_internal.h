@@ -30,47 +30,6 @@ SOFTWARE.
 
 #include "settings.h"
 
-// === State ===================================================================
-
-#define STATE_SEEK_FOUND 0
-#define STATE_SEEK 1
-#define STATE_SCAN 2
-#define STATE_MANUAL 3
-#define STATE_SETUP_MENU 4
-#define STATE_SAVE 5
-#define STATE_RSSI_SETUP 6
-#define STATE_SCREEN_SAVER 7
-#ifdef USE_DIVERSITY
-    #define STATE_DIVERSITY 8
-#endif
-#ifdef USE_VOLTAGE_MONITORING
-    #define STATE_VOLTAGE 9
-#endif
-
-#define START_STATE STATE_SEEK
-#define MAX_STATE STATE_MANUAL
-
-// === Setup Menu ==============================================================
-
-#ifdef USE_VOLTAGE_MONITORING
-    #define SETUP_MENU_MAX_ITEMS 5
-#else
-    #define SETUP_MENU_MAX_ITEMS 4
-#endif
-
-// === Channels ================================================================
-
-#define CHANNEL_BAND_SIZE 8
-#define CHANNEL_MIN 0
-#define CHANNEL_MIN_INDEX 0
-#ifdef USE_LBAND
-    #define CHANNEL_MAX 47
-    #define CHANNEL_MAX_INDEX 47
-#else
-    #define CHANNEL_MAX 39
-    #define CHANNEL_MAX_INDEX 39
-#endif
-
 // === EEPROM ==================================================================
 
 // This should be incremented after every EEPROM change.

@@ -47,11 +47,11 @@ void StateMachine::ManualStateHandler::onTick() {
 static void onButtonChange() {
     if (ButtonState::get(Button::UP)) {
         Receiver::setChannel(
-            (Receiver::activeChannel + 1) % CHANNEL_MAX_INDEX
+            (Receiver::activeChannel + 1) % (CHANNELS_SIZE - 1)
         );
     } else if (ButtonState::get(Button::DOWN)) {
         Receiver::setChannel(
-            (Receiver::activeChannel - 1) % CHANNEL_MAX_INDEX
+            (Receiver::activeChannel - 1) % (CHANNELS_SIZE - 1)
         );
     }
 }

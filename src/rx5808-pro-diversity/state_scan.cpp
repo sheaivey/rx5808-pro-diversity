@@ -39,7 +39,7 @@ void StateMachine::ScanStateHandler::onTick() {
         EepromSettings.rssiAMin,
         EepromSettings.rssiAMax);*/
 
-    orderedChanelIndex = (orderedChanelIndex + 1) % CHANNEL_MAX_INDEX;
+    orderedChanelIndex = (orderedChanelIndex + 1) % (CHANNELS_SIZE - 1);
     uint8_t realChannelIndex = Channels::getOrderedIndex(
         orderedChanelIndex);
 
