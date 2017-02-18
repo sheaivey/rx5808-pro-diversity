@@ -25,6 +25,7 @@ namespace Receiver {
         uint16_t rssiBRaw = 0;
         uint8_t rssiBLast[16] = { 0 };
     #endif
+    uint32_t lastRssiLogTime = 0;
 
     #ifdef USE_SERIAL_OUT
         static uint32_t lastSerialWriteTime = 0;
@@ -89,11 +90,6 @@ namespace Receiver {
             1,
             100);
 
-        for (uint8_t i = 0; i < 15; i++) {
-            rssiALast[i] = rssiALast[i + 1];
-        }
-        rssiALast[15] = rssiA;
-
         #ifdef USE_DIVERSITY
             rssiB = map(
                 rssiBRaw,
@@ -101,12 +97,24 @@ namespace Receiver {
                 EepromSettings.rssiBMax,
                 1,
                 100);
-
-            for (uint8_t i = 0; i < 15; i++) {
-                rssiBLast[i] = rssiBLast[i + 1];
-            }
-            rssiBLast[15] = rssiB;
         #endif
+
+        if (millis() >= lastRssiLogTime + 25) {
+            for (uint8_t i = 0; i < 15; i++) {
+                rssiALast[i] = rssiALast[i + 1];
+
+                #ifdef USE_DIVERSITY
+                    rssiBLast[i] = rssiBLast[i + 1];
+                #endif
+            }
+
+            rssiALast[15] = rssiA;
+            #ifdef USE_DIVERSITY
+                rssiBLast[15] = rssiB;
+            #endif
+
+            lastRssiLogTime = millis();
+        }
     }
 
     void setDiversityMode(uint8_t mode) {
@@ -187,6 +195,7 @@ static void updateRssiLimits() {
     #endif
 }
 
+#ifdef USE_SERIAL_OUT
 static void writeSerialData() {
     uint16_t timeSinceWrite = millis() - Receiver::lastSerialWriteTime;
     if (timeSinceWrite >= 20) {
@@ -203,3 +212,4 @@ static void writeSerialData() {
         Receiver::lastSerialWriteTime = millis();
     }
 }
+#endif
