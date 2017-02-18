@@ -63,6 +63,8 @@ static void onButtonChange() {
         scanning = true;
         forceNext = true;
         direction = ScanDirection::DOWN;
+    } else if (ButtonState::get(Button::MODE)) {
+        StateMachine::switchState(StateMachine::State::MENU);
     }
 }
 
