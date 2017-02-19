@@ -6,7 +6,6 @@ namespace StateMachine {
     #define STATE_COUNT 6
     enum class State {
         BOOT,
-        MANUAL,
         SCAN,
         AUTO,
         SCREENSAVER,
