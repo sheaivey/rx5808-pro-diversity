@@ -70,16 +70,11 @@ namespace Receiver {
             rssiBRaw = 0;
         #endif
 
-        for (uint8_t i = 0; i < RSSI_READS; i++) {
-            rssiARaw += analogRead(PIN_RSSI_A);
-            #ifdef USE_DIVERSITY
-                rssiBRaw += analogRead(PIN_RSSI_B);
-            #endif
-        }
-
-        rssiARaw = rssiARaw / RSSI_READS;
+        analogRead(PIN_RSSI_A); // Fake read to let ADC settle.
+        rssiARaw = analogRead(PIN_RSSI_A);
         #ifdef USE_DIVERSITY
-            rssiBRaw = rssiBRaw / RSSI_READS;
+            analogRead(PIN_RSSI_B);
+            rssiBRaw = analogRead(PIN_RSSI_B);
         #endif
 
         updateRssiLimits();
@@ -90,7 +85,6 @@ namespace Receiver {
             EepromSettings.rssiAMax,
             1,
             100);
-
         #ifdef USE_DIVERSITY
             rssiB = map(
                 rssiBRaw,
@@ -103,7 +97,6 @@ namespace Receiver {
         if (millis() >= lastRssiLogTime + RECEIVER_LAST_DELAY) {
             for (uint8_t i = 0; i < RECEIVER_LAST_DATA_SIZE - 1; i++) {
                 rssiALast[i] = rssiALast[i + 1];
-
                 #ifdef USE_DIVERSITY
                     rssiBLast[i] = rssiBLast[i + 1];
                 #endif
