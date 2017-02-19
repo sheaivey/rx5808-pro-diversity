@@ -20,6 +20,13 @@ enum class ScanDirection : int8_t {
 static bool scanning = true;
 static ScanDirection direction = ScanDirection::UP;
 static bool forceNext = false;
+static uint8_t orderedChanelIndex = 0;
+static bool scanningPeak = false;
+
+static uint8_t peakChannelIndex = 0;
+
+#define PEAK_LOOKAHEAD 16
+static uint8_t peaks[PEAK_LOOKAHEAD] = { 0 };
 
 static void onButtonChange();
 
@@ -33,21 +40,55 @@ void StateMachine::AutoStateHandler::onExit() {
 }
 
 void StateMachine::AutoStateHandler::onTick() {
-    if (scanning) {
-        if (!forceNext && Receiver::rssiA >= RSSI_SEEK_TRESHOLD)
-            scanning = false;
+    Receiver::waitForStableRssi();
 
-        int nextChannel = Receiver::activeChannel
-            + static_cast<int8_t>(direction);
-        if (nextChannel < 0)
-            nextChannel = CHANNELS_SIZE - 1;
-        if (nextChannel >= CHANNELS_SIZE)
-            nextChannel = 0;
+    if (scanningPeak) {
+        uint8_t peaksIndex = peakChannelIndex - orderedChanelIndex;
+        peaks[peaksIndex] = Receiver::rssiA;
+        peakChannelIndex++;
 
-        Receiver::setChannel(nextChannel);
+        if (peaksIndex >= PEAK_LOOKAHEAD || peakChannelIndex >= CHANNELS_SIZE) {
+            uint8_t largestPeak = 0;
+            uint8_t largestPeakIndex = 0;
+            for (uint8_t i = 0; i < PEAK_LOOKAHEAD; i++) {
+                uint8_t peak = peaks[i];
+                if (peak > largestPeak) {
+                    largestPeak = peak;
+                    largestPeakIndex = i;
+                }
+            }
 
-        if (forceNext)
-            forceNext = false;
+            uint8_t peakChannel = orderedChanelIndex + largestPeakIndex;
+            orderedChanelIndex = peakChannel;
+            Receiver::setChannel(Channels::getOrderedIndex(peakChannel));
+
+            scanningPeak = false;
+        } else {
+            Receiver::setChannel(Channels::getOrderedIndex(peakChannelIndex));
+        }
+    } else {
+        if (scanning) {
+            if (!forceNext && Receiver::rssiA >= RSSI_SEEK_TRESHOLD) {
+                scanning = false;
+                scanningPeak = true;
+                peakChannelIndex = orderedChanelIndex;
+
+                for (uint8_t i = 0; i < PEAK_LOOKAHEAD; i++)
+                    peaks[i] = 0;
+            } else {
+                orderedChanelIndex += static_cast<int8_t>(direction);
+                if (orderedChanelIndex < 0)
+                    orderedChanelIndex = CHANNELS_SIZE - 1;
+                if (orderedChanelIndex >= CHANNELS_SIZE)
+                    orderedChanelIndex = 0;
+
+                Receiver::setChannel(
+                    Channels::getOrderedIndex(orderedChanelIndex));
+            }
+
+            if (forceNext)
+                forceNext = false;
+        }
     }
 
     Ui::needUpdate();
@@ -154,7 +195,7 @@ static void drawFrequencyText() {
 }
 
 static void drawScanBar() {
-    int scanWidth = Receiver::activeChannel * 54 / CHANNELS_SIZE;
+    int scanWidth = orderedChanelIndex * 54 / CHANNELS_SIZE;
 
     Ui::display.fillRect(
         1,
