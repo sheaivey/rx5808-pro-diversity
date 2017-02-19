@@ -16,7 +16,6 @@ namespace Receiver {
     uint8_t activeReceiver = RECEIVER_A;
     uint8_t activeChannel = 0;
 
-
     uint8_t rssiA = 0;
     uint16_t rssiARaw = 0;
     uint8_t rssiALast[RECEIVER_LAST_DATA_SIZE] = { 0 };
