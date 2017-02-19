@@ -59,7 +59,9 @@ SOFTWARE.
 
 // Can enable this to powerdown the audio blocks on the RX58xx if you don't
 // need it. Save a tiny bit of power, make your videos less noisy.
-#define DISABLE_AUDIO
+//
+// WARNING: Makes RSSI act a little weird.
+//#define DISABLE_AUDIO
 
 // === Features ===============================================================
 //
@@ -171,9 +173,6 @@ SOFTWARE.
 #endif
 
 // === RSSI ====================================================================
-
-// Number of analog RSSI reads to average for the current check.
-#define RSSI_READS 4
 
 // RSSI default raw range.
 #define RSSI_MIN_VAL 90
