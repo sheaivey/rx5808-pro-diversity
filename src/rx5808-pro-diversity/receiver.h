@@ -16,8 +16,8 @@
   #define DIVERSITY_FORCE_B 2
 #endif
 
-#define RECEIVER_LAST_DELAY 50
-#define RECEIVER_LAST_DATA_SIZE 16
+#define RECEIVER_LAST_DELAY 100
+#define RECEIVER_LAST_DATA_SIZE 32
 
 
 namespace Receiver {
