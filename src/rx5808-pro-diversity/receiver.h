@@ -23,6 +23,7 @@
 namespace Receiver {
     extern uint8_t activeReceiver;
     extern uint8_t activeChannel;
+
     extern uint8_t rssiA;
     extern uint8_t rssiALast[RECEIVER_LAST_DATA_SIZE];
     #ifdef USE_DIVERSITY

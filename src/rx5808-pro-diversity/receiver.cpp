@@ -15,7 +15,7 @@ static void writeSerialData();
 namespace Receiver {
     uint8_t activeReceiver = RECEIVER_A;
     uint8_t activeChannel = 0;
-    uint32_t lastChannelSwitchTime = 0;
+
 
     uint8_t rssiA = 0;
     uint16_t rssiARaw = 0;
@@ -25,8 +25,9 @@ namespace Receiver {
         uint16_t rssiBRaw = 0;
         uint8_t rssiBLast[RECEIVER_LAST_DATA_SIZE] = { 0 };
     #endif
-    uint32_t lastRssiLogTime = 0;
 
+    uint32_t lastChannelSwitchTime = 0;
+    uint32_t lastRssiLogTime = 0;
     #ifdef USE_SERIAL_OUT
         static uint32_t lastSerialWriteTime = 0;
     #endif
