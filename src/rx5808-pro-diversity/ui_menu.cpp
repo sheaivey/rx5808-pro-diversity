@@ -104,7 +104,7 @@ void Ui::MenuComponent::reset() {
 void Ui::MenuComponent::addItem(
     const char* text,
     const unsigned char* icon,
-    Ui::MenuHandler handler
+    const Ui::MenuHandler handler
 ) {
     menuItems[activeItems].text = text;
     menuItems[activeItems].icon = icon;

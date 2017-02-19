@@ -16,7 +16,7 @@ namespace Ui {
             void addItem(
                 const char* text,
                 const unsigned char* icon,
-                MenuHandler handler
+                const MenuHandler handler
             );
 
             void selectNextItem();
