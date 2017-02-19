@@ -154,7 +154,7 @@ static void drawFrequencyText() {
 }
 
 static void drawScanBar() {
-    int scanWidth = Receiver::activeChannel * 54 / (CHANNELS_SIZE - 1);
+    int scanWidth = Receiver::activeChannel * 54 / CHANNELS_SIZE;
 
     Ui::display.fillRect(
         1,
