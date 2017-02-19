@@ -56,8 +56,10 @@ namespace Ui {
 
         Ui::clearRect(x, y, w - 1, h + 1);
 
-        const uint8_t xScaler = w / dataSize;
-        const uint8_t xScalarMissing = w % dataSize;
+        const uint8_t xScaler = w / (dataSize - 1);
+        const uint8_t xScalarMissing = w - (xScaler * (dataSize - 1));
+
+        uint8_t xNext = x;
 
         for (uint8_t i = 0; i < dataSize - 1; i++) {
             const uint8_t dataPoint = CLAMP_DATAPOINT(data[i]);
@@ -69,14 +71,18 @@ namespace Ui {
             const uint8_t dataPointNextHeight =
                 h - SCALE_DATAPOINT(dataPointNext);
 
+            const uint8_t xEnd = xNext + xScaler
+                    + (i == 0 || i == dataSize - 2 ? (xScalarMissing + 1) / 2 : 0);
+
             Ui::display.drawLine(
-                x + (i) * xScaler,
+                xNext,
                 y + dataPointHeight,
-                x + (i + 1) * xScaler
-                    + (i == dataSize - 2 ? xScalarMissing : 0),
+                xEnd,
                 y + dataPointNextHeight,
                 WHITE
             );
+
+            xNext = xEnd;
         }
 
         #undef SCALE_DATAPOINT
