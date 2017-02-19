@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#include "state_auto.h"
+#include "state_search.h"
 
 #include "settings.h"
 #include "settings_internal.h"
@@ -31,15 +31,15 @@ static uint8_t peaks[PEAK_LOOKAHEAD] = { 0 };
 static void onButtonChange();
 
 
-void StateMachine::AutoStateHandler::onEnter() {
+void StateMachine::SearchStateHandler::onEnter() {
     ButtonState::registerChangeFunc(onButtonChange);
 }
 
-void StateMachine::AutoStateHandler::onExit() {
+void StateMachine::SearchStateHandler::onExit() {
     ButtonState::deregisterChangeFunc(onButtonChange);
 }
 
-void StateMachine::AutoStateHandler::onTick() {
+void StateMachine::SearchStateHandler::onTick() {
     Receiver::waitForStableRssi();
 
     if (scanningPeak) {
@@ -117,7 +117,7 @@ static void drawScanBar();
 static void drawRssiGraph();
 
 
-void StateMachine::AutoStateHandler::onInitialDraw() {
+void StateMachine::SearchStateHandler::onInitialDraw() {
     Ui::clear();
 
     drawBorders();
@@ -130,7 +130,7 @@ void StateMachine::AutoStateHandler::onInitialDraw() {
     Ui::needDisplay();
 }
 
-void StateMachine::AutoStateHandler::onUpdateDraw() {
+void StateMachine::SearchStateHandler::onUpdateDraw() {
     Ui::clearRect(
         0,
         0,

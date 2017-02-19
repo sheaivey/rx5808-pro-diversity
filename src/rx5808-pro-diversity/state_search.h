@@ -6,7 +6,7 @@
 
 
 namespace StateMachine {
-    class AutoStateHandler : public StateMachine::StateHandler {
+    class SearchStateHandler : public StateMachine::StateHandler {
         public:
             void onEnter();
             void onExit();

@@ -3,8 +3,8 @@
 #include "state.h"
 
 #include "state_screensaver.h"
-#include "state_scan.h"
-#include "state_auto.h"
+#include "state_search.h"
+#include "state_bandscan.h"
 #include "state_menu.h"
 
 #include "ui.h"
@@ -12,16 +12,17 @@
 
 namespace StateMachine {
     static ScreensaverStateHandler screensaverHandler;
-    static ScanStateHandler scanHandler;
-    static AutoStateHandler autoHandler;
+    static SearchStateHandler searchHandler;
+    static BandScanStateHandler bandHandler;
     static MenuStateHandler menuHandler;
 
     static StateHandler* handlers[STATE_COUNT] = {
         nullptr,
-        &scanHandler,
-        &autoHandler,
+        &searchHandler,
+        &bandHandler,
         &screensaverHandler,
-        &menuHandler
+        &menuHandler,
+        nullptr
     };
 
     State currentState = State::BOOT;

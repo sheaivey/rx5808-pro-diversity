@@ -6,7 +6,7 @@
 
 
 namespace StateMachine {
-    class ScanStateHandler : public StateMachine::StateHandler {
+    class BandScanStateHandler : public StateMachine::StateHandler {
         public:
             void onEnter();
             void onExit();

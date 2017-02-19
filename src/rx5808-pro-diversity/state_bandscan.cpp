@@ -1,6 +1,6 @@
 #include <avr/pgmspace.h>
 
-#include "state_scan.h"
+#include "state_bandscan.h"
 
 #include "settings.h"
 #include "settings_internal.h"
@@ -22,21 +22,21 @@ static uint8_t rssiData[CHANNELS_SIZE] = { 0 };
 static void onButtonChange();
 
 
-void StateMachine::ScanStateHandler::onEnter() {
+void StateMachine::BandScanStateHandler::onEnter() {
     orderedChanelIndex = 0;
     lastChannelIndex = Receiver::activeChannel;
 
     ButtonState::registerChangeFunc(onButtonChange);
 }
 
-void StateMachine::ScanStateHandler::onExit() {
+void StateMachine::BandScanStateHandler::onExit() {
     Receiver::setChannel(lastChannelIndex);
 
     ButtonState::deregisterChangeFunc(onButtonChange);
 }
 
 
-void StateMachine::ScanStateHandler::onTick() {
+void StateMachine::BandScanStateHandler::onTick() {
     Receiver::waitForStableRssi();
     rssiData[orderedChanelIndex] = (Receiver::rssiA + Receiver::rssiB) / 2;
 
@@ -54,11 +54,11 @@ static void onButtonChange() {
 }
 
 
-void StateMachine::ScanStateHandler::onInitialDraw() {
+void StateMachine::BandScanStateHandler::onInitialDraw() {
 
 }
 
-void StateMachine::ScanStateHandler::onUpdateDraw() {
+void StateMachine::BandScanStateHandler::onUpdateDraw() {
     Ui::clear();
 
     Ui::drawGraph(

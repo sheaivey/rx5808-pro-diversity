@@ -90,14 +90,14 @@ static void onButtonChange() {
 }
 
 static void searchMenuHandler() {
-    StateMachine::switchState(StateMachine::State::AUTO);
+    StateMachine::switchState(StateMachine::State::SEARCH);
 };
 
 static void bandScannerMenuHandler() {
-    StateMachine::switchState(StateMachine::State::SCAN);
+    StateMachine::switchState(StateMachine::State::BANDSCAN);
 };
 
 static void settingsMenuHandler() {
-    StateMachine::switchState(StateMachine::State::SCAN);
+    StateMachine::switchState(StateMachine::State::SETTINGS);
 };
 
