@@ -39,6 +39,7 @@ SOFTWARE.
 
 #include "channels.h"
 #include "receiver.h"
+#include "receiver_spi.h"
 #include "buttons.h"
 #include "state.h"
 
@@ -53,16 +54,16 @@ void setup()
     digitalWrite(PIN_LED, HIGH);
     digitalWrite(PIN_BUZZER, HIGH);
 
-    Receiver::setActiveReceiver(RECEIVER_A);
     setupSettings();
 
+    Receiver::setup();
     Ui::setup();
 
+    Receiver::setActiveReceiver(RECEIVER_A);
+
     #ifdef USE_IR_EMITTER
-        // Used to Transmit IR Payloads
         Serial.begin(9600);
     #endif
-
     #ifdef USE_SERIAL_OUT
         Serial.begin(250000);
     #endif

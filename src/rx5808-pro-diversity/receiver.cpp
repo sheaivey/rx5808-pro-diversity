@@ -164,6 +164,12 @@ namespace Receiver {
         setActiveReceiver(bestReceiver);
     }
 
+    void setup() {
+        #ifdef DISABLE_AUDIO
+            ReceiverSpi::setPowerDownRegister(0b00010000110111110011);
+        #endif
+    }
+
     void update() {
         updateRssi();
 

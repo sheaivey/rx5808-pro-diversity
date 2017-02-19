@@ -37,12 +37,12 @@ SOFTWARE.
 
 // === Receiver Modules =========================================================
 
-#ifdef rx5808
+#ifdef RX5808
     // rx5808 module need >20ms to tune.
     // 25 ms will do a 40 channel scan in 1 second.
     #define MIN_TUNE_TIME 25
 #endif
-#ifdef rx5880
+#ifdef RX5880
     // rx5880 module needs >30ms to tune.
     // 35 ms will do a 40 channel scan in 1.4 seconds.
     #define MIN_TUNE_TIME 35

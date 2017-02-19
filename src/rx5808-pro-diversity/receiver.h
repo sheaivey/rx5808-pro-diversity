@@ -40,6 +40,7 @@ namespace Receiver {
         void switchDiversity();
     #endif
 
+    void setup();
     void update();
 }
 

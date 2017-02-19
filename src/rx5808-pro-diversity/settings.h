@@ -54,8 +54,12 @@ SOFTWARE.
 //
 // =============================================================================
 
-#define rx5808
-//#define rx5880
+#define RX5808
+//#define RX5880
+
+// Can enable this to powerdown the audio blocks on the RX58xx if you don't
+// need it. Save a tiny bit of power, make your videos less noisy.
+#define DISABLE_AUDIO
 
 // === Features ===============================================================
 //
