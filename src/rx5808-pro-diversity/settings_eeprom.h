@@ -16,7 +16,6 @@ struct EepromSettings {
     uint16_t rssiAMin;
     uint16_t rssiAMax;
 
-    char callSign[16];
     uint8_t beepEnabled;
     uint8_t orderByChannel;
 
@@ -45,7 +44,6 @@ PROGMEM const struct {
     uint16_t rssiAMin = RSSI_MIN_VAL;
     uint16_t rssiAMax = RSSI_MAX_VAL;
 
-    char callSign[16] = CALL_SIGN;
     uint8_t beepEnabled = true;
     uint8_t orderByChannel = true;
 
