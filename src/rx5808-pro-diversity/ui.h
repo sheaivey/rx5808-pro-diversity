@@ -3,6 +3,7 @@
 
 
 #include <Adafruit_SSD1306.h>
+#include <stdint.h>
 
 #include "settings.h"
 #include "settings_internal.h"
@@ -29,10 +30,21 @@ namespace Ui {
     void update();
 
     void drawTitle(const char* title);
+    void drawGraph(
+        const uint8_t data[],
+        const uint8_t dataSize,
+        const uint8_t dataScale,
+        const uint8_t x,
+        const uint8_t y,
+        const uint8_t w,
+        const uint8_t h
+    );
+
     void drawDashedHLine(const int x, const int y, const int w, const int step);
+    void drawDashedVLine(const int x, const int y, const int w, const int step);
+
     void clear();
     void clearRect(const int x, const int y, const int w, const int h);
-
 
     void needUpdate();
     void needDisplay();

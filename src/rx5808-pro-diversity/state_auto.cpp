@@ -165,47 +165,8 @@ static void drawScanBar() {
     );
 }
 
-static void drawGraph(
-    const uint8_t data[],
-    const uint8_t dataSize,
-    const uint8_t dataScale,
-    const int x,
-    const int y,
-    const int w,
-    const int h
-) {
-    #define SCALE_DATAPOINT(p) (p * h / dataScale)
-    #define CLAMP_DATAPOINT(p) \
-        (p > dataScale) ? dataScale : ((p < 0) ? 0 : p);
-
-    Ui::clearRect(x, y, w - 1, h + 1);
-
-    const uint8_t xScaler = w / dataSize;
-    const uint8_t xScalarMissing = w % dataSize;
-
-    for (uint8_t i = 0; i < dataSize - 1; i++) {
-        const uint8_t dataPoint = CLAMP_DATAPOINT(data[i]);
-        const uint8_t dataPointNext = CLAMP_DATAPOINT(data[i + 1]);
-
-        // Need to invert the heights so it shows the right way on he screen.
-        const uint8_t dataPointHeight = h - SCALE_DATAPOINT(dataPoint);
-        const uint8_t dataPointNextHeight = h - SCALE_DATAPOINT(dataPointNext);
-
-        Ui::display.drawLine(
-            x + (i) * xScaler,
-            y + dataPointHeight,
-            x + (i + 1) * xScaler + (i == dataSize - 2 ? xScalarMissing : 0),
-            y + dataPointNextHeight,
-            WHITE
-        );
-    }
-
-    #undef SCALE_DATAPOINT
-    #undef CLAMP_DATAPOINT
-}
-
 static void drawRssiGraph() {
-    drawGraph(
+    Ui::drawGraph(
         Receiver::rssiALast,
         RECEIVER_LAST_DATA_SIZE,
         100,
@@ -215,7 +176,7 @@ static void drawRssiGraph() {
         30
     );
 
-    drawGraph(
+    Ui::drawGraph(
         Receiver::rssiBLast,
         RECEIVER_LAST_DATA_SIZE,
         100,
