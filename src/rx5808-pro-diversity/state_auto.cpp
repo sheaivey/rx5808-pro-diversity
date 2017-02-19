@@ -25,7 +25,7 @@ static bool scanningPeak = false;
 
 static uint8_t peakChannelIndex = 0;
 
-#define PEAK_LOOKAHEAD 16
+#define PEAK_LOOKAHEAD 4
 static uint8_t peaks[PEAK_LOOKAHEAD] = { 0 };
 
 static void onButtonChange();
@@ -77,17 +77,17 @@ void StateMachine::AutoStateHandler::onTick() {
                     peaks[i] = 0;
             } else {
                 orderedChanelIndex += static_cast<int8_t>(direction);
-                if (orderedChanelIndex < 0)
+                if (orderedChanelIndex == 255)
                     orderedChanelIndex = CHANNELS_SIZE - 1;
                 if (orderedChanelIndex >= CHANNELS_SIZE)
                     orderedChanelIndex = 0;
 
                 Receiver::setChannel(
                     Channels::getOrderedIndex(orderedChanelIndex));
-            }
 
-            if (forceNext)
-                forceNext = false;
+                if (forceNext)
+                    forceNext = false;
+            }
         }
     }
 
