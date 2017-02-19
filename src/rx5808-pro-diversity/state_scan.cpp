@@ -41,10 +41,8 @@ void StateMachine::ScanStateHandler::onTick() {
     rssiData[orderedChanelIndex] = (Receiver::rssiA + Receiver::rssiB) / 2;
 
     orderedChanelIndex = (orderedChanelIndex + 1) % (CHANNELS_SIZE);
-    uint8_t realChannelIndex = Channels::getOrderedIndex(
-        orderedChanelIndex);
+    Receiver::setChannel(Channels::getOrderedIndex(orderedChanelIndex));
 
-    Receiver::setChannel(realChannelIndex);
     Ui::needUpdate();
 }
 
@@ -67,7 +65,7 @@ void StateMachine::ScanStateHandler::onUpdateDraw() {
         rssiData,
         CHANNELS_SIZE,
         100,
-        2,
+        1,
         0,
         SCREEN_WIDTH - 3,
         SCREEN_HEIGHT
