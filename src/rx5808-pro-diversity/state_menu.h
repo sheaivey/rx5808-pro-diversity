@@ -8,11 +8,10 @@
 namespace StateMachine {
     class MenuStateHandler : public StateMachine::StateHandler {
         public:
-            void onEnter();
-            void onExit();
-
             void onInitialDraw();
             void onUpdateDraw();
+
+            void onButtonChange();
     };
 }
 

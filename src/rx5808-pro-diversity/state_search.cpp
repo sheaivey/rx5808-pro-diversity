@@ -28,16 +28,6 @@ static uint8_t peakChannelIndex = 0;
 #define PEAK_LOOKAHEAD 4
 static uint8_t peaks[PEAK_LOOKAHEAD] = { 0 };
 
-static void onButtonChange();
-
-
-void StateMachine::SearchStateHandler::onEnter() {
-    ButtonState::registerChangeFunc(onButtonChange);
-}
-
-void StateMachine::SearchStateHandler::onExit() {
-    ButtonState::deregisterChangeFunc(onButtonChange);
-}
 
 void StateMachine::SearchStateHandler::onTick() {
     Receiver::waitForStableRssi();
@@ -95,7 +85,7 @@ void StateMachine::SearchStateHandler::onTick() {
 }
 
 
-static void onButtonChange() {
+void StateMachine::SearchStateHandler::onButtonChange() {
     if (ButtonState::get(Button::UP)) {
         scanning = true;
         forceNext = true;

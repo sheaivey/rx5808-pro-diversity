@@ -56,6 +56,7 @@ void setup()
 
     setupSettings();
 
+    StateMachine::setup();
     Receiver::setup();
     Ui::setup();
 

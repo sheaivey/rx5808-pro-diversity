@@ -10,9 +10,6 @@
 #include "ui.h"
 
 
-static void onButtonChange();
-
-
 void StateMachine::SettingsStateHandler::onEnter() {
 
 }
@@ -25,8 +22,7 @@ void StateMachine::SettingsStateHandler::onTick() {
 
 }
 
-
-static void onButtonChange() {
+void StateMachine::SettingsStateHandler::onButtonChange() {
 
 }
 

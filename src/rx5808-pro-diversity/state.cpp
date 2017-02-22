@@ -9,9 +9,12 @@
 #include "state_settings.h"
 
 #include "ui.h"
+#include "buttons.h"
 
 
 namespace StateMachine {
+    static void onButtonChange();
+
     static ScreensaverStateHandler screensaverHandler;
     static SearchStateHandler searchHandler;
     static BandScanStateHandler bandHandler;
@@ -39,8 +42,9 @@ namespace StateMachine {
         StateHandler* newHandler =
             handlers[static_cast<size_t>(newState)];
 
-        if (lastHandler != nullptr)
+        if (lastHandler != nullptr) {
             lastHandler->onExit();
+        }
 
         lastState = currentState;
         currentState = newState;
@@ -50,6 +54,10 @@ namespace StateMachine {
             newHandler->onEnter();
             newHandler->onInitialDraw();
         }
+    }
+
+    void setup() {
+        ButtonState::registerChangeFunc(onButtonChange);
     }
 
     void tick() {
@@ -67,6 +75,12 @@ namespace StateMachine {
                 lastDraw = millis();
                 Ui::shouldDrawUpdate = false;
             }
+        }
+    }
+
+    static void onButtonChange() {
+        if (currentHandler != nullptr) {
+            currentHandler->onButtonChange();
         }
     }
 }

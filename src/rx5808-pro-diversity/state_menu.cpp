@@ -39,20 +39,9 @@ static const unsigned char settingsIcon[] PROGMEM = {
 };
 
 
-static void onButtonChange();
-
 static void searchMenuHandler();
 static void bandScannerMenuHandler();
 static void settingsMenuHandler();
-
-
-void StateMachine::MenuStateHandler::onEnter() {
-    ButtonState::registerChangeFunc(onButtonChange);
-}
-
-void StateMachine::MenuStateHandler::onExit() {
-    ButtonState::deregisterChangeFunc(onButtonChange);
-}
 
 
 void StateMachine::MenuStateHandler::onInitialDraw() {
@@ -73,7 +62,7 @@ void StateMachine::MenuStateHandler::onUpdateDraw() {
 }
 
 
-static void onButtonChange() {
+void StateMachine::MenuStateHandler::onButtonChange() {
     if (ButtonState::get(Button::UP)) {
         Ui::menu.selectPreviousItem();
         Ui::needUpdate();

@@ -21,13 +21,17 @@ namespace StateMachine {
             virtual void onEnter() {};
             virtual void onTick() {};
             virtual void onExit() {};
+
+            virtual void onButtonChange() {};
     };
 
     extern State currentState;
     extern State lastState;
 
-    void switchState(State newState);
+    void setup();
     void tick();
+
+    void switchState(State newState);
 }
 
 

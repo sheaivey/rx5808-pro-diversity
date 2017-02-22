@@ -80,19 +80,10 @@ static const unsigned char PROGMEM logo[] = {
 static unsigned long nextSwapDisplayTime = 0;
 static bool showLogo = false;
 
-static void onButtonChange();
-
 
 void StateMachine::ScreensaverStateHandler::onEnter() {
     showLogo = true;
-
-    ButtonState::registerChangeFunc(onButtonChange);
 }
-
-void StateMachine::ScreensaverStateHandler::onExit() {
-    ButtonState::deregisterChangeFunc(onButtonChange);
-}
-
 
 void StateMachine::ScreensaverStateHandler::onTick() {
     if (millis() >= nextSwapDisplayTime) {
@@ -104,7 +95,7 @@ void StateMachine::ScreensaverStateHandler::onTick() {
 }
 
 
-static void onButtonChange() {
+void StateMachine::ScreensaverStateHandler::onButtonChange() {
     StateMachine::switchState(StateMachine::lastState);
 }
 

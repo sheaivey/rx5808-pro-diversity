@@ -14,6 +14,8 @@ namespace StateMachine {
 
             void onInitialDraw();
             void onUpdateDraw();
+
+            void onButtonChange();
     };
 }
 

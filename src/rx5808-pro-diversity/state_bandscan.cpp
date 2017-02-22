@@ -19,20 +19,13 @@ static uint8_t lastChannelIndex = 0;
 static uint8_t rssiData[CHANNELS_SIZE] = { 0 };
 
 
-static void onButtonChange();
-
-
 void StateMachine::BandScanStateHandler::onEnter() {
     orderedChanelIndex = 0;
     lastChannelIndex = Receiver::activeChannel;
-
-    ButtonState::registerChangeFunc(onButtonChange);
 }
 
 void StateMachine::BandScanStateHandler::onExit() {
     Receiver::setChannel(lastChannelIndex);
-
-    ButtonState::deregisterChangeFunc(onButtonChange);
 }
 
 
@@ -47,7 +40,7 @@ void StateMachine::BandScanStateHandler::onTick() {
 }
 
 
-static void onButtonChange() {
+void StateMachine::BandScanStateHandler::onButtonChange() {
     if (ButtonState::get(Button::MODE)) {
         StateMachine::switchState(StateMachine::State::MENU);
     }
