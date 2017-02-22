@@ -122,10 +122,10 @@ void StateMachine::SearchStateHandler::onInitialDraw() {
 
     drawBorders();
 
-    drawChannelText();
+    /*drawChannelText();
     drawFrequencyText();
     drawScanBar();
-    drawRssiGraph();
+    drawRssiGraph();*/
 
     Ui::needDisplay();
 }
@@ -156,6 +156,57 @@ void StateMachine::SearchStateHandler::onUpdateDraw() {
     drawFrequencyText();
     drawScanBar();
     drawRssiGraph();
+
+    /*Ui::display.setTextSize(1);
+    Ui::display.setTextColor(WHITE);
+
+    char channelName[3];
+    Channels::getName(Receiver::activeChannel, channelName);
+
+    Ui::display.setCursor(0, 0);
+    Ui::display.print(channelName[0]);
+    Ui::display.setCursor(0, CHAR_HEIGHT + 1);
+    Ui::display.print(channelName[1]);
+
+    String freq = String(Channels::getFrequency(Receiver::activeChannel));
+    Ui::display.setCursor(0, SCREEN_HEIGHT - ((CHAR_HEIGHT + 1) * 4) + 1);
+    Ui::display.print(freq.charAt(0));
+    Ui::display.setCursor(0, SCREEN_HEIGHT - ((CHAR_HEIGHT + 1) * 3) + 1);
+    Ui::display.print(freq.charAt(1));
+    Ui::display.setCursor(0, SCREEN_HEIGHT - ((CHAR_HEIGHT + 1) * 2) + 1);
+    Ui::display.print(freq.charAt(2));
+    Ui::display.setCursor(0, SCREEN_HEIGHT - ((CHAR_HEIGHT + 1) * 1) + 1);
+    Ui::display.print(freq.charAt(3));
+
+    Ui::display.drawFastVLine(CHAR_WIDTH + 1, 0, SCREEN_HEIGHT, WHITE);
+    Ui::display.drawFastHLine(0, (CHAR_HEIGHT + 1) * 2, CHAR_WIDTH + 1, WHITE);
+    Ui::display.drawFastHLine(0, ((CHAR_HEIGHT + 1) * 4) - 2, CHAR_WIDTH + 1, WHITE);
+
+    uint8_t barMaxHeight = (((CHAR_HEIGHT + 1) * 4) - 2) - ((CHAR_HEIGHT + 1) * 2) - 2;
+    uint8_t barHeight = orderedChanelIndex * barMaxHeight / CHANNELS_SIZE;
+    Ui::display.fillRect(0, (CHAR_HEIGHT + 1) * 2 + 2, CHAR_WIDTH, barHeight, WHITE);
+
+    Ui::drawDashedHLine(CHAR_WIDTH + 2, 32, SCREEN_WIDTH - (CHAR_WIDTH + 2), 8);
+
+    Ui::drawGraph(
+        Receiver::rssiALast,
+        RECEIVER_LAST_DATA_SIZE,
+        100,
+        CHAR_WIDTH + 2,
+        0,
+        SCREEN_WIDTH - (CHAR_WIDTH + 2),
+        30
+    );
+
+    Ui::drawGraph(
+        Receiver::rssiBLast,
+        RECEIVER_LAST_DATA_SIZE,
+        100,
+        CHAR_WIDTH + 2,
+        SCREEN_HEIGHT - 30,
+        SCREEN_WIDTH - (CHAR_WIDTH + 2),
+        30
+    );*/
 
     Ui::needDisplay();
 }
@@ -195,7 +246,7 @@ static void drawFrequencyText() {
 }
 
 static void drawScanBar() {
-    int scanWidth = orderedChanelIndex * 54 / CHANNELS_SIZE;
+    uint8_t scanWidth = orderedChanelIndex * 54 / CHANNELS_SIZE;
 
     Ui::display.fillRect(
         1,
