@@ -22,12 +22,20 @@ namespace Buttons {
     typedef void(*ChangeFunc)();
 
 
+    struct ButtonState {
+        unsigned long lastDebounceTime = 0;
+        bool lastReading = false;
+
+        bool pressed = false;
+    };
+
+
     extern uint32_t lastPressTime;
 
 
     void update();
 
-    const bool get(Button button);
+    const ButtonState get(Button button);
     const bool any();
     unsigned long waitForRelease(Button button);
 

@@ -5,21 +5,13 @@
 #include "settings.h"
 
 
-struct ButtonHistory {
-    unsigned long lastDebounceTime = 0;
-    bool lastReading = false;
-};
-
-
 static const bool updateButton(
     const int pin,
-    bool &state,
-    struct ButtonHistory &history
+    struct Buttons::ButtonState &state
 );
 
 
-static struct ButtonHistory histories[BUTTON_COUNT];
-static bool states[BUTTON_COUNT];
+static struct Buttons::ButtonState states[BUTTON_COUNT];
 
 static bool needCallChangeFuncs = false;
 static Buttons::ChangeFunc changeFuncs[BUTTON_HOOKS_MAX] = { nullptr };
@@ -34,8 +26,7 @@ namespace Buttons {
         #define UPDATE_BUTTON(button) \
             updateButton( \
                 PIN_BUTTON_ ## button, \
-                states[static_cast<size_t>(Button::button)], \
-                histories[static_cast<size_t>(Button::button)] \
+                states[static_cast<size_t>(Button::button)] \
             );
 
         UPDATE_BUTTON(UP);
@@ -53,13 +44,13 @@ namespace Buttons {
         #undef UPDATE_BUTTON
     }
 
-    const bool get(Button button) {
+    const ButtonState get(Button button) {
         return states[static_cast<size_t>(button)];
     }
 
     const bool any() {
         for (uint8_t i = 0; i < BUTTON_COUNT; i++) {
-            if (states[i])
+            if (states[i].pressed)
                 return true;
         }
 
@@ -69,7 +60,7 @@ namespace Buttons {
     unsigned long waitForRelease(Button button) {
         const unsigned long startTime = millis();
 
-        while (get(button)) {
+        while (get(button).pressed) {
             update();
             delay(BUTTON_DEBOUNCE_DELAY);
         }
@@ -107,22 +98,21 @@ namespace Buttons {
 
 static const bool updateButton(
     const int pin,
-    bool &state,
-    struct ButtonHistory &history
+    struct Buttons::ButtonState &state
 ) {
     const int reading = !digitalRead(pin); // Invert as we use pull-ups.
 
-    if (reading != history.lastReading) {
-        history.lastDebounceTime = millis();
+    if (reading != state.lastReading) {
+        state.lastDebounceTime = millis();
     }
 
-    history.lastReading = reading;
+    state.lastReading = reading;
 
     if (
-        reading != state &&
-        (millis() - history.lastDebounceTime) >= BUTTON_DEBOUNCE_DELAY
+        reading != state.pressed &&
+        (millis() - state.lastDebounceTime) >= BUTTON_DEBOUNCE_DELAY
     ) {
-        state = reading;
+        state.pressed = reading;
         needCallChangeFuncs = true;
     }
 }

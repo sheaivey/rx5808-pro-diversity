@@ -86,15 +86,15 @@ void StateMachine::SearchStateHandler::onUpdate() {
 
 
 void StateMachine::SearchStateHandler::onButtonChange() {
-    if (Buttons::get(Button::UP)) {
+    if (Buttons::get(Button::UP).pressed) {
         scanning = true;
         forceNext = true;
         direction = ScanDirection::UP;
-    } else if (Buttons::get(Button::DOWN)) {
+    } else if (Buttons::get(Button::DOWN).pressed) {
         scanning = true;
         forceNext = true;
         direction = ScanDirection::DOWN;
-    } else if (Buttons::get(Button::MODE)) {
+    } else if (Buttons::get(Button::MODE).pressed) {
         StateMachine::switchState(StateMachine::State::MENU);
     }
 }
