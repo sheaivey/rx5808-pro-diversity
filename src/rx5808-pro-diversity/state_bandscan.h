@@ -1,5 +1,5 @@
-#ifndef STATE_SCAN_H
-#define STATE_SCAN_H
+#ifndef STATE_BANDSCAN_H
+#define STATE_BANDSCAN_H
 
 
 #include "state.h"

@@ -1,5 +1,5 @@
-#ifndef STATE_AUTO_H
-#define STATE_AUTO_H
+#ifndef STATE_SEARCH_H
+#define STATE_SEARCH_H
 
 
 #include "state.h"
