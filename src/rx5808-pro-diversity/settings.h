@@ -197,4 +197,7 @@ SOFTWARE.
 // Seconds to wait before force entering screensaver
 #define SCREENSAVER_TIMEOUT 30
 
+// Time needed to hold mode to get to menu
+#define BUTTON_WAIT_FOR_MENU 1000
+
 #endif // file_defined

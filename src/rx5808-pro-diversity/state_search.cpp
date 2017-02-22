@@ -94,8 +94,6 @@ void StateMachine::SearchStateHandler::onButtonChange() {
         scanning = true;
         forceNext = true;
         direction = ScanDirection::DOWN;
-    } else if (Buttons::get(Button::MODE).pressed) {
-        StateMachine::switchState(StateMachine::State::MENU);
     }
 }
 

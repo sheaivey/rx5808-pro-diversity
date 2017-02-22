@@ -113,6 +113,7 @@ static const bool updateButton(
         (millis() - state.lastDebounceTime) >= BUTTON_DEBOUNCE_DELAY
     ) {
         state.pressed = reading;
+        state.pressTime = millis();
         needCallChangeFuncs = true;
     }
 }

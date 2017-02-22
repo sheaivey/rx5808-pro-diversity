@@ -125,4 +125,13 @@ void loop() {
     ) {
         StateMachine::switchState(StateMachine::State::SCREENSAVER);
     }
+
+    if (
+        StateMachine::currentState != StateMachine::State::MENU
+        && Buttons::get(Button::MODE).pressed
+        && Buttons::get(Button::MODE).pressTime + BUTTON_WAIT_FOR_MENU <=
+            millis()
+    ) {
+        StateMachine::switchState(StateMachine::State::MENU);
+    }
 }

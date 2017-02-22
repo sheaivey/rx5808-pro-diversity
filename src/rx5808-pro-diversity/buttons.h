@@ -27,6 +27,7 @@ namespace Buttons {
         bool lastReading = false;
 
         bool pressed = false;
+        unsigned long pressTime = 0;
     };
 
 
