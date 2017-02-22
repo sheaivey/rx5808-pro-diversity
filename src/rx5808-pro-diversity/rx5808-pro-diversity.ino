@@ -114,13 +114,13 @@ void setupSettings() {
 
 void loop() {
     Receiver::update();
-    ButtonState::update();
+    Buttons::update();
     StateMachine::update();
     Ui::update();
 
     if (
         StateMachine::currentState != StateMachine::State::SCREENSAVER
-        && (millis() - ButtonState::lastPressTime) >
+        && (millis() - Buttons::lastPressTime) >
             (SCREENSAVER_TIMEOUT * 1000)
     ) {
         StateMachine::switchState(StateMachine::State::SCREENSAVER);

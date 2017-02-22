@@ -57,7 +57,7 @@ namespace StateMachine {
     }
 
     void setup() {
-        ButtonState::registerChangeFunc(onButtonChange);
+        Buttons::registerChangeFunc(onButtonChange);
     }
 
     void update() {

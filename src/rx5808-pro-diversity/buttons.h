@@ -18,7 +18,7 @@ enum class Button : uint8_t {
 #define BUTTON_COUNT static_cast<uint8_t>(Button::COUNT)
 
 
-namespace ButtonState {
+namespace Buttons {
     typedef void(*ChangeFunc)();
 
 

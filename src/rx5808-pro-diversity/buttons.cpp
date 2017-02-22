@@ -22,10 +22,10 @@ static struct ButtonHistory histories[BUTTON_COUNT];
 static bool states[BUTTON_COUNT];
 
 static bool needCallChangeFuncs = false;
-static ButtonState::ChangeFunc changeFuncs[BUTTON_HOOKS_MAX] = { nullptr };
+static Buttons::ChangeFunc changeFuncs[BUTTON_HOOKS_MAX] = { nullptr };
 
 
-namespace ButtonState {
+namespace Buttons {
     static void runChangeFuncs();
     uint32_t lastPressTime = 0;
 

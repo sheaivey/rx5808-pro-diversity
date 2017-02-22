@@ -41,7 +41,7 @@ void StateMachine::BandScanStateHandler::onUpdate() {
 
 
 void StateMachine::BandScanStateHandler::onButtonChange() {
-    if (ButtonState::get(Button::MODE)) {
+    if (Buttons::get(Button::MODE)) {
         StateMachine::switchState(StateMachine::State::MENU);
     }
 }

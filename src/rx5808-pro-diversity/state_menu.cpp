@@ -63,17 +63,17 @@ void StateMachine::MenuStateHandler::onUpdateDraw() {
 
 
 void StateMachine::MenuStateHandler::onButtonChange() {
-    if (ButtonState::get(Button::UP)) {
+    if (Buttons::get(Button::UP)) {
         Ui::menu.selectPreviousItem();
         Ui::needUpdate();
     }
 
-    if (ButtonState::get(Button::DOWN)) {
+    if (Buttons::get(Button::DOWN)) {
         Ui::menu.selectNextItem();
         Ui::needUpdate();
     }
 
-    if (ButtonState::get(Button::MODE)) {
+    if (Buttons::get(Button::MODE)) {
         Ui::menu.activateItem();
     }
 }
