@@ -10,7 +10,7 @@ namespace StateMachine {
         public:
             void onEnter();
             void onExit();
-            void onTick();
+            void onUpdate();
 
             void onInitialDraw();
             void onUpdateDraw();

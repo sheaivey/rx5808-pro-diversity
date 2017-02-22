@@ -29,7 +29,7 @@ void StateMachine::BandScanStateHandler::onExit() {
 }
 
 
-void StateMachine::BandScanStateHandler::onTick() {
+void StateMachine::BandScanStateHandler::onUpdate() {
     Receiver::waitForStableRssi();
     rssiData[orderedChanelIndex] = (Receiver::rssiA + Receiver::rssiB) / 2;
 

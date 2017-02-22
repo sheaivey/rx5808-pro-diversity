@@ -85,7 +85,7 @@ void StateMachine::ScreensaverStateHandler::onEnter() {
     showLogo = true;
 }
 
-void StateMachine::ScreensaverStateHandler::onTick() {
+void StateMachine::ScreensaverStateHandler::onUpdate() {
     if (millis() >= nextSwapDisplayTime) {
         nextSwapDisplayTime = millis() + 2500;
         showLogo = !showLogo;

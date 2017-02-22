@@ -29,7 +29,7 @@ static uint8_t peakChannelIndex = 0;
 static uint8_t peaks[PEAK_LOOKAHEAD] = { 0 };
 
 
-void StateMachine::SearchStateHandler::onTick() {
+void StateMachine::SearchStateHandler::onUpdate() {
     Receiver::waitForStableRssi();
 
     if (scanningPeak) {

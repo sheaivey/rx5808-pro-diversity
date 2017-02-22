@@ -60,9 +60,9 @@ namespace StateMachine {
         ButtonState::registerChangeFunc(onButtonChange);
     }
 
-    void tick() {
+    void update() {
         if (currentHandler) {
-            currentHandler->onTick();
+            currentHandler->onUpdate();
 
             // FIXME: This should probably be handled in the UI module but not
             // 100% on how to decouple them at this stage

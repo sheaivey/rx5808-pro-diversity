@@ -18,7 +18,7 @@ void StateMachine::SettingsStateHandler::onExit() {
 
 }
 
-void StateMachine::SettingsStateHandler::onTick() {
+void StateMachine::SettingsStateHandler::onUpdate() {
 
 }
 

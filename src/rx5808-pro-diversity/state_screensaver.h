@@ -9,7 +9,7 @@ namespace StateMachine {
     class ScreensaverStateHandler : public StateMachine::StateHandler {
         public:
             void onEnter();
-            void onTick();
+            void onUpdate();
 
             void onInitialDraw();
             void onUpdateDraw();

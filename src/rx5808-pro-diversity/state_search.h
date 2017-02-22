@@ -8,7 +8,7 @@
 namespace StateMachine {
     class SearchStateHandler : public StateMachine::StateHandler {
         public:
-            void onTick();
+            void onUpdate();
 
             void onInitialDraw();
             void onUpdateDraw();

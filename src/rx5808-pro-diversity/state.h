@@ -19,7 +19,7 @@ namespace StateMachine {
             virtual void onUpdateDraw() {};
 
             virtual void onEnter() {};
-            virtual void onTick() {};
+            virtual void onUpdate() {};
             virtual void onExit() {};
 
             virtual void onButtonChange() {};
@@ -29,7 +29,7 @@ namespace StateMachine {
     extern State lastState;
 
     void setup();
-    void tick();
+    void update();
 
     void switchState(State newState);
 }

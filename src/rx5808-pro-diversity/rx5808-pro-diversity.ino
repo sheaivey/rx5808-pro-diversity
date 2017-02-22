@@ -115,7 +115,7 @@ void setupSettings() {
 void loop() {
     Receiver::update();
     ButtonState::update();
-    StateMachine::tick();
+    StateMachine::update();
     Ui::update();
 
     if (
