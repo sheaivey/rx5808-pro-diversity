@@ -6,6 +6,7 @@
 #include "state_search.h"
 #include "state_bandscan.h"
 #include "state_menu.h"
+#include "state_settings.h"
 
 #include "ui.h"
 
@@ -15,6 +16,7 @@ namespace StateMachine {
     static SearchStateHandler searchHandler;
     static BandScanStateHandler bandHandler;
     static MenuStateHandler menuHandler;
+    static SettingsStateHandler settingsHandler;
 
     static StateHandler* handlers[STATE_COUNT] = {
         nullptr,
@@ -22,7 +24,7 @@ namespace StateMachine {
         &bandHandler,
         &screensaverHandler,
         &menuHandler,
-        nullptr
+        &settingsHandler
     };
 
     State currentState = State::BOOT;
