@@ -25,9 +25,11 @@ namespace Receiver {
     extern uint8_t activeChannel;
 
     extern uint8_t rssiA;
+    extern uint16_t rssiARaw;
     extern uint8_t rssiALast[RECEIVER_LAST_DATA_SIZE];
     #ifdef USE_DIVERSITY
         extern uint8_t rssiB;
+        extern uint16_t rssiBRaw;
         extern uint8_t rssiBLast[RECEIVER_LAST_DATA_SIZE];
     #endif
 

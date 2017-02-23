@@ -64,11 +64,6 @@ namespace Receiver {
     uint16_t updateRssi() {
         waitForStableRssi();
 
-        rssiARaw = 0;
-        #ifdef USE_DIVERSITY
-            rssiBRaw = 0;
-        #endif
-
         analogRead(PIN_RSSI_A); // Fake read to let ADC settle.
         rssiARaw = analogRead(PIN_RSSI_A);
         #ifdef USE_DIVERSITY
@@ -76,21 +71,29 @@ namespace Receiver {
             rssiBRaw = analogRead(PIN_RSSI_B);
         #endif
 
-        updateRssiLimits();
-
-        rssiA = map(
-            rssiARaw,
-            EepromSettings.rssiAMin,
-            EepromSettings.rssiAMax,
-            1,
-            100);
+        rssiA = constrain(
+            map(
+                rssiARaw,
+                EepromSettings.rssiAMin,
+                EepromSettings.rssiAMax,
+                0,
+                100
+            ),
+            0,
+            100
+        );
         #ifdef USE_DIVERSITY
-            rssiB = map(
-                rssiBRaw,
-                EepromSettings.rssiBMin,
-                EepromSettings.rssiBMax,
-                1,
-                100);
+            rssiB = constrain(
+                map(
+                    rssiARaw,
+                    EepromSettings.rssiBMin,
+                    EepromSettings.rssiBMax,
+                    0,
+                    100
+                ),
+                0,
+                100
+            );
         #endif
 
         if (millis() >= lastRssiLogTime + RECEIVER_LAST_DELAY) {
@@ -176,36 +179,21 @@ namespace Receiver {
 }
 
 
-static void updateRssiLimits() {
-    // TEMP: Until logic for setting RSSI max is rewritten.
-
-    if (Receiver::rssiARaw > EepromSettings.rssiAMax)
-        EepromSettings.rssiAMax = Receiver::rssiARaw;
-
-    if (Receiver::rssiARaw < EepromSettings.rssiAMin)
-        EepromSettings.rssiAMin = Receiver::rssiARaw;
-
-    #ifdef USE_DIVERSITY
-        if (Receiver::rssiBRaw > EepromSettings.rssiBMax)
-            EepromSettings.rssiBMax = Receiver::rssiBRaw;
-
-        if (Receiver::rssiBRaw < EepromSettings.rssiBMin)
-            EepromSettings.rssiBMin = Receiver::rssiBRaw;
-    #endif
-}
-
 #ifdef USE_SERIAL_OUT
+
+#include "pstr_helper.h"
+
 static void writeSerialData() {
     uint16_t timeSinceWrite = millis() - Receiver::lastSerialWriteTime;
     if (timeSinceWrite >= 20) {
         Serial.print(Receiver::activeChannel, DEC);
-        Serial.print("\t");
+        Serial.print(PSTR2("\t"));
         Serial.print(Receiver::rssiA, DEC);
-        Serial.print("\t");
+        Serial.print(PSTR2("\t"));
         Serial.print(Receiver::rssiARaw, DEC);
-        Serial.print("\t");
+        Serial.print(PSTR2("\t"));
         Serial.print(Receiver::rssiB, DEC);
-        Serial.print("\t");
+        Serial.print(PSTR2("\t"));
         Serial.println(Receiver::rssiBRaw, DEC);
 
         Receiver::lastSerialWriteTime = millis();

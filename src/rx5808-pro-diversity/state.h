@@ -2,15 +2,19 @@
 #define STATE_H
 
 
+#include <stdint.h>
+
+
 namespace StateMachine {
-    #define STATE_COUNT 6
-    enum class State {
+    #define STATE_COUNT 7
+    enum class State : uint8_t {
         BOOT,
         SEARCH,
         BANDSCAN,
         SCREENSAVER,
         MENU,
-        SETTINGS
+        SETTINGS,
+        SETTINGS_RSSI,
     };
 
     class StateHandler {

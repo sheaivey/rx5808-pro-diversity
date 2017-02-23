@@ -29,8 +29,13 @@ void StateMachine::SettingsStateHandler::onButtonChange() {
 
 
 void StateMachine::SettingsStateHandler::onInitialDraw() {
-  Ui::clear();
-  Ui::needDisplay();
+    Ui::clear();
+
+    Ui::display.setTextSize(1);
+    Ui::display.setCursor(0, 0);
+    Ui::display.print(PSTR2("Press mode for\nRSSI calibration"));
+
+    Ui::needDisplay();
 }
 
 void StateMachine::SettingsStateHandler::onUpdateDraw() {

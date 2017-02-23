@@ -7,6 +7,7 @@
 #include "state_bandscan.h"
 #include "state_menu.h"
 #include "state_settings.h"
+#include "state_settings_rssi.h"
 
 #include "ui.h"
 #include "buttons.h"
@@ -20,6 +21,7 @@ namespace StateMachine {
     static BandScanStateHandler bandHandler;
     static MenuStateHandler menuHandler;
     static SettingsStateHandler settingsHandler;
+    static SettingsRssiStateHandler settingsRssiHandler;
 
     static StateHandler* handlers[STATE_COUNT] = {
         nullptr,
@@ -27,7 +29,8 @@ namespace StateMachine {
         &bandHandler,
         &screensaverHandler,
         &menuHandler,
-        &settingsHandler
+        &settingsHandler,
+        &settingsRssiHandler
     };
 
     State currentState = State::BOOT;
