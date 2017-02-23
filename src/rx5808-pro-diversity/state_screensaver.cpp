@@ -120,9 +120,7 @@ void StateMachine::ScreensaverStateHandler::onInitialDraw() {
             SCREEN_WIDTH / 2 - ((CHAR_WIDTH) * 6) / 2 * 2 - 3,
             2);
 
-        char channelName[3];
-        Channels::getName(Receiver::activeChannel, channelName);
-        Ui::display.print(channelName);
+        Ui::display.print(Channels::getName(Receiver::activeChannel));
 
         Ui::display.setTextSize(2);
         Ui::display.setCursor(

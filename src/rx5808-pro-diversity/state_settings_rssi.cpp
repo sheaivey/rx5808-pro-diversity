@@ -1,4 +1,3 @@
-#include <avr/pgmspace.h>
 #include <stdint.h>
 
 #include "state_settings_rssi.h"

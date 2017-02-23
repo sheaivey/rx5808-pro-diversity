@@ -229,12 +229,15 @@ namespace Channels {
 
     // Returns channel name as a string.
     //      dest[] must be at least 3-bytes.
-    void getName(uint8_t index, char dest[]) {
+    char nameBuffer[3];
+    const char *getName(uint8_t index) {
         uint8_t encodedName = pgm_read_byte_near(channelNames + index);
 
-        dest[0] = 65 + (encodedName >> 3);
-        dest[1] = 48 + (encodedName & (255 >> (8 - 3))) + 1;
-        dest[2] = '\0';
+        nameBuffer[0] = 65 + (encodedName >> 3);
+        nameBuffer[1] = 48 + (encodedName & (255 >> (8 - 3))) + 1;
+        nameBuffer[2] = '\0';
+
+        return nameBuffer;
     }
 
     const uint8_t getOrderedIndex(uint8_t index) {

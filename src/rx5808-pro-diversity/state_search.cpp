@@ -144,10 +144,10 @@ void StateMachine::SearchStateHandler::onInitialDraw() {
 
     drawBorders();
 
-    /*drawChannelText();
+    drawChannelText();
     drawFrequencyText();
     drawScanBar();
-    drawRssiGraph();*/
+    drawRssiGraph();
 
     Ui::needDisplay();
 }
@@ -253,10 +253,7 @@ static void drawChannelText() {
     Ui::display.setTextColor(WHITE);
     Ui::display.setCursor(0, 0);
 
-    char channelName[3];
-    Channels::getName(Receiver::activeChannel, channelName);
-
-    Ui::display.print(channelName);
+    Ui::display.print(Channels::getName(Receiver::activeChannel));
 }
 
 static void drawFrequencyText() {

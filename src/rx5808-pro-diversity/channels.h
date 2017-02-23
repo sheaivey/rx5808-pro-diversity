@@ -15,7 +15,7 @@
 namespace Channels {
     const uint16_t getSynthRegisterB(uint8_t index);
     const uint16_t getFrequency(uint8_t index);
-    void getName(uint8_t index, char dest[]);
+    const char *getName(uint8_t index);
     const uint8_t getOrderedIndex(uint8_t index);
 }
 
