@@ -48,9 +48,9 @@ void StateMachine::MenuStateHandler::onInitialDraw() {
     Ui::clear();
 
     Ui::menu.reset();
-    Ui::menu.addItem("Search", searchIcon, searchMenuHandler);
-    Ui::menu.addItem("Band Scan", bandScanIcon, bandScannerMenuHandler);
-    Ui::menu.addItem("Settings", settingsIcon, settingsMenuHandler);
+    Ui::menu.addItem(PSTR("Search"), searchIcon, searchMenuHandler);
+    Ui::menu.addItem(PSTR("Band Scan"), bandScanIcon, bandScannerMenuHandler);
+    Ui::menu.addItem(PSTR("Settings"), settingsIcon, settingsMenuHandler);
 
     Ui::menu.drawInitial();
     Ui::needDisplay();

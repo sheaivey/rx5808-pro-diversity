@@ -1,5 +1,6 @@
 #include "ui.h"
 #include "ui_menu.h"
+#include "pstr_helper.h"
 
 
 namespace Ui {
@@ -24,7 +25,7 @@ static int selectedItem = 0;
 
 void Ui::MenuComponent::drawInitial() {
     const MenuItem* item = &menuItems[selectedItem];
-    const uint8_t charLen = strlen(item->text);
+    const uint8_t charLen = strlen(PSTRtoBuffer_P(item->text));
 
     Ui::display.setTextSize(2);
     Ui::display.setTextColor(WHITE);
@@ -32,7 +33,7 @@ void Ui::MenuComponent::drawInitial() {
         SCREEN_WIDTH / 2 - (charLen * ((CHAR_WIDTH + 1) * 2)) / 2,
         SCREEN_HEIGHT - (CHAR_HEIGHT + 2) * 2
     );
-    Ui::display.print(item->text);
+    Ui::display.print(PSTRtoBuffer_P(item->text));
 
     if (item->icon) {
         Ui::clearRect(
