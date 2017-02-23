@@ -36,7 +36,7 @@ namespace Buttons {
 
     void update();
 
-    const ButtonState get(Button button);
+    const ButtonState *get(Button button);
     const bool any();
     unsigned long waitForRelease(Button button);
 

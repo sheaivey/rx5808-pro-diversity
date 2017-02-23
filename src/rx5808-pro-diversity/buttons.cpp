@@ -6,12 +6,12 @@
 
 
 static const bool updateButton(
-    const int pin,
+    const uint8_t pin,
     struct Buttons::ButtonState &state
 );
 
 
-static struct Buttons::ButtonState states[BUTTON_COUNT];
+struct Buttons::ButtonState states[BUTTON_COUNT];
 
 static bool needCallChangeFuncs = false;
 static Buttons::ChangeFunc changeFuncs[BUTTON_HOOKS_MAX] = { nullptr };
@@ -44,8 +44,8 @@ namespace Buttons {
         #undef UPDATE_BUTTON
     }
 
-    const ButtonState get(Button button) {
-        return states[static_cast<size_t>(button)];
+    const ButtonState *get(Button button) {
+        return &states[static_cast<size_t>(button)];
     }
 
     const bool any() {
@@ -60,7 +60,7 @@ namespace Buttons {
     unsigned long waitForRelease(Button button) {
         const unsigned long startTime = millis();
 
-        while (get(button).pressed) {
+        while (get(button)->pressed) {
             update();
             delay(BUTTON_DEBOUNCE_DELAY);
         }
@@ -97,10 +97,10 @@ namespace Buttons {
 
 
 static const bool updateButton(
-    const int pin,
+    const uint8_t pin,
     struct Buttons::ButtonState &state
 ) {
-    const int reading = !digitalRead(pin); // Invert as we use pull-ups.
+    const uint8_t reading = !digitalRead(pin); // Invert as we use pull-ups.
 
     if (reading != state.lastReading) {
         state.lastDebounceTime = millis();

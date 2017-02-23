@@ -10,6 +10,8 @@
 #include "buttons.h"
 #include "ui.h"
 
+#include "pstr_helper.h"
+
 
 enum class ScanDirection : int8_t {
     UP = 1,
@@ -99,14 +101,14 @@ static void onUpdateManual() {
 }
 
 void StateMachine::SearchStateHandler::onButtonChange() {
-    if (Buttons::get(Button::MODE).pressed) {
+    if (Buttons::get(Button::MODE)->pressed) {
         manual = !manual;
     }
 
     if (manual) {
-        if (Buttons::get(Button::UP).pressed) {
+        if (Buttons::get(Button::UP)->pressed) {
             orderedChanelIndex += 1;
-        } else if (Buttons::get(Button::DOWN).pressed) {
+        } else if (Buttons::get(Button::DOWN)->pressed) {
             orderedChanelIndex -= 1;
         }
 
@@ -117,11 +119,11 @@ void StateMachine::SearchStateHandler::onButtonChange() {
 
         Receiver::setChannel(Channels::getOrderedIndex(orderedChanelIndex));
     } else {
-        if (Buttons::get(Button::UP).pressed) {
+        if (Buttons::get(Button::UP)->pressed) {
             scanning = true;
             forceNext = true;
             direction = ScanDirection::UP;
-        } else if (Buttons::get(Button::DOWN).pressed) {
+        } else if (Buttons::get(Button::DOWN)->pressed) {
             scanning = true;
             forceNext = true;
             direction = ScanDirection::DOWN;
@@ -361,8 +363,8 @@ static void drawRssiGraph() {
     Ui::display.setTextColor(INVERSE);
 
     Ui::display.setCursor(61, 16 - CHAR_HEIGHT);
-    Ui::display.print("A");
+    Ui::display.print(PSTR2("A"));
 
     Ui::display.setCursor(61, 48 - CHAR_HEIGHT);
-    Ui::display.print("B");
+    Ui::display.print(PSTR2("B"));
 }

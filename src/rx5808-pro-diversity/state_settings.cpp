@@ -2,12 +2,11 @@
 
 #include "state_settings.h"
 
-#include "settings.h"
-#include "settings_internal.h"
-#include "settings_eeprom.h"
+#include "state.h"
 #include "buttons.h"
-
 #include "ui.h"
+
+#include "pstr_helper.h"
 
 
 void StateMachine::SettingsStateHandler::onEnter() {
@@ -23,7 +22,9 @@ void StateMachine::SettingsStateHandler::onUpdate() {
 }
 
 void StateMachine::SettingsStateHandler::onButtonChange() {
-
+    if (Buttons::get(Button::MODE)->pressed) {
+        StateMachine::switchState(StateMachine::State::SETTINGS_RSSI);
+    }
 }
 
 
