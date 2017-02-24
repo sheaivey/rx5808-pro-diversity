@@ -340,7 +340,7 @@ static void drawRssiGraph() {
     } else {
         Ui::display.fillRoundRect(
             59,
-            7,
+            32 + 7,
             CHAR_WIDTH * 2 + 2 + 2,
             32 - 7 - 7,
             2,
