@@ -7,6 +7,7 @@
 #include "receiver_spi.h"
 #include "channels.h"
 
+#include "timer.h"
 
 static void updateRssiLimits();
 static void writeSerialData();
@@ -26,9 +27,9 @@ namespace Receiver {
     #endif
 
     uint32_t lastChannelSwitchTime = 0;
-    uint32_t lastRssiLogTime = 0;
+    static Timer rssiLogTimer = Timer(RECEIVER_LAST_DELAY);
     #ifdef USE_SERIAL_OUT
-        static uint32_t lastSerialWriteTime = 0;
+        static Timer serialLogTimer = Timer(25);
     #endif
 
 
@@ -96,7 +97,7 @@ namespace Receiver {
             );
         #endif
 
-        if (millis() >= lastRssiLogTime + RECEIVER_LAST_DELAY) {
+        if (rssiLogTimer.hasTicked()) {
             for (uint8_t i = 0; i < RECEIVER_LAST_DATA_SIZE - 1; i++) {
                 rssiALast[i] = rssiALast[i + 1];
                 #ifdef USE_DIVERSITY
@@ -109,7 +110,7 @@ namespace Receiver {
                 rssiBLast[RECEIVER_LAST_DATA_SIZE - 1] = rssiB;
             #endif
 
-            lastRssiLogTime = millis();
+            rssiLogTimer.reset();
         }
     }
 
@@ -184,8 +185,7 @@ namespace Receiver {
 #include "pstr_helper.h"
 
 static void writeSerialData() {
-    uint16_t timeSinceWrite = millis() - Receiver::lastSerialWriteTime;
-    if (timeSinceWrite >= 20) {
+    if (Receiver::serialLogTimer.hasTicked()) {
         Serial.print(Receiver::activeChannel, DEC);
         Serial.print(PSTR2("\t"));
         Serial.print(Receiver::rssiA, DEC);
@@ -196,7 +196,7 @@ static void writeSerialData() {
         Serial.print(PSTR2("\t"));
         Serial.println(Receiver::rssiBRaw, DEC);
 
-        Receiver::lastSerialWriteTime = millis();
+        Receiver::serialLogTimer.reset();
     }
 }
 #endif

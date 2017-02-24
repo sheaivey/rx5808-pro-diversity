@@ -12,6 +12,8 @@
 #include "ui.h"
 #include "buttons.h"
 
+#include "timer.h"
+
 
 namespace StateMachine {
     static void onButtonChange();
@@ -69,14 +71,14 @@ namespace StateMachine {
 
             // FIXME: This should probably be handled in the UI module but not
             // 100% on how to decouple them at this stage
-            static long lastDraw = 0;
+            static Timer drawTimer = Timer(OLED_FRAMERATE);
             if (currentHandler
                 && Ui::shouldDrawUpdate
-                && millis() > lastDraw + OLED_FRAMERATE
+                && drawTimer.hasTicked()
             ) {
                 currentHandler->onUpdateDraw();
-                lastDraw = millis();
                 Ui::shouldDrawUpdate = false;
+                drawTimer.reset();
             }
         }
     }
