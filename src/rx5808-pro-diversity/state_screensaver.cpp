@@ -77,8 +77,7 @@ static const unsigned char PROGMEM logo[] = {
 };
 
 
-static unsigned long nextSwapDisplayTime = 0;
-static bool showLogo = false;
+
 
 
 void StateMachine::ScreensaverStateHandler::onEnter() {

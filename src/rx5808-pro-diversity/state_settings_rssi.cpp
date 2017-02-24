@@ -14,19 +14,6 @@
 #include "pstr_helper.h"
 
 
-enum class InternalState : uint8_t {
-    WAIT_FOR_LOW,
-    SCANNING_LOW,
-    WAIT_FOR_HIGH,
-    SCANNING_HIGH,
-    DONE
-};
-
-
-static InternalState internalState = InternalState::WAIT_FOR_LOW;
-static uint8_t currentSweep = 0;
-
-
 void StateMachine::SettingsRssiStateHandler::onEnter() {
     internalState = InternalState::WAIT_FOR_LOW;
 }

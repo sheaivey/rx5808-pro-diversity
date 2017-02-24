@@ -7,6 +7,10 @@
 
 namespace StateMachine {
     class ScreensaverStateHandler : public StateMachine::StateHandler {
+        private:
+            unsigned long nextSwapDisplayTime = 0;
+            bool showLogo = false;
+
         public:
             void onEnter();
             void onUpdate();

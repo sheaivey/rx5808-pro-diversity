@@ -13,28 +13,6 @@
 #include "pstr_helper.h"
 
 
-enum class ScanDirection : int8_t {
-    UP = 1,
-    DOWN = -1
-};
-
-
-static bool manual = false;
-static bool scanning = true;
-static ScanDirection direction = ScanDirection::UP;
-static bool forceNext = false;
-static uint8_t orderedChanelIndex = 0;
-
-static bool scanningPeak = false;
-static uint8_t peakChannelIndex = 0;
-#define PEAK_LOOKAHEAD 4
-static uint8_t peaks[PEAK_LOOKAHEAD] = { 0 };
-
-
-static void onUpdateAuto();
-static void onUpdateManual();
-
-
 void StateMachine::SearchStateHandler::onUpdate() {
     Receiver::waitForStableRssi();
 
@@ -45,7 +23,7 @@ void StateMachine::SearchStateHandler::onUpdate() {
     Ui::needUpdate();
 }
 
-static void onUpdateAuto() {
+void StateMachine::SearchStateHandler::onUpdateAuto() {
     if (scanningPeak) {
         uint8_t peaksIndex = peakChannelIndex - orderedChanelIndex;
         peaks[peaksIndex] = Receiver::rssiA;
@@ -96,7 +74,7 @@ static void onUpdateAuto() {
     }
 }
 
-static void onUpdateManual() {
+void StateMachine::SearchStateHandler::onUpdateManual() {
 
 }
 
@@ -130,13 +108,6 @@ void StateMachine::SearchStateHandler::onButtonChange() {
         }
     }
 }
-
-
-static void drawBorders();
-static void drawChannelText();
-static void drawFrequencyText();
-static void drawScanBar();
-static void drawRssiGraph();
 
 
 void StateMachine::SearchStateHandler::onInitialDraw() {
@@ -234,7 +205,7 @@ void StateMachine::SearchStateHandler::onUpdateDraw() {
 }
 
 
-static void drawBorders() {
+void StateMachine::SearchStateHandler::drawBorders() {
     Ui::display.drawFastVLine(59, 0, SCREEN_HEIGHT, WHITE);
     Ui::display.drawFastVLine(SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT, WHITE);
 
@@ -248,7 +219,7 @@ static void drawBorders() {
     );
 }
 
-static void drawChannelText() {
+void StateMachine::SearchStateHandler::drawChannelText() {
     Ui::display.setTextSize(5);
     Ui::display.setTextColor(WHITE);
     Ui::display.setCursor(0, 0);
@@ -256,7 +227,7 @@ static void drawChannelText() {
     Ui::display.print(Channels::getName(Receiver::activeChannel));
 }
 
-static void drawFrequencyText() {
+void StateMachine::SearchStateHandler::drawFrequencyText() {
     Ui::display.setTextSize(2);
     Ui::display.setTextColor(WHITE);
     Ui::display.setCursor(6, SCREEN_HEIGHT - (CHAR_HEIGHT * 2));
@@ -264,7 +235,7 @@ static void drawFrequencyText() {
     Ui::display.print(Channels::getFrequency(Receiver::activeChannel));
 }
 
-static void drawScanBar() {
+void StateMachine::SearchStateHandler::drawScanBar() {
     uint8_t scanWidth = orderedChanelIndex * 54 / CHANNELS_SIZE;
 
     Ui::display.fillRect(
@@ -276,7 +247,7 @@ static void drawScanBar() {
     );
 }
 
-static void drawRssiGraph() {
+void StateMachine::SearchStateHandler::drawRssiGraph() {
     Ui::drawGraph(
         Receiver::rssiALast,
         RECEIVER_LAST_DATA_SIZE,

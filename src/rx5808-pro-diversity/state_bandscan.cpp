@@ -13,12 +13,6 @@
 #include "ui_menu.h"
 
 
-static uint8_t orderedChanelIndex = 0;
-static uint8_t lastChannelIndex = 0;
-
-static uint8_t rssiData[CHANNELS_SIZE] = { 0 };
-
-
 void StateMachine::BandScanStateHandler::onEnter() {
     orderedChanelIndex = 0;
     lastChannelIndex = Receiver::activeChannel;
