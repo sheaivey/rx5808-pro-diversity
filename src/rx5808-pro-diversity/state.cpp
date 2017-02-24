@@ -31,20 +31,19 @@ void *operator new(size_t size, void *ptr){
 ;
 
 namespace StateMachine {
-    static char stateBuffer[STATE_BUFFER_SIZE];
-
     static void onButtonChange();
     static StateHandler *getStateHandler(State stateType);
 
+
+    static uint8_t stateBuffer[STATE_BUFFER_SIZE];
+    static StateHandler* currentHandler = nullptr;
     State currentState = State::BOOT;
     State lastState = currentState;
 
-    static StateHandler* currentHandler = nullptr;
 
     void switchState(State newState) {
         if (currentHandler != nullptr) {
             currentHandler->onExit();
-            delete currentHandler;
         }
 
         lastState = currentState;
@@ -62,35 +61,23 @@ namespace StateMachine {
     }
 
     static StateHandler *getStateHandler(State state) {
-        StateHandler *stateHandler = nullptr;
+        #define STATE_FACTORY(s, c) \
+            case s: \
+                return new (&stateBuffer) c(); \
+                break;
 
         switch (state) {
-            case State::SEARCH:
-                stateHandler = new (&stateBuffer) SearchStateHandler();
-                break;
+            STATE_FACTORY(State::SEARCH, SearchStateHandler);
+            STATE_FACTORY(State::SCREENSAVER, ScreensaverStateHandler);
+            STATE_FACTORY(State::BANDSCAN, BandScanStateHandler);
+            STATE_FACTORY(State::MENU, MenuStateHandler);
+            STATE_FACTORY(State::SETTINGS, SettingsStateHandler);
 
-            case State::SCREENSAVER:
-                stateHandler = new (&stateBuffer) ScreensaverStateHandler();
-                break;
-
-            case State::BANDSCAN:
-                stateHandler = new (&stateBuffer) BandScanStateHandler();
-                break;
-
-            case State::MENU:
-                stateHandler = new (&stateBuffer) MenuStateHandler();
-                break;
-
-            case State::SETTINGS:
-                stateHandler = new (&stateBuffer) SettingsStateHandler();
-                break;
-
-            case State::SETTINGS_RSSI:
-                stateHandler = new (&stateBuffer) SettingsRssiStateHandler();
-                break;
+            default:
+                return nullptr;
         }
 
-        return stateHandler;
+        #undef STATE_FACTORY
     }
 
     void update() {
