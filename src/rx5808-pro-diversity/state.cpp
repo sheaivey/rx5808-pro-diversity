@@ -15,54 +15,82 @@
 #include "timer.h"
 
 
+void *operator new(size_t size, void *ptr){
+  return ptr;
+}
+
+#define MAX(a, b) (a > b ? a : b)
+#define STATE_BUFFER_SIZE \
+    MAX(sizeof(ScreensaverStateHandler), \
+    MAX(sizeof(SearchStateHandler), \
+    MAX(sizeof(BandScanStateHandler), \
+    MAX(sizeof(MenuStateHandler), \
+    MAX(sizeof(SettingsStateHandler), \
+        sizeof(SettingsRssiStateHandler) \
+    )))))
+;
+
 namespace StateMachine {
+    static char stateBuffer[STATE_BUFFER_SIZE];
+
     static void onButtonChange();
-
-    static ScreensaverStateHandler screensaverHandler;
-    static SearchStateHandler searchHandler;
-    static BandScanStateHandler bandHandler;
-    static MenuStateHandler menuHandler;
-    static SettingsStateHandler settingsHandler;
-    static SettingsRssiStateHandler settingsRssiHandler;
-
-    static StateHandler* handlers[STATE_COUNT] = {
-        nullptr,
-        &searchHandler,
-        &bandHandler,
-        &screensaverHandler,
-        &menuHandler,
-        &settingsHandler,
-        &settingsRssiHandler
-    };
+    static StateHandler *getStateHandler(State stateType);
 
     State currentState = State::BOOT;
     State lastState = currentState;
 
-    static StateHandler* currentHandler =
-        handlers[static_cast<size_t>(currentState)];
+    static StateHandler* currentHandler = nullptr;
 
     void switchState(State newState) {
-        StateHandler* lastHandler =
-            handlers[static_cast<size_t>(currentState)];
-        StateHandler* newHandler =
-            handlers[static_cast<size_t>(newState)];
-
-        if (lastHandler != nullptr) {
-            lastHandler->onExit();
+        if (currentHandler != nullptr) {
+            currentHandler->onExit();
+            delete currentHandler;
         }
 
         lastState = currentState;
         currentState = newState;
-        currentHandler = newHandler;
+        currentHandler = getStateHandler(newState);
 
-        if (newHandler != nullptr) {
-            newHandler->onEnter();
-            newHandler->onInitialDraw();
+        if (currentHandler != nullptr) {
+            currentHandler->onEnter();
+            currentHandler->onInitialDraw();
         }
     }
 
     void setup() {
         Buttons::registerChangeFunc(onButtonChange);
+    }
+
+    static StateHandler *getStateHandler(State state) {
+        StateHandler *stateHandler = nullptr;
+
+        switch (state) {
+            case State::SEARCH:
+                stateHandler = new (&stateBuffer) SearchStateHandler();
+                break;
+
+            case State::SCREENSAVER:
+                stateHandler = new (&stateBuffer) ScreensaverStateHandler();
+                break;
+
+            case State::BANDSCAN:
+                stateHandler = new (&stateBuffer) BandScanStateHandler();
+                break;
+
+            case State::MENU:
+                stateHandler = new (&stateBuffer) MenuStateHandler();
+                break;
+
+            case State::SETTINGS:
+                stateHandler = new (&stateBuffer) SettingsStateHandler();
+                break;
+
+            case State::SETTINGS_RSSI:
+                stateHandler = new (&stateBuffer) SettingsRssiStateHandler();
+                break;
+        }
+
+        return stateHandler;
     }
 
     void update() {
