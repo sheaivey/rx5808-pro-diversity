@@ -41,6 +41,28 @@ namespace StateMachine {
     State lastState = currentState;
 
 
+    void setup() {
+        Buttons::registerChangeFunc(onButtonChange);
+    }
+
+    void update() {
+        if (currentHandler) {
+            currentHandler->onUpdate();
+
+            // FIXME: This should probably be handled in the UI module but not
+            // 100% on how to decouple them at this stage
+            static Timer drawTimer = Timer(OLED_FRAMERATE);
+            if (currentHandler
+                && Ui::shouldDrawUpdate
+                && drawTimer.hasTicked()
+            ) {
+                currentHandler->onUpdateDraw();
+                Ui::shouldDrawUpdate = false;
+                drawTimer.reset();
+            }
+        }
+    }
+
     void switchState(State newState) {
         if (currentHandler != nullptr) {
             currentHandler->onExit();
@@ -54,10 +76,6 @@ namespace StateMachine {
             currentHandler->onEnter();
             currentHandler->onInitialDraw();
         }
-    }
-
-    void setup() {
-        Buttons::registerChangeFunc(onButtonChange);
     }
 
     static StateHandler *getStateHandler(State state) {
@@ -78,24 +96,6 @@ namespace StateMachine {
         }
 
         #undef STATE_FACTORY
-    }
-
-    void update() {
-        if (currentHandler) {
-            currentHandler->onUpdate();
-
-            // FIXME: This should probably be handled in the UI module but not
-            // 100% on how to decouple them at this stage
-            static Timer drawTimer = Timer(OLED_FRAMERATE);
-            if (currentHandler
-                && Ui::shouldDrawUpdate
-                && drawTimer.hasTicked()
-            ) {
-                currentHandler->onUpdateDraw();
-                Ui::shouldDrawUpdate = false;
-                drawTimer.reset();
-            }
-        }
     }
 
     static void onButtonChange() {
