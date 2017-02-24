@@ -111,7 +111,9 @@ void StateMachine::SettingsRssiStateHandler::onUpdateDraw() {
         case InternalState::WAIT_FOR_LOW:
             Ui::display.setTextSize(1);
             Ui::display.setCursor(0, 0);
-            Ui::display.print(PSTR2("1/4\nTurn off all VTXs"));
+            Ui::display.print(PSTR2("1/4\nTurn off all VTXs."));
+            Ui::display.setCursor(0, (CHAR_HEIGHT + 1) * 2);
+            Ui::display.print(PSTR2("Remove RX antennas."));
 
             Ui::display.setCursor(0, SCREEN_HEIGHT - CHAR_HEIGHT - 1);
             Ui::display.print(PSTR2("Press MODE when ready."));
