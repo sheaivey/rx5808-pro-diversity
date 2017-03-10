@@ -80,25 +80,19 @@ void setup()
 void setupPins() {
     pinMode(PIN_LED, OUTPUT);
     pinMode(PIN_BUZZER, OUTPUT);
-
-    pinMode(PIN_BUTTON_UP, INPUT);
-    pinMode(PIN_BUTTON_MODE, INPUT);
-    digitalWrite(PIN_BUTTON_UP, INPUT_PULLUP);
-    digitalWrite(PIN_BUTTON_MODE, INPUT_PULLUP);
-
-    pinMode(PIN_BUTTON_DOWN, INPUT);
-    pinMode(PIN_BUTTON_SAVE, INPUT);
-    digitalWrite(PIN_BUTTON_DOWN, INPUT_PULLUP);
-    digitalWrite(PIN_BUTTON_SAVE, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_UP, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_MODE, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_DOWN, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_SAVE, INPUT_PULLUP);
 
     pinMode(PIN_LED_A,OUTPUT);
     #ifdef USE_DIVERSITY
         pinMode(PIN_LED_B,OUTPUT);
     #endif
 
-    pinMode(PIN_RSSI_A, INPUT);
+    pinMode(PIN_RSSI_A, INPUT_PULLUP);
     #ifdef USE_DIVERSITY
-        pinMode(PIN_RSSI_B, INPUT);
+        pinMode(PIN_RSSI_B, INPUT_PULLUP);
     #endif
 
     pinMode(PIN_SPI_SLAVE_SELECT, OUTPUT);
