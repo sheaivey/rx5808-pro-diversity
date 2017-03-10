@@ -90,6 +90,7 @@ namespace StateMachine {
             STATE_FACTORY(State::BANDSCAN, BandScanStateHandler);
             STATE_FACTORY(State::MENU, MenuStateHandler);
             STATE_FACTORY(State::SETTINGS, SettingsStateHandler);
+            STATE_FACTORY(State::SETTINGS_RSSI, SettingsRssiStateHandler);
 
             default:
                 return nullptr;
