@@ -58,7 +58,6 @@ static inline void sendRegister(uint8_t address, uint32_t data) {
 
     // Finished clocking data in
     sendSlaveSelect(HIGH);
-    digitalWrite(PIN_SPI_SLAVE_SELECT, LOW);
     digitalWrite(PIN_SPI_CLOCK, LOW);
     digitalWrite(PIN_SPI_DATA, LOW);
 }

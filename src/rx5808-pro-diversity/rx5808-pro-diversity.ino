@@ -98,6 +98,10 @@ void setupPins() {
     pinMode(PIN_SPI_SLAVE_SELECT, OUTPUT);
     pinMode(PIN_SPI_DATA, OUTPUT);
 	pinMode(PIN_SPI_CLOCK, OUTPUT);
+
+    digitalWrite(PIN_SPI_SLAVE_SELECT, HIGH);
+    digitalWrite(PIN_SPI_CLOCK, LOW);
+    digitalWrite(PIN_SPI_DATA, LOW);
 }
 
 void setupSettings() {
