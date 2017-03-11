@@ -6,6 +6,45 @@
 #include "pstr_helper.h"
 
 
+#define BORDER_GRAPH_L_X 59
+
+#define CHANNEL_TEXT_SIZE 5
+#define CHANNEL_TEXT_X 0
+#define CHANENL_TEXT_Y 0
+#define CHANNEL_TEXT_H (CHAR_HEIGHT * CHANNEL_TEXT_SIZE)
+
+#define FREQUENCY_TEXT_SIZE 2
+#define FREQUENCY_TEXT_X 6
+#define FREQUENCY_TEXT_Y (SCREEN_HEIGHT - (CHAR_HEIGHT * 2))
+#define FREQUENCY_TEXT_H (CHAR_HEIGHT * FREQUENCY_TEXT_SIZE)
+
+#define SCANBAR_BORDER_X 0
+#define SCANBAR_BORDER_Y (CHANNEL_TEXT_H + 4)
+#define SCANBAR_BORDER_W (BORDER_GRAPH_L_X - 4)
+#define SCANBAR_BORDER_H 7
+
+#define SCANBAR_X (SCANBAR_BORDER_X + 2)
+#define SCANBAR_Y (SCANBAR_BORDER_Y + 2)
+#define SCANBAR_W (SCANBAR_BORDER_W - 4)
+#define SCANBAR_H (SCANBAR_BORDER_H - 4)
+
+#define GRAPH_SEPERATOR_Y ((SCREEN_HEIGHT / 2) - 1)
+#define GRAPH_SEPERATOR_W (SCREEN_WIDTH - BORDER_GRAPH_L_X)
+#define GRAPH_SEPERATOR_STEP 3
+
+#define GRAPH_X (BORDER_GRAPH_L_X + 2)
+#define GRAPH_W (SCREEN_WIDTH - BORDER_GRAPH_L_X)
+#define GRAPH_H (GRAPH_SEPERATOR_Y - 2)
+#define GRAPH_A_Y 0
+#define GRAPH_B_Y (SCREEN_HEIGHT - GRAPH_H - 1)
+
+#define RX_TEXT_SIZE 1
+#define RX_TEXT_X (BORDER_GRAPH_L_X + 4)
+#define RX_TEXT_H (CHAR_HEIGHT * RX_TEXT_SIZE)
+#define RX_TEXT_A_Y ((GRAPH_A_Y + GRAPH_H / 2) - (RX_TEXT_H / 2))
+#define RX_TEXT_B_Y ((GRAPH_B_Y + GRAPH_H / 2) - (RX_TEXT_H / 2))
+
+
 void StateMachine::SearchStateHandler::onInitialDraw() {
     Ui::clear();
 
@@ -23,22 +62,22 @@ void StateMachine::SearchStateHandler::onUpdateDraw() {
     Ui::clearRect(
         0,
         0,
-        59,
-        CHAR_HEIGHT * 5
+        BORDER_GRAPH_L_X,
+        CHANNEL_TEXT_H
     );
 
     Ui::clearRect(
         0,
-        SCREEN_HEIGHT - (CHAR_HEIGHT * 2),
-        59,
+        FREQUENCY_TEXT_Y,
+        BORDER_GRAPH_L_X,
         CHAR_HEIGHT * 2
     );
 
     Ui::clearRect(
-        1,
-        (CHAR_HEIGHT * 5) + 4 + 1,
-        54,
-        5
+        SCANBAR_X,
+        SCANBAR_Y,
+        SCANBAR_W,
+        SCANBAR_H
     );
 
     drawChannelText();
@@ -46,99 +85,51 @@ void StateMachine::SearchStateHandler::onUpdateDraw() {
     drawScanBar();
     drawRssiGraph();
 
-    /*Ui::display.setTextSize(1);
-    Ui::display.setTextColor(WHITE);
-
-    char channelName[3];
-    Channels::getName(Receiver::activeChannel, channelName);
-
-    Ui::display.setCursor(0, 0);
-    Ui::display.print(channelName[0]);
-    Ui::display.setCursor(0, CHAR_HEIGHT + 1);
-    Ui::display.print(channelName[1]);
-
-    String freq = String(Channels::getFrequency(Receiver::activeChannel));
-    Ui::display.setCursor(0, SCREEN_HEIGHT - ((CHAR_HEIGHT + 1) * 4) + 1);
-    Ui::display.print(freq.charAt(0));
-    Ui::display.setCursor(0, SCREEN_HEIGHT - ((CHAR_HEIGHT + 1) * 3) + 1);
-    Ui::display.print(freq.charAt(1));
-    Ui::display.setCursor(0, SCREEN_HEIGHT - ((CHAR_HEIGHT + 1) * 2) + 1);
-    Ui::display.print(freq.charAt(2));
-    Ui::display.setCursor(0, SCREEN_HEIGHT - ((CHAR_HEIGHT + 1) * 1) + 1);
-    Ui::display.print(freq.charAt(3));
-
-    Ui::display.drawFastVLine(CHAR_WIDTH + 1, 0, SCREEN_HEIGHT, WHITE);
-    Ui::display.drawFastHLine(0, (CHAR_HEIGHT + 1) * 2, CHAR_WIDTH + 1, WHITE);
-    Ui::display.drawFastHLine(0, ((CHAR_HEIGHT + 1) * 4) - 2, CHAR_WIDTH + 1, WHITE);
-
-    uint8_t barMaxHeight = (((CHAR_HEIGHT + 1) * 4) - 2) - ((CHAR_HEIGHT + 1) * 2) - 2;
-    uint8_t barHeight = orderedChanelIndex * barMaxHeight / CHANNELS_SIZE;
-    Ui::display.fillRect(0, (CHAR_HEIGHT + 1) * 2 + 2, CHAR_WIDTH, barHeight, WHITE);
-
-    Ui::drawDashedHLine(CHAR_WIDTH + 2, 32, SCREEN_WIDTH - (CHAR_WIDTH + 2), 8);
-
-    Ui::drawGraph(
-        Receiver::rssiALast,
-        RECEIVER_LAST_DATA_SIZE,
-        100,
-        CHAR_WIDTH + 2,
-        0,
-        SCREEN_WIDTH - (CHAR_WIDTH + 2),
-        30
-    );
-
-    Ui::drawGraph(
-        Receiver::rssiBLast,
-        RECEIVER_LAST_DATA_SIZE,
-        100,
-        CHAR_WIDTH + 2,
-        SCREEN_HEIGHT - 30,
-        SCREEN_WIDTH - (CHAR_WIDTH + 2),
-        30
-    );*/
-
     Ui::needDisplay();
 }
 
-
 void StateMachine::SearchStateHandler::drawBorders() {
-    Ui::display.drawFastVLine(59, 0, SCREEN_HEIGHT, WHITE);
-    Ui::display.drawFastVLine(SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT, WHITE);
-
     Ui::display.drawRoundRect(
-        0,
-        (CHAR_HEIGHT * 5) + 4,
-        56,
-        7,
+        SCANBAR_BORDER_X,
+        SCANBAR_BORDER_Y,
+        SCANBAR_BORDER_W,
+        SCANBAR_BORDER_H,
         2,
         WHITE
+    );
+
+    Ui::drawDashedVLine(
+      BORDER_GRAPH_L_X,
+      0,
+      SCREEN_HEIGHT,
+      GRAPH_SEPERATOR_STEP
     );
 }
 
 void StateMachine::SearchStateHandler::drawChannelText() {
-    Ui::display.setTextSize(5);
+    Ui::display.setTextSize(CHANNEL_TEXT_SIZE);
     Ui::display.setTextColor(WHITE);
-    Ui::display.setCursor(0, 0);
+    Ui::display.setCursor(CHANNEL_TEXT_X, CHANENL_TEXT_Y);
 
     Ui::display.print(Channels::getName(Receiver::activeChannel));
 }
 
 void StateMachine::SearchStateHandler::drawFrequencyText() {
-    Ui::display.setTextSize(2);
+    Ui::display.setTextSize(FREQUENCY_TEXT_SIZE);
     Ui::display.setTextColor(WHITE);
-    Ui::display.setCursor(6, SCREEN_HEIGHT - (CHAR_HEIGHT * 2));
+    Ui::display.setCursor(FREQUENCY_TEXT_X, FREQUENCY_TEXT_Y);
 
     Ui::display.print(Channels::getFrequency(Receiver::activeChannel));
 }
 
 void StateMachine::SearchStateHandler::drawScanBar() {
-    uint8_t scanWidth = orderedChanelIndex * 54 / CHANNELS_SIZE;
+    uint8_t scanWidth = orderedChanelIndex * SCANBAR_W / CHANNELS_SIZE;
 
     Ui::display.fillRect(
-        1,
-        (CHAR_HEIGHT * 5) + 4 + 1,
+        SCANBAR_X,
+        SCANBAR_Y,
         scanWidth,
-        5,
+        SCANBAR_H,
         WHITE
     );
 }
@@ -148,87 +139,35 @@ void StateMachine::SearchStateHandler::drawRssiGraph() {
         Receiver::rssiALast,
         RECEIVER_LAST_DATA_SIZE,
         100,
-        62,
-        0,
-        66,
-        30
+        GRAPH_X,
+        GRAPH_A_Y,
+        GRAPH_W,
+        GRAPH_H
     );
 
     Ui::drawGraph(
         Receiver::rssiBLast,
         RECEIVER_LAST_DATA_SIZE,
         100,
-        62,
-        34,
-        66,
-        30
+        GRAPH_X,
+        GRAPH_B_Y,
+        GRAPH_W,
+        GRAPH_H
     );
 
-    Ui::drawDashedHLine(60, 32, 64, 8);
+    Ui::drawDashedHLine(
+      GRAPH_X,
+      GRAPH_SEPERATOR_Y,
+      GRAPH_SEPERATOR_W,
+      GRAPH_SEPERATOR_STEP
+    );
 
-    if (Receiver::activeReceiver == RECEIVER_A) {
-        Ui::display.fillRoundRect(
-            59,
-            7,
-            CHAR_WIDTH * 2 + 2 + 2,
-            32 - 7 - 7,
-            2,
-            WHITE
-        );
-    } else {
-        Ui::display.fillRoundRect(
-            59,
-            7,
-            CHAR_WIDTH * 2 + 2 + 2,
-            32 - 7 - 7,
-            2,
-            BLACK
-        );
-
-        Ui::display.drawRoundRect(
-            59,
-            7,
-            CHAR_WIDTH * 2 + 2 + 2,
-            32 - 7 - 7,
-            2,
-            WHITE
-        );
-    }
-
-    if (Receiver::activeReceiver == RECEIVER_B) {
-        Ui::display.fillRoundRect(
-            59,
-            32 + 7,
-            CHAR_WIDTH * 2 + 2 + 2,
-            32 - 7 - 7,
-            2,
-            WHITE
-        );
-    } else {
-        Ui::display.fillRoundRect(
-            59,
-            32 + 7,
-            CHAR_WIDTH * 2 + 2 + 2,
-            32 - 7 - 7,
-            2,
-            BLACK
-        );
-
-        Ui::display.drawRoundRect(
-            59,
-            32 + 7,
-            CHAR_WIDTH * 2 + 2 + 2,
-            32 - 7 - 7,
-            2,
-            WHITE
-        );
-    }
-
+    Ui::display.setTextSize(RX_TEXT_SIZE);
     Ui::display.setTextColor(INVERSE);
 
-    Ui::display.setCursor(61, 16 - CHAR_HEIGHT);
+    Ui::display.setCursor(RX_TEXT_X, RX_TEXT_A_Y);
     Ui::display.print(PSTR2("A"));
 
-    Ui::display.setCursor(61, 48 - CHAR_HEIGHT);
+    Ui::display.setCursor(RX_TEXT_X, RX_TEXT_B_Y);
     Ui::display.print(PSTR2("B"));
 }
