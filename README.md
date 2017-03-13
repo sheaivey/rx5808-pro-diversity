@@ -1,3 +1,5 @@
+[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/rx5808-pro-diversity/)
+
 Manufactured version of this project can be found at [La Forge FPV](www.laforgefpv.com)
 
 #Introduction
