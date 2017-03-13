@@ -52,6 +52,12 @@ SOFTWARE.
 //#define USE_LBAND
 #define USE_BOOT_CHECK
 #define USE_DIM_ON_SCREENSAVER
+// Switch the receivers faster - uses direct port manipulations instead of using arduino helper functions.
+// WARNING You can safely enable this only when receiverA_led and receiverB_led is on the same PORT
+// arduino/atmega has 3 ports - PORTD, PORTB and PORTC
+// by default the two outputs are on PORTC (A0 and A1) so you can safetly enable it if youre using the defaults
+// PORTC is analog pins A0-A7, PORTD is digital pins 0-7 and PORTB is digital pins 8-13
+//#define FAST_DIVERSITY_SWITCHING
 
 // Receiver Module version
 // used for tuning time
