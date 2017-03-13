@@ -37,6 +37,10 @@ SOFTWARE.
 #include <Wire.h>
 #include <SPI.h>
 
+#ifdef USE_BOOT_ANIMATION
+    #include "boot_animation.h"
+#endif
+
 // New version of PSTR that uses a temp buffer and returns char *
 // by Shea Ivey
 #define PSTR2(x) PSTRtoBuffer_P(PSTR(x))
@@ -72,7 +76,6 @@ char screens::begin(const char *call_sign) {
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D or 0x3C (for the 128x64)
 #endif
 
-
 #ifdef USE_FLIP_SCREEN
     flip();
 #endif
@@ -81,6 +84,18 @@ char screens::begin(const char *call_sign) {
     display.display(); // show splash screen
     delay(3000);
 #endif
+
+#ifdef USE_BOOT_ANIMATION
+    for (int i = 0; i < BOOT_ANIMATION_REPEATS; i++) {
+        for (int frame = 0; frame < BOOT_ANIMATION_FRAMES; frame++) {
+            display.clearDisplay();
+            display.drawBitmap(0, 0, BOOT_ANIMATION_BITMAPS[frame], 128, 64, WHITE);
+            display.display();
+            delay(BOOT_ANIMATION_INTERVAL);
+        }
+    }
+#endif
+
     // init done
     reset();
 
