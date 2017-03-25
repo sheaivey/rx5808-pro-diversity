@@ -77,16 +77,13 @@ static const unsigned char PROGMEM logo[] = {
 };
 
 
-
-
-
 void StateMachine::ScreensaverStateHandler::onEnter() {
     showLogo = true;
 }
 
 void StateMachine::ScreensaverStateHandler::onUpdate() {
     if (millis() >= nextSwapDisplayTime) {
-        nextSwapDisplayTime = millis() + 2500;
+        nextSwapDisplayTime = millis() + (SCREENSAVER_DISPLAY_CYCLE * 1000);
         showLogo = !showLogo;
 
         Ui::needUpdate();
