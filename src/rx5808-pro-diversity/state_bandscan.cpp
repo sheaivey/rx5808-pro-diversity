@@ -53,38 +53,38 @@ void StateMachine::BandScanStateHandler::onUpdateDraw() {
         1,
         0,
         SCREEN_WIDTH - 3,
-        SCREEN_HEIGHT
+        SCREEN_HEIGHT - 1
     );
 
     Ui::drawDashedVLine(
         orderedChanelIndex * (SCREEN_WIDTH / CHANNELS_SIZE),
         0,
-        SCREEN_HEIGHT,
+        SCREEN_HEIGHT - 1,
         4
     );
 
     Ui::display.drawFastVLine(
         0,
         0,
-        SCREEN_HEIGHT,
+        SCREEN_HEIGHT - 1,
         WHITE
     );
 
     Ui::display.drawFastVLine(
         SCREEN_WIDTH - 1,
         0,
-        SCREEN_HEIGHT,
+        SCREEN_HEIGHT - 1,
         WHITE
     );
 
     Ui::display.setTextSize(1);
     Ui::display.setTextColor(INVERSE);
-    Ui::display.setCursor(2, SCREEN_HEIGHT - CHAR_HEIGHT);
+    Ui::display.setCursor(2, SCREEN_HEIGHT - CHAR_HEIGHT - 2);
     Ui::display.print(Channels::getFrequency(Channels::getOrderedIndex(0)));
 
     Ui::display.setCursor(
         SCREEN_WIDTH - 2 - (CHAR_WIDTH + 1) * 4,
-        SCREEN_HEIGHT - CHAR_HEIGHT);
+        SCREEN_HEIGHT - CHAR_HEIGHT - 2);
     Ui::display.print(
         Channels::getFrequency(Channels::getOrderedIndex(CHANNELS_SIZE - 1)));
 
