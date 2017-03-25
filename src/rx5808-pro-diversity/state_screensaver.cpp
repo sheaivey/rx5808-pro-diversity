@@ -82,8 +82,8 @@ void StateMachine::ScreensaverStateHandler::onEnter() {
 }
 
 void StateMachine::ScreensaverStateHandler::onUpdate() {
-    if (millis() >= nextSwapDisplayTime) {
-        nextSwapDisplayTime = millis() + (SCREENSAVER_DISPLAY_CYCLE * 1000);
+    if (this->displaySwapTimer.hasTicked()) {
+        this->displaySwapTimer.reset();
         showLogo = !showLogo;
 
         Ui::needUpdate();

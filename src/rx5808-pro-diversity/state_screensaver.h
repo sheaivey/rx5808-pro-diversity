@@ -3,12 +3,14 @@
 
 
 #include "state.h"
+#include "timer.h"
+#include "settings.h"
 
 
 namespace StateMachine {
     class ScreensaverStateHandler : public StateMachine::StateHandler {
         private:
-            unsigned long nextSwapDisplayTime = 0;
+            Timer displaySwapTimer = Timer(SCREENSAVER_DISPLAY_CYCLE * 1000);
             bool showLogo = false;
 
         public:
