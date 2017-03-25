@@ -125,17 +125,14 @@ SOFTWARE.
 // === Diversity ===============================================================
 
 #ifdef USE_DIVERSITY
-    // RSSI strenth should be greater than the value below (percent) over the
+    // RSSI strength should be greater than the value below (percent) over the
     // other receiver before we switch. This pervents flicker when RSSI values
     // are close and delays diversity checks counter.
-    #define DIVERSITY_CUTOVER 2
+    #define DIVERSITY_HYSTERESIS 2
 
-    // Number of checks a receiver needs to win over the other to switch
-    // receivers. This pervents rapid switching.
-    //
-    // 1 to 10 is a good range. 1 being fast switching, 10 being slow 100ms to
-    // switch.
-    #define DIVERSITY_MAX_CHECKS 5
+    // How long (ms) the RSSI strength has to have a greater difference than the
+    // above before switching.
+    #define DIVERSITY_HYSTERESIS_PERIOD 5
 #endif
 
 // === Voltage Monitoring ======================================================

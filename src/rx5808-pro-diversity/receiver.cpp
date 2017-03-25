@@ -24,6 +24,9 @@ namespace Receiver {
         uint8_t rssiB = 0;
         uint16_t rssiBRaw = 0;
         uint8_t rssiBLast[RECEIVER_LAST_DATA_SIZE] = { 0 };
+
+        uint8_t diversityTargetReceiver = activeReceiver;
+        Timer diversityHysteresisTimer = Timer(DIVERSITY_HYSTERESIS_PERIOD);
     #endif
 
     uint32_t lastChannelSwitchTime = 0;
@@ -120,44 +123,46 @@ namespace Receiver {
     }
 
     void switchDiversity() {
-        static uint8_t diversityCheckTick = 0;
-        uint8_t bestReceiver = activeReceiver;
+        uint8_t nextReceiver = activeReceiver;
 
         if (EepromSettings.diversityMode == DIVERSITY_AUTO) {
-            uint8_t rssiDiff =
-                (int) abs(((rssiA - rssiB) / (float) rssiB) * 100.0f);
+            int8_t rssiDiff = (int8_t) rssiA - (int8_t) rssiB;
+            uint8_t rssiDiffAbs = abs(rssiDiff);
+            uint8_t currentBestReceiver = activeReceiver;
 
-            if (rssiDiff >= DIVERSITY_CUTOVER) {
-                if(rssiA > rssiB && diversityCheckTick > 0)
-                    diversityCheckTick--;
+            if (rssiDiff > 0) {
+                currentBestReceiver = RECEIVER_A;
+            } else if (rssiDiff < 0) {
+                currentBestReceiver = RECEIVER_B;
+            } else {
+                currentBestReceiver = activeReceiver;
+            }
 
-                if(rssiA < rssiB && diversityCheckTick < DIVERSITY_MAX_CHECKS)
-                    diversityCheckTick++;
-
-                // Have we reached the maximum number of checks to switch
-                // receivers?
-                if (diversityCheckTick == 0 ||
-                    diversityCheckTick >= DIVERSITY_MAX_CHECKS
-                ) {
-                    bestReceiver =
-                        (diversityCheckTick == 0) ?
-                        RECEIVER_A :
-                        RECEIVER_B;
+            if (rssiDiffAbs >= DIVERSITY_HYSTERESIS) {
+                if (currentBestReceiver == diversityTargetReceiver) {
+                    if (diversityHysteresisTimer.hasTicked()) {
+                        nextReceiver = diversityTargetReceiver;
+                    }
+                } else {
+                    diversityTargetReceiver = currentBestReceiver;
+                    diversityHysteresisTimer.reset();
                 }
+            } else {
+                diversityHysteresisTimer.reset();
             }
         } else {
             switch (EepromSettings.diversityMode) {
                 case DIVERSITY_FORCE_A:
-                    bestReceiver = RECEIVER_A;
+                    nextReceiver = RECEIVER_A;
                     break;
 
                 case DIVERSITY_FORCE_B:
-                    bestReceiver = RECEIVER_B;
+                    nextReceiver = RECEIVER_B;
                     break;
             }
         }
 
-        setActiveReceiver(bestReceiver);
+        setActiveReceiver(nextReceiver);
     }
 
     void setup() {
