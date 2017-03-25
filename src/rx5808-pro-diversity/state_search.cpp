@@ -16,6 +16,8 @@ void StateMachine::SearchStateHandler::onUpdate() {
 
     if (!manual) {
         onUpdateAuto();
+    } else {
+        onUpdateManual();
     }
 
     Ui::needUpdate();
@@ -73,7 +75,26 @@ void StateMachine::SearchStateHandler::onUpdateAuto() {
 }
 
 void StateMachine::SearchStateHandler::onUpdateManual() {
+    if (
+        Buttons::get(Button::UP)->pressed &&
+        millis() - Buttons::get(Button::UP)->pressTime > 500
+    ) {
+        orderedChanelIndex += 1;
+    }
 
+    if (
+        Buttons::get(Button::DOWN)->pressed &&
+        millis() - Buttons::get(Button::DOWN)->pressTime > 500
+    ) {
+        orderedChanelIndex -= 1;
+    }
+
+    if (orderedChanelIndex == 255)
+        orderedChanelIndex = CHANNELS_SIZE - 1;
+    else if (orderedChanelIndex >= CHANNELS_SIZE)
+        orderedChanelIndex = 0;
+
+    Receiver::setChannel(Channels::getOrderedIndex(orderedChanelIndex));
 }
 
 void StateMachine::SearchStateHandler::onButtonChange() {
