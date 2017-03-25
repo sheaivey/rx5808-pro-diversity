@@ -71,6 +71,20 @@ SOFTWARE.
 // =============================================================================
 
 #define USE_DIVERSITY
+
+ // Enable this to switch receivers much faster. This uses the port registers
+ // to switch rather than the Arduino helper functions.
+ //
+ // WARNING: You can only use this if your receivers are on the same port.
+ // Arduino/ATmega has 3 ports: PORTD, PORTB, and PORTC. The "default" hardware
+ // configuration uses pins A0 and A1 (PORTC), so if you're using reasonably
+ // standard hardware then this should be fine.
+ //
+ // PORTC: Pins A0-A7
+ // PORTD: 0-7
+ // PORTB: 8-13
+#define USE_DIVERSITY_FAST_SWITCHING
+
 //#define USE_IR_EMITTER
 //#define USE_SERIAL_OUT // Not compatible with IR emitter.
 

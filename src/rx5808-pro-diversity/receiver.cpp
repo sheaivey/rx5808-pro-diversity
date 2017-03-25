@@ -46,8 +46,26 @@ namespace Receiver {
 
     void setActiveReceiver(uint8_t receiver) {
         #ifdef USE_DIVERSITY
-            digitalWrite(PIN_LED_A, receiver == RECEIVER_A);
-            digitalWrite(PIN_LED_B, receiver == RECEIVER_B);
+            #ifdef USE_DIVERSITY_FAST_SWITCHING
+                uint8_t targetPin, disablePin;
+                if (receiver == RECEIVER_A) {
+                    targetPin = PIN_LED_A;
+                    disablePin = PIN_LED_B;
+                } else {
+                    targetPin = PIN_LED_B;
+                    disablePin = PIN_LED_A;
+                }
+
+                uint8_t port = digitalPinToPort(targetPin);
+                uint8_t targetBit = digitalPinToBitMask(targetPin);
+                uint8_t disablebit = digitalPinToBitMask(disablePin);
+                volatile uint8_t *out = portOutputRegister(port);
+
+                *out = (*out | targetBit) & ~disablebit;
+            #else
+                digitalWrite(PIN_LED_A, receiver == RECEIVER_A);
+                digitalWrite(PIN_LED_B, receiver == RECEIVER_B);
+            #endif
         #else
             digitalWrite(PIN_LED_A, HIGH);
         #endif
