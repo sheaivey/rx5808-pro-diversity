@@ -25,7 +25,12 @@ void StateMachine::BandScanStateHandler::onExit() {
 
 void StateMachine::BandScanStateHandler::onUpdate() {
     Receiver::waitForStableRssi();
-    rssiData[orderedChanelIndex] = (Receiver::rssiA + Receiver::rssiB) / 2;
+
+    #ifdef USE_DIVERSITY
+        rssiData[orderedChanelIndex] = (Receiver::rssiA + Receiver::rssiB) / 2;
+    #else
+        rssiData[orderedChanelIndex] = Receiver::rssiA;
+    #endif
 
     orderedChanelIndex = (orderedChanelIndex + 1) % (CHANNELS_SIZE);
     Receiver::setChannel(Channels::getOrderedIndex(orderedChanelIndex));

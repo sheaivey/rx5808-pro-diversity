@@ -34,15 +34,21 @@
 
 #define GRAPH_X (BORDER_GRAPH_L_X + 2)
 #define GRAPH_W (SCREEN_WIDTH - BORDER_GRAPH_L_X)
-#define GRAPH_H (GRAPH_SEPERATOR_Y - 2)
-#define GRAPH_A_Y 0
-#define GRAPH_B_Y (SCREEN_HEIGHT - GRAPH_H - 1)
+#ifdef USE_DIVERSITY
+    #define GRAPH_H (GRAPH_SEPERATOR_Y - 2)
+    #define GRAPH_A_Y 0
+    #define GRAPH_B_Y (SCREEN_HEIGHT - GRAPH_H - 1)
 
-#define RX_TEXT_SIZE 1
-#define RX_TEXT_X (BORDER_GRAPH_L_X + 4)
-#define RX_TEXT_H (CHAR_HEIGHT * RX_TEXT_SIZE)
-#define RX_TEXT_A_Y ((GRAPH_A_Y + GRAPH_H / 2) - (RX_TEXT_H / 2))
-#define RX_TEXT_B_Y ((GRAPH_B_Y + GRAPH_H / 2) - (RX_TEXT_H / 2))
+    #define RX_TEXT_SIZE 1
+    #define RX_TEXT_X (BORDER_GRAPH_L_X + 4)
+    #define RX_TEXT_H (CHAR_HEIGHT * RX_TEXT_SIZE)
+    #define RX_TEXT_A_Y ((GRAPH_A_Y + GRAPH_H / 2) - (RX_TEXT_H / 2))
+    #define RX_TEXT_B_Y ((GRAPH_B_Y + GRAPH_H / 2) - (RX_TEXT_H / 2))
+#else
+    #define GRAPH_H (SCREEN_HEIGHT - 1)
+    #define GRAPH_Y 0
+    #define GRAPH_B_Y 0
+#endif
 
 
 void StateMachine::SearchStateHandler::onInitialDraw() {
@@ -99,10 +105,10 @@ void StateMachine::SearchStateHandler::drawBorders() {
     );
 
     Ui::drawDashedVLine(
-      BORDER_GRAPH_L_X,
-      0,
-      SCREEN_HEIGHT,
-      GRAPH_SEPERATOR_STEP
+        BORDER_GRAPH_L_X,
+        0,
+        SCREEN_HEIGHT,
+        GRAPH_SEPERATOR_STEP
     );
 }
 
@@ -135,39 +141,51 @@ void StateMachine::SearchStateHandler::drawScanBar() {
 }
 
 void StateMachine::SearchStateHandler::drawRssiGraph() {
-    Ui::drawGraph(
-        Receiver::rssiALast,
-        RECEIVER_LAST_DATA_SIZE,
-        100,
-        GRAPH_X,
-        GRAPH_A_Y,
-        GRAPH_W,
-        GRAPH_H
-    );
+    #ifdef USE_DIVERSITY
+        Ui::drawGraph(
+            Receiver::rssiALast,
+            RECEIVER_LAST_DATA_SIZE,
+            100,
+            GRAPH_X,
+            GRAPH_A_Y,
+            GRAPH_W,
+            GRAPH_H
+        );
 
-    Ui::drawGraph(
-        Receiver::rssiBLast,
-        RECEIVER_LAST_DATA_SIZE,
-        100,
-        GRAPH_X,
-        GRAPH_B_Y,
-        GRAPH_W,
-        GRAPH_H
-    );
+        Ui::drawGraph(
+            Receiver::rssiBLast,
+            RECEIVER_LAST_DATA_SIZE,
+            100,
+            GRAPH_X,
+            GRAPH_B_Y,
+            GRAPH_W,
+            GRAPH_H
+        );
 
-    Ui::drawDashedHLine(
-      GRAPH_X,
-      GRAPH_SEPERATOR_Y,
-      GRAPH_SEPERATOR_W,
-      GRAPH_SEPERATOR_STEP
-    );
+        Ui::drawDashedHLine(
+            GRAPH_X,
+            GRAPH_SEPERATOR_Y,
+            GRAPH_SEPERATOR_W,
+            GRAPH_SEPERATOR_STEP
+        );
 
-    Ui::display.setTextSize(RX_TEXT_SIZE);
-    Ui::display.setTextColor(INVERSE);
+        Ui::display.setTextSize(RX_TEXT_SIZE);
+        Ui::display.setTextColor(INVERSE);
 
-    Ui::display.setCursor(RX_TEXT_X, RX_TEXT_A_Y);
-    Ui::display.print(PSTR2("A"));
+        Ui::display.setCursor(RX_TEXT_X, RX_TEXT_A_Y);
+        Ui::display.print(PSTR2("A"));
 
-    Ui::display.setCursor(RX_TEXT_X, RX_TEXT_B_Y);
-    Ui::display.print(PSTR2("B"));
+        Ui::display.setCursor(RX_TEXT_X, RX_TEXT_B_Y);
+        Ui::display.print(PSTR2("B"));
+    #else
+        Ui::drawGraph(
+            Receiver::rssiALast,
+            RECEIVER_LAST_DATA_SIZE,
+            100,
+            GRAPH_X,
+            GRAPH_Y,
+            GRAPH_W,
+            GRAPH_H
+        );
+    #endif
 }

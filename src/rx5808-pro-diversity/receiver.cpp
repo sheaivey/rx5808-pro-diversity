@@ -135,6 +135,7 @@ namespace Receiver {
         }
     }
 
+#ifdef USE_DIVERSITY
     void setDiversityMode(uint8_t mode) {
         EepromSettings.diversityMode = mode;
         switchDiversity();
@@ -182,6 +183,7 @@ namespace Receiver {
 
         setActiveReceiver(nextReceiver);
     }
+#endif
 
     void setup() {
         #ifdef DISABLE_AUDIO
