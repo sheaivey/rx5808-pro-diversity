@@ -107,7 +107,7 @@ namespace Receiver {
         #ifdef USE_DIVERSITY
             rssiB = constrain(
                 map(
-                    rssiARaw,
+                    rssiBRaw,
                     EepromSettings.rssiBMin,
                     EepromSettings.rssiBMax,
                     0,

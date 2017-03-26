@@ -48,7 +48,7 @@ PROGMEM const struct {
     uint8_t orderByChannel = true;
 
     #ifdef USE_DIVERSITY
-    uint8_t diversityMode = RECEIVER_AUTO;
+    uint8_t diversityMode = DIVERSITY_AUTO;
     uint16_t rssiBMin = RSSI_MIN_VAL;
     uint16_t rssiBMax = RSSI_MAX_VAL;
     #endif
