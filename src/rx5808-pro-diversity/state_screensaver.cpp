@@ -113,14 +113,14 @@ void StateMachine::ScreensaverStateHandler::onInitialDraw() {
 
         Ui::display.setTextSize(6);
         Ui::display.setCursor(
-            SCREEN_WIDTH / 2 - ((CHAR_WIDTH) * 6) / 2 * 2 - 3,
+            SCREEN_WIDTH_MID - ((CHAR_WIDTH) * 6) / 2 * 2 - 3,
             2);
 
         Ui::display.print(Channels::getName(Receiver::activeChannel));
 
         Ui::display.setTextSize(2);
         Ui::display.setCursor(
-            SCREEN_WIDTH / 2 - ((CHAR_WIDTH + 1) * 2) / 2 * 4 - 1,
+            SCREEN_WIDTH_MID - ((CHAR_WIDTH + 1) * 2) / 2 * 4 - 1,
             SCREEN_HEIGHT - CHAR_HEIGHT * 2 - 2);
         Ui::display.print(Channels::getFrequency(Receiver::activeChannel));
     }
