@@ -18,7 +18,7 @@ namespace StateMachine {
 
 
             bool manual = false;
-            bool scanning = true;
+            bool scanning = false;
             ScanDirection direction = ScanDirection::UP;
             bool forceNext = false;
             uint8_t orderedChanelIndex = 0;
