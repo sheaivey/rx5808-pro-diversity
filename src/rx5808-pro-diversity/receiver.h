@@ -9,11 +9,6 @@
 #define RECEIVER_A 0
 #ifdef USE_DIVERSITY
   #define RECEIVER_B 1
-  #define RECEIVER_AUTO 2
-
-  #define DIVERSITY_AUTO 0
-  #define DIVERSITY_FORCE_A 1
-  #define DIVERSITY_FORCE_B 2
 #endif
 
 #define RECEIVER_LAST_DELAY 50
@@ -40,6 +35,14 @@ namespace Receiver {
     #ifdef USE_DIVERSITY
         void setDiversityMode(uint8_t mode);
         void switchDiversity();
+    #endif
+
+    #ifdef USE_DIVERSITY
+        enum class DiversityMode : uint8_t {
+            AUTO,
+            FORCE_A,
+            FORCE_B
+        };
     #endif
 
     void setup();

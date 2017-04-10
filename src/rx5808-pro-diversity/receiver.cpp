@@ -136,7 +136,7 @@ namespace Receiver {
     }
 
 #ifdef USE_DIVERSITY
-    void setDiversityMode(uint8_t mode) {
+    void setDiversityMode(DiversityMode mode) {
         EepromSettings.diversityMode = mode;
         switchDiversity();
     }
@@ -144,7 +144,7 @@ namespace Receiver {
     void switchDiversity() {
         uint8_t nextReceiver = activeReceiver;
 
-        if (EepromSettings.diversityMode == DIVERSITY_AUTO) {
+        if (EepromSettings.diversityMode == DiversityMode::AUTO) {
             int8_t rssiDiff = (int8_t) rssiA - (int8_t) rssiB;
             uint8_t rssiDiffAbs = abs(rssiDiff);
             uint8_t currentBestReceiver = activeReceiver;
@@ -171,11 +171,11 @@ namespace Receiver {
             }
         } else {
             switch (EepromSettings.diversityMode) {
-                case DIVERSITY_FORCE_A:
+                case DiversityMode::FORCE_A:
                     nextReceiver = RECEIVER_A;
                     break;
 
-                case DIVERSITY_FORCE_B:
+                case DiversityMode::FORCE_B:
                     nextReceiver = RECEIVER_B;
                     break;
             }
