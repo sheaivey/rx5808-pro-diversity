@@ -52,7 +52,7 @@ void setup()
 
     // Enable buzzer and LED for duration of setup process.
     digitalWrite(PIN_LED, HIGH);
-    digitalWrite(PIN_BUZZER, HIGH);
+    digitalWrite(PIN_BUZZER, LOW);
 
     setupSettings();
 
@@ -71,7 +71,7 @@ void setup()
 
     // Setup complete.
     digitalWrite(PIN_LED, LOW);
-    digitalWrite(PIN_BUZZER, LOW);
+    digitalWrite(PIN_BUZZER, HIGH);
 
     // Switch to initial state.
     StateMachine::switchState(StateMachine::State::MENU);
