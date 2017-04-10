@@ -42,6 +42,7 @@ SOFTWARE.
     // 25 ms will do a 40 channel scan in 1 second.
     #define MIN_TUNE_TIME 25
 #endif
+
 #ifdef RX5880
     // rx5880 module needs >30ms to tune.
     // 35 ms will do a 40 channel scan in 1.4 seconds.
@@ -65,13 +66,6 @@ SOFTWARE.
 #ifdef USE_VOLTAGE_MONITORING
     #define VBAT_SMOOTH 8
     #define VBAT_PRESCALER 16
-#endif
-
-#ifdef USE_DIVERSITY
-    // Used to figure out if diversity module has been plugged in.
-    // When RSSI is plugged in the min value is around 90.
-    // When RSSI is not plugged in the min value is 0.
-    #define isDiversity() (analogRead(PIN_RSSI_B) >= 5)
 #endif
 
 #endif // file_defined
