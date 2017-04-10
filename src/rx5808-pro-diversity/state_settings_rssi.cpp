@@ -63,8 +63,11 @@ void StateMachine::SettingsRssiStateHandler::onUpdate() {
     }
 }
 
-void StateMachine::SettingsRssiStateHandler::onButtonChange() {
-    if (!Buttons::get(Button::MODE)->pressed)
+void StateMachine::SettingsRssiStateHandler::onButtonChange(
+    Button button,
+    Buttons::PressType pressType
+) {
+    if (button != Button::MODE || pressType != Buttons::PressType::SHORT)
         return;
 
     switch (internalState) {

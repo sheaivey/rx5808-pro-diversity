@@ -19,7 +19,11 @@ enum class Button : uint8_t {
 
 
 namespace Buttons {
-    typedef void(*ChangeFunc)();
+    enum class PressType : uint8_t {
+        SHORT,
+        LONG,
+        HOLDING
+    };
 
 
     struct ButtonState {
@@ -27,18 +31,19 @@ namespace Buttons {
         bool lastReading = false;
 
         bool pressed = false;
-        unsigned long pressTime = 0;
+        unsigned long changeTime = 0;
     };
 
 
-    extern uint32_t lastPressTime;
+    typedef void(*ChangeFunc)(Button button, PressType pressType);
 
+
+    extern uint32_t lastChangeTime;
 
     void update();
 
     const ButtonState *get(Button button);
     const bool any();
-    unsigned long waitForRelease(Button button);
 
     void registerChangeFunc(ChangeFunc func);
     void deregisterChangeFunc(ChangeFunc func);

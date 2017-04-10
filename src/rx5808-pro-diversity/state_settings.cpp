@@ -21,8 +21,11 @@ void StateMachine::SettingsStateHandler::onUpdate() {
 
 }
 
-void StateMachine::SettingsStateHandler::onButtonChange() {
-    if (Buttons::get(Button::MODE)->pressed) {
+void StateMachine::SettingsStateHandler::onButtonChange(
+    Button button,
+    Buttons::PressType pressType
+) {
+    if (button == Button::MODE) {
         StateMachine::switchState(StateMachine::State::SETTINGS_RSSI);
     }
 }

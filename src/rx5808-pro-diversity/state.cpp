@@ -31,7 +31,7 @@ void *operator new(size_t size, void *ptr){
 ;
 
 namespace StateMachine {
-    static void onButtonChange();
+    static void onButtonChange(Button button, Buttons::PressType pressType);
     static StateHandler *getStateHandler(State stateType);
 
 
@@ -99,9 +99,9 @@ namespace StateMachine {
         #undef STATE_FACTORY
     }
 
-    static void onButtonChange() {
+    static void onButtonChange(Button button, Buttons::PressType pressType) {
         if (currentHandler != nullptr) {
-            currentHandler->onButtonChange();
+            currentHandler->onButtonChange(button, pressType);
         }
     }
 }

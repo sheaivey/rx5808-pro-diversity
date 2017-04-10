@@ -5,41 +5,34 @@
 #include "settings.h"
 
 
-static const bool updateButton(
-    const uint8_t pin,
-    struct Buttons::ButtonState &state
-);
-
-
 struct Buttons::ButtonState states[BUTTON_COUNT];
-
-static bool needCallChangeFuncs = false;
 static Buttons::ChangeFunc changeFuncs[BUTTON_HOOKS_MAX] = { nullptr };
 
 
 namespace Buttons {
-    static void runChangeFuncs();
-    uint32_t lastPressTime = 0;
+    static void runChangeFuncs(Button button, PressType pressType);
+    static void updateButton(
+        const Button button,
+        struct Buttons::ButtonState &state,
+        const uint8_t pin
+    );
+
+
+    uint32_t lastChangeTime = 0;
 
 
     void update() {
         #define UPDATE_BUTTON(button) \
             updateButton( \
-                PIN_BUTTON_ ## button, \
-                states[static_cast<size_t>(Button::button)] \
+                Button::button, \
+                states[static_cast<size_t>(Button::button)], \
+                PIN_BUTTON_ ## button \
             );
 
         UPDATE_BUTTON(UP);
         UPDATE_BUTTON(DOWN);
         UPDATE_BUTTON(MODE);
         UPDATE_BUTTON(SAVE);
-
-        // HACK: this is super gross, better way of doing it?
-        if (needCallChangeFuncs) {
-            runChangeFuncs();
-            needCallChangeFuncs = false;
-            lastPressTime = millis();
-        }
 
         #undef UPDATE_BUTTON
     }
@@ -55,17 +48,6 @@ namespace Buttons {
         }
 
         return false;
-    }
-
-    unsigned long waitForRelease(Button button) {
-        const unsigned long startTime = millis();
-
-        while (get(button)->pressed) {
-            update();
-            delay(BUTTON_DEBOUNCE_DELAY);
-        }
-
-        return millis() - startTime;
     }
 
     void registerChangeFunc(ChangeFunc func) {
@@ -86,34 +68,52 @@ namespace Buttons {
         }
     }
 
-    static void runChangeFuncs() {
+    static void runChangeFuncs(Button button, PressType pressType) {
         for (uint8_t i = 0; i < BUTTON_HOOKS_MAX; i++) {
             if (changeFuncs[i] != nullptr) {
-                changeFuncs[i]();
+                changeFuncs[i](button, pressType);
             }
         }
     }
-}
 
-
-static const bool updateButton(
-    const uint8_t pin,
-    struct Buttons::ButtonState &state
-) {
-    const uint8_t reading = !digitalRead(pin); // Invert as we use pull-ups.
-
-    if (reading != state.lastReading) {
-        state.lastDebounceTime = millis();
-    }
-
-    state.lastReading = reading;
-
-    if (
-        reading != state.pressed &&
-        (millis() - state.lastDebounceTime) >= BUTTON_DEBOUNCE_DELAY
+    static void updateButton(
+        const Button button,
+        struct ButtonState &state,
+        const uint8_t pin
     ) {
-        state.pressed = reading;
-        state.pressTime = millis();
-        needCallChangeFuncs = true;
+        const uint8_t reading = !digitalRead(pin); // Invert as we use pull-ups.
+
+        if (reading != state.lastReading) {
+            state.lastDebounceTime = millis();
+        }
+
+        state.lastReading = reading;
+
+        if (
+            reading != state.pressed &&
+            (millis() - state.lastDebounceTime) >= BUTTON_DEBOUNCE_DELAY
+        ) {
+            state.pressed = reading;
+
+            uint32_t prevChangeTime = state.changeTime;
+            state.changeTime = millis();
+            lastChangeTime = state.changeTime;
+
+            if (!state.pressed) {
+                uint32_t duration = state.changeTime - prevChangeTime;
+
+                if (duration < 500)
+                    runChangeFuncs(button, PressType::SHORT);
+                else if (duration < 1000)
+                    runChangeFuncs(button, PressType::LONG);
+            }
+        }
+
+        if (state.pressed) {
+            uint32_t duration = millis() - state.changeTime;
+
+            if (duration >= 2000)
+                runChangeFuncs(button, PressType::HOLDING);
+        }
     }
 }

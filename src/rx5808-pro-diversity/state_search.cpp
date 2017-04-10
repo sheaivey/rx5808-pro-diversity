@@ -75,37 +75,51 @@ void StateMachine::SearchStateHandler::onUpdateAuto() {
 }
 
 void StateMachine::SearchStateHandler::onUpdateManual() {
-    if (
-        Buttons::get(Button::UP)->pressed &&
-        millis() - Buttons::get(Button::UP)->pressTime > 500
-    ) {
-        orderedChanelIndex += 1;
-    }
 
-    if (
-        Buttons::get(Button::DOWN)->pressed &&
-        millis() - Buttons::get(Button::DOWN)->pressTime > 500
-    ) {
-        orderedChanelIndex -= 1;
-    }
-
-    if (orderedChanelIndex == 255)
-        orderedChanelIndex = CHANNELS_SIZE - 1;
-    else if (orderedChanelIndex >= CHANNELS_SIZE)
-        orderedChanelIndex = 0;
-
-    Receiver::setChannel(Channels::getOrderedIndex(orderedChanelIndex));
 }
 
-void StateMachine::SearchStateHandler::onButtonChange() {
-    if (Buttons::get(Button::MODE)->pressed) {
-        manual = !manual;
-    }
+void StateMachine::SearchStateHandler::onButtonChange(
+    Button button,
+    Buttons::PressType pressType
+) {
+    if (pressType == Buttons::PressType::SHORT) {
+        if (button == Button::MODE) {
+            manual = !manual;
+            if (!manual) {
+                scanning = false;
+            }
+        }
 
-    if (manual) {
-        if (Buttons::get(Button::UP)->pressed) {
+        if (manual) {
+            if (button == Button::UP) {
+                orderedChanelIndex += 1;
+            } else if (button == Button::DOWN) {
+                orderedChanelIndex -= 1;
+            }
+
+            if (orderedChanelIndex == 255)
+                orderedChanelIndex = CHANNELS_SIZE - 1;
+            else if (orderedChanelIndex >= CHANNELS_SIZE)
+                orderedChanelIndex = 0;
+
+            Receiver::setChannel(Channels::getOrderedIndex(orderedChanelIndex));
+        } else {
+            if (button == Button::UP) {
+                scanning = true;
+                forceNext = true;
+                direction = ScanDirection::UP;
+            } else if (button == Button::DOWN) {
+                scanning = true;
+                forceNext = true;
+                direction = ScanDirection::DOWN;
+            }
+        }
+    } else if (pressType == Buttons::PressType::HOLDING) {
+        if (button == Button::UP) {
             orderedChanelIndex += 1;
-        } else if (Buttons::get(Button::DOWN)->pressed) {
+        }
+
+        if (button == Button::DOWN) {
             orderedChanelIndex -= 1;
         }
 
@@ -115,15 +129,5 @@ void StateMachine::SearchStateHandler::onButtonChange() {
             orderedChanelIndex = 0;
 
         Receiver::setChannel(Channels::getOrderedIndex(orderedChanelIndex));
-    } else {
-        if (Buttons::get(Button::UP)->pressed) {
-            scanning = true;
-            forceNext = true;
-            direction = ScanDirection::UP;
-        } else if (Buttons::get(Button::DOWN)->pressed) {
-            scanning = true;
-            forceNext = true;
-            direction = ScanDirection::DOWN;
-        }
     }
 }

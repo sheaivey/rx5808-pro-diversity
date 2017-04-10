@@ -3,6 +3,7 @@
 
 
 #include <stdint.h>
+#include "buttons.h"
 
 
 namespace StateMachine {
@@ -26,7 +27,9 @@ namespace StateMachine {
             virtual void onUpdate() {};
             virtual void onExit() {};
 
-            virtual void onButtonChange() {};
+            virtual void onButtonChange(
+                Button button,
+                Buttons::PressType pressType) {};
     };
 
     extern State currentState;

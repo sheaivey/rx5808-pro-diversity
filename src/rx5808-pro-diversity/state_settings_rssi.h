@@ -28,7 +28,7 @@ namespace StateMachine {
             void onInitialDraw();
             void onUpdateDraw();
 
-            void onButtonChange();
+            void onButtonChange(Button button, Buttons::PressType pressType);
     };
 }
 

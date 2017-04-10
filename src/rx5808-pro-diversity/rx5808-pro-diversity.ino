@@ -46,6 +46,12 @@ SOFTWARE.
 #include "ui.h"
 
 
+static void globalMenuButtonHandler(
+    Button button,
+    Buttons::PressType pressType
+);
+
+
 void setup()
 {
     setupPins();
@@ -72,6 +78,8 @@ void setup()
     // Setup complete.
     digitalWrite(PIN_LED, LOW);
     digitalWrite(PIN_BUZZER, HIGH);
+
+    Buttons::registerChangeFunc(globalMenuButtonHandler);
 
     // Switch to initial state.
     StateMachine::switchState(StateMachine::State::MENU);
@@ -118,17 +126,22 @@ void loop() {
 
     if (
         StateMachine::currentState != StateMachine::State::SCREENSAVER
-        && (millis() - Buttons::lastPressTime) >
+        && (millis() - Buttons::lastChangeTime) >
             (SCREENSAVER_TIMEOUT * 1000)
     ) {
         StateMachine::switchState(StateMachine::State::SCREENSAVER);
     }
+}
 
+
+static void globalMenuButtonHandler(
+    Button button,
+    Buttons::PressType pressType
+) {
     if (
-        StateMachine::currentState != StateMachine::State::MENU
-        && Buttons::get(Button::MODE)->pressed
-        && Buttons::get(Button::MODE)->pressTime + BUTTON_WAIT_FOR_MENU <=
-            millis()
+        StateMachine::currentState != StateMachine::State::MENU &&
+        button == Button::MODE &&
+        pressType == Buttons::PressType::HOLDING
     ) {
         StateMachine::switchState(StateMachine::State::MENU);
     }

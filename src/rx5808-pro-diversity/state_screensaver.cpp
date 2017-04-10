@@ -91,7 +91,10 @@ void StateMachine::ScreensaverStateHandler::onUpdate() {
 }
 
 
-void StateMachine::ScreensaverStateHandler::onButtonChange() {
+void StateMachine::ScreensaverStateHandler::onButtonChange(
+    Button button,
+    Buttons::PressType pressType
+) {
     StateMachine::switchState(StateMachine::lastState);
 }
 

@@ -52,19 +52,27 @@ void StateMachine::MenuStateHandler::onEnter() {
 }
 
 
-void StateMachine::MenuStateHandler::onButtonChange() {
-    if (Buttons::get(Button::UP)->pressed) {
-        this->menu.selectPreviousItem();
-        Ui::needUpdate();
-    }
+void StateMachine::MenuStateHandler::onButtonChange(
+    Button button,
+    Buttons::PressType pressType
+) {
+    if (pressType != Buttons::PressType::SHORT)
+        return;
 
-    if (Buttons::get(Button::DOWN)->pressed) {
-        this->menu.selectNextItem();
-        Ui::needUpdate();
-    }
+    switch (button) {
+        case Button::UP:
+            this->menu.selectPreviousItem();
+            Ui::needUpdate();
+            break;
 
-    if (Buttons::get(Button::MODE)->pressed) {
-        this->menu.activateItem();
+        case Button::DOWN:
+            this->menu.selectNextItem();
+            Ui::needUpdate();
+            break;
+
+        case Button::MODE:
+            this->menu.activateItem();
+            break;
     }
 }
 
