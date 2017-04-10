@@ -60,7 +60,7 @@ void setup()
     Receiver::setup();
     Ui::setup();
 
-    Receiver::setActiveReceiver(RECEIVER_A);
+    Receiver::setActiveReceiver(Receiver::ReceiverId::A);
 
     #ifdef USE_IR_EMITTER
         Serial.begin(9600);

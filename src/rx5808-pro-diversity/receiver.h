@@ -6,17 +6,29 @@
 #include "settings.h"
 
 
-#define RECEIVER_A 0
-#ifdef USE_DIVERSITY
-  #define RECEIVER_B 1
-#endif
-
 #define RECEIVER_LAST_DELAY 50
 #define RECEIVER_LAST_DATA_SIZE 24
 
 
 namespace Receiver {
-    extern uint8_t activeReceiver;
+    enum class ReceiverId : uint8_t {
+        A
+        #ifdef USE_DIVERSITY
+            ,
+            B
+        #endif
+    };
+
+    #ifdef USE_DIVERSITY
+        enum class DiversityMode : uint8_t {
+            AUTO,
+            FORCE_A,
+            FORCE_B
+        };
+    #endif
+
+
+    extern ReceiverId activeReceiver;
     extern uint8_t activeChannel;
 
     extern uint8_t rssiA;
@@ -31,19 +43,12 @@ namespace Receiver {
     void setChannel(uint8_t channel);
     void waitForStableRssi();
     uint16_t updateRssi();
-    void setActiveReceiver(uint8_t receiver = RECEIVER_A);
+    void setActiveReceiver(ReceiverId receiver = ReceiverId::A);
     #ifdef USE_DIVERSITY
         void setDiversityMode(uint8_t mode);
         void switchDiversity();
     #endif
 
-    #ifdef USE_DIVERSITY
-        enum class DiversityMode : uint8_t {
-            AUTO,
-            FORCE_A,
-            FORCE_B
-        };
-    #endif
 
     void setup();
     void update();

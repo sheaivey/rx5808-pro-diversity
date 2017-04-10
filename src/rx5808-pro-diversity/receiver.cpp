@@ -14,7 +14,7 @@ static void writeSerialData();
 
 
 namespace Receiver {
-    uint8_t activeReceiver = RECEIVER_A;
+    ReceiverId activeReceiver = ReceiverId::A;
     uint8_t activeChannel = 0;
 
     uint8_t rssiA = 0;
@@ -25,7 +25,7 @@ namespace Receiver {
         uint16_t rssiBRaw = 0;
         uint8_t rssiBLast[RECEIVER_LAST_DATA_SIZE] = { 0 };
 
-        uint8_t diversityTargetReceiver = activeReceiver;
+        ReceiverId diversityTargetReceiver = activeReceiver;
         Timer diversityHysteresisTimer = Timer(DIVERSITY_HYSTERESIS_PERIOD);
     #endif
 
@@ -44,11 +44,11 @@ namespace Receiver {
         activeChannel = channel;
     }
 
-    void setActiveReceiver(uint8_t receiver) {
+    void setActiveReceiver(ReceiverId receiver) {
         #ifdef USE_DIVERSITY
             #ifdef USE_DIVERSITY_FAST_SWITCHING
                 uint8_t targetPin, disablePin;
-                if (receiver == RECEIVER_A) {
+                if (receiver == ReceiverId::A) {
                     targetPin = PIN_LED_A;
                     disablePin = PIN_LED_B;
                 } else {
@@ -63,8 +63,8 @@ namespace Receiver {
 
                 *out = (*out | targetBit) & ~disablebit;
             #else
-                digitalWrite(PIN_LED_A, receiver == RECEIVER_A);
-                digitalWrite(PIN_LED_B, receiver == RECEIVER_B);
+                digitalWrite(PIN_LED_A, receiver == ReceiverId::A);
+                digitalWrite(PIN_LED_B, receiver == ReceiverId::B);
             #endif
         #else
             digitalWrite(PIN_LED_A, HIGH);
@@ -142,17 +142,17 @@ namespace Receiver {
     }
 
     void switchDiversity() {
-        uint8_t nextReceiver = activeReceiver;
+        ReceiverId nextReceiver = activeReceiver;
 
         if (EepromSettings.diversityMode == DiversityMode::AUTO) {
             int8_t rssiDiff = (int8_t) rssiA - (int8_t) rssiB;
             uint8_t rssiDiffAbs = abs(rssiDiff);
-            uint8_t currentBestReceiver = activeReceiver;
+            ReceiverId currentBestReceiver = activeReceiver;
 
             if (rssiDiff > 0) {
-                currentBestReceiver = RECEIVER_A;
+                currentBestReceiver = ReceiverId::A;
             } else if (rssiDiff < 0) {
-                currentBestReceiver = RECEIVER_B;
+                currentBestReceiver = ReceiverId::B;
             } else {
                 currentBestReceiver = activeReceiver;
             }
@@ -172,11 +172,11 @@ namespace Receiver {
         } else {
             switch (EepromSettings.diversityMode) {
                 case DiversityMode::FORCE_A:
-                    nextReceiver = RECEIVER_A;
+                    nextReceiver = ReceiverId::A;
                     break;
 
                 case DiversityMode::FORCE_B:
-                    nextReceiver = RECEIVER_B;
+                    nextReceiver = ReceiverId::B;
                     break;
             }
         }
