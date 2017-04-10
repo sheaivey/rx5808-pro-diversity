@@ -44,21 +44,11 @@ static void bandScannerMenuHandler();
 static void settingsMenuHandler();
 
 
-void StateMachine::MenuStateHandler::onInitialDraw() {
-    Ui::clear();
-
+void StateMachine::MenuStateHandler::onEnter() {
     Ui::menu.reset();
     Ui::menu.addItem(PSTR("Search"), searchIcon, searchMenuHandler);
     Ui::menu.addItem(PSTR("Band Scan"), bandScanIcon, bandScannerMenuHandler);
     Ui::menu.addItem(PSTR("Settings"), settingsIcon, settingsMenuHandler);
-
-    Ui::menu.drawInitial();
-    Ui::needDisplay();
-}
-
-void StateMachine::MenuStateHandler::onUpdateDraw() {
-    Ui::menu.drawUpdate();
-    Ui::needDisplay();
 }
 
 
@@ -77,6 +67,7 @@ void StateMachine::MenuStateHandler::onButtonChange() {
         Ui::menu.activateItem();
     }
 }
+
 
 static void searchMenuHandler() {
     StateMachine::switchState(StateMachine::State::SEARCH);

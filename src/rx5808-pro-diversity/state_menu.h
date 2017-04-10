@@ -8,6 +8,8 @@
 namespace StateMachine {
     class MenuStateHandler : public StateMachine::StateHandler {
         public:
+            void onEnter();
+
             void onInitialDraw();
             void onUpdateDraw();
 

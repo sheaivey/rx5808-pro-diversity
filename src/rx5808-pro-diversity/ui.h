@@ -45,12 +45,6 @@ namespace Ui {
 
     void needUpdate();
     void needDisplay();
-
-    class UiComponent {
-        public:
-            virtual void drawInitial();
-            virtual void drawUpdate();
-    };
 }
 
 #endif

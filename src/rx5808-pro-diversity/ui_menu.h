@@ -7,11 +7,14 @@
 namespace Ui {
     typedef void(*MenuHandler)();
 
-    class MenuComponent : public UiComponent {
-        public:
-            void drawInitial();
-            void drawUpdate();
+    struct MenuItem {
+        const char* text = nullptr;
+        Ui::MenuHandler handler = nullptr;
+        const unsigned char* icon = nullptr;
+    };
 
+    class MenuHelper {
+        public:
             void reset();
             void addItem(
                 const char* text,
@@ -19,12 +22,14 @@ namespace Ui {
                 const MenuHandler handler
             );
 
+            MenuItem* getCurrentItem();
+
             void selectNextItem();
             void selectPreviousItem();
             void activateItem();
     };
 
-    extern MenuComponent menu;
+    extern MenuHelper menu;
 }
 
 
