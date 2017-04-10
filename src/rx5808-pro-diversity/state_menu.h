@@ -3,6 +3,7 @@
 
 
 #include "state.h"
+#include "ui_menu.h"
 
 
 namespace StateMachine {
@@ -14,6 +15,10 @@ namespace StateMachine {
             void onUpdateDraw();
 
             void onButtonChange();
+
+        private:
+            void drawMenuEntry();
+            Ui::MenuHelper menu;
     };
 }
 

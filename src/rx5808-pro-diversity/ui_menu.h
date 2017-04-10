@@ -1,7 +1,10 @@
 #ifndef UI_MENU_H
-
+#define UI_MENU_H
 
 #include "ui.h"
+
+
+#define MENU_ITEMS_MAX 4
 
 
 namespace Ui {
@@ -27,9 +30,13 @@ namespace Ui {
             void selectNextItem();
             void selectPreviousItem();
             void activateItem();
-    };
 
-    extern MenuHelper menu;
+        private:
+            Ui::MenuItem menuItems[MENU_ITEMS_MAX];
+
+            int activeItems = 0;
+            int selectedItem = 0;
+    };
 }
 
 

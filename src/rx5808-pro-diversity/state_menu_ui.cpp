@@ -40,36 +40,8 @@ void StateMachine::MenuStateHandler::onUpdateDraw() {
 }
 
 
-static void drawTriangles() {
-    Ui::display.fillTriangle(
-        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE),
-        SCREEN_HEIGHT_MID + TRIANGLE_MARGIN,
-
-        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE / 2),
-        SCREEN_HEIGHT_MID + TRIANGLE_MARGIN + (TRIANGLE_SIZE),
-
-        SCREEN_WIDTH - 1,
-        SCREEN_HEIGHT_MID + TRIANGLE_MARGIN,
-
-        WHITE
-    );
-
-    Ui::display.fillTriangle(
-        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE),
-        SCREEN_HEIGHT_MID - TRIANGLE_MARGIN,
-
-        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE / 2),
-        SCREEN_HEIGHT_MID - TRIANGLE_MARGIN - (TRIANGLE_SIZE),
-
-        SCREEN_WIDTH - 1,
-        SCREEN_HEIGHT_MID - TRIANGLE_MARGIN,
-
-        WHITE
-    );
-}
-
-static void drawMenuEntry() {
-    const Ui::MenuItem* item = Ui::menu.getCurrentItem();
+void StateMachine::MenuStateHandler::drawMenuEntry() {
+    const Ui::MenuItem* item = this->menu.getCurrentItem();
     const uint8_t charLen = strlen(PSTRtoBuffer_P(item->text));
 
     Ui::display.setTextSize(2);
@@ -97,4 +69,32 @@ static void drawMenuEntry() {
             WHITE
         );
     }
+}
+
+static void drawTriangles() {
+    Ui::display.fillTriangle(
+        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE),
+        SCREEN_HEIGHT_MID + TRIANGLE_MARGIN,
+
+        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE / 2),
+        SCREEN_HEIGHT_MID + TRIANGLE_MARGIN + (TRIANGLE_SIZE),
+
+        SCREEN_WIDTH - 1,
+        SCREEN_HEIGHT_MID + TRIANGLE_MARGIN,
+
+        WHITE
+    );
+
+    Ui::display.fillTriangle(
+        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE),
+        SCREEN_HEIGHT_MID - TRIANGLE_MARGIN,
+
+        SCREEN_WIDTH - 1 - (TRIANGLE_SIZE / 2),
+        SCREEN_HEIGHT_MID - TRIANGLE_MARGIN - (TRIANGLE_SIZE),
+
+        SCREEN_WIDTH - 1,
+        SCREEN_HEIGHT_MID - TRIANGLE_MARGIN,
+
+        WHITE
+    );
 }
