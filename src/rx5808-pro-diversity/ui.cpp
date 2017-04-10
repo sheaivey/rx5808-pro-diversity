@@ -33,14 +33,6 @@ namespace Ui {
     }
 
 
-    void drawTitle(const char* title) {
-        display.drawFastHLine(0, CHAR_HEIGHT + 2, SCREEN_WIDTH, WHITE);
-
-        display.setTextColor(WHITE);
-        display.setCursor(0, 0);
-        display.print(title);
-    }
-
     void drawGraph(
         const uint8_t data[],
         const uint8_t dataSize,
