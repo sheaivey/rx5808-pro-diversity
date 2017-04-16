@@ -56,6 +56,11 @@ namespace StateMachine {
                 && Ui::shouldDrawUpdate
                 && drawTimer.hasTicked()
             ) {
+                if (Ui::shouldFullRedraw) {
+                    currentHandler->onInitialDraw();
+                    Ui::shouldFullRedraw = false;
+                }
+
                 currentHandler->onUpdateDraw();
                 Ui::shouldDrawUpdate = false;
                 drawTimer.reset();

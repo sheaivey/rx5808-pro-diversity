@@ -3,6 +3,7 @@
 
 
 #include "state.h"
+#include "ui_state_menu.h"
 
 
 #define PEAK_LOOKAHEAD 4
@@ -17,7 +18,6 @@ namespace StateMachine {
             };
 
 
-            bool manual = false;
             bool scanning = false;
             ScanDirection direction = ScanDirection::UP;
             bool forceNext = false;
@@ -27,6 +27,8 @@ namespace StateMachine {
             uint8_t peakChannelIndex = 0;
             uint8_t peaks[PEAK_LOOKAHEAD] = { 0 };
 
+            bool menuShowing = true;
+            Ui::StateMenuHelper menu = Ui::StateMenuHelper(this);
 
             void onUpdateAuto();
             void onUpdateManual();
@@ -36,9 +38,13 @@ namespace StateMachine {
             void drawFrequencyText();
             void drawScanBar();
             void drawRssiGraph();
-
+            void drawMenu();
 
         public:
+            bool manual = false;
+
+
+            void onEnter();
             void onUpdate();
 
             void onInitialDraw();

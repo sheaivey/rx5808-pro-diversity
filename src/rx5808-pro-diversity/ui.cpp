@@ -11,6 +11,7 @@ namespace Ui {
     OLED_CLASS display;
     bool shouldDrawUpdate = false;
     bool shouldDisplay = false;
+    bool shouldFullRedraw = false;
 
 
     void setup() {
@@ -119,5 +120,9 @@ namespace Ui {
 
     void needDisplay() {
         shouldDisplay = true;
+    }
+
+    void needFullRedraw() {
+        shouldFullRedraw = true;
     }
 }

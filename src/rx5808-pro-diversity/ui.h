@@ -23,6 +23,7 @@ namespace Ui {
     extern OLED_CLASS display;
     extern bool shouldDrawUpdate;
     extern bool shouldDisplay;
+    extern bool shouldFullRedraw;
 
     void setup();
     void update();
@@ -45,6 +46,7 @@ namespace Ui {
 
     void needUpdate();
     void needDisplay();
+    void needFullRedraw();
 }
 
 #endif

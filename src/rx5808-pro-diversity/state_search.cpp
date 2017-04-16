@@ -9,9 +9,46 @@
 #include "channels.h"
 #include "buttons.h"
 #include "ui.h"
+#include "pstr_helper.h"
 
 
-void StateMachine::SearchStateHandler::onUpdate() {
+using StateMachine::SearchStateHandler;
+
+
+static char* menuModeText(void* state) {
+    SearchStateHandler* search = static_cast<SearchStateHandler*>(state);
+    return search->manual ? PSTR2("M") : PSTR2("A");
+}
+
+static char* menuOrderText(void* state) {
+    SearchStateHandler* search = static_cast<SearchStateHandler*>(state);
+    return PSTR2("F");
+}
+
+static void menuModeHandler(void* state) {
+    SearchStateHandler* search = static_cast<SearchStateHandler*>(state);
+    search->manual = !search->manual;
+}
+
+static void menuOrderHandler(void* state) {
+    SearchStateHandler* search = static_cast<SearchStateHandler*>(state);
+    return;
+}
+
+
+void SearchStateHandler::onEnter() {
+    menu.addItem(
+        menuModeText,
+        menuModeHandler
+    );
+
+    menu.addItem(
+        menuOrderText,
+        menuOrderHandler
+    );
+}
+
+void SearchStateHandler::onUpdate() {
     Receiver::waitForStableRssi();
 
     if (!manual) {
@@ -23,7 +60,7 @@ void StateMachine::SearchStateHandler::onUpdate() {
     Ui::needUpdate();
 }
 
-void StateMachine::SearchStateHandler::onUpdateAuto() {
+void SearchStateHandler::onUpdateAuto() {
     if (scanningPeak) {
         uint8_t peaksIndex = peakChannelIndex - orderedChanelIndex;
         peaks[peaksIndex] = Receiver::rssiA;
@@ -74,22 +111,18 @@ void StateMachine::SearchStateHandler::onUpdateAuto() {
     }
 }
 
-void StateMachine::SearchStateHandler::onUpdateManual() {
+void SearchStateHandler::onUpdateManual() {
 
 }
 
-void StateMachine::SearchStateHandler::onButtonChange(
+void SearchStateHandler::onButtonChange(
     Button button,
     Buttons::PressType pressType
 ) {
-    if (pressType == Buttons::PressType::SHORT) {
-        if (button == Button::MODE) {
-            manual = !manual;
-            if (!manual) {
-                scanning = false;
-            }
-        }
+    if (this->menu.handleButtons(button, pressType))
+        return;
 
+    if (pressType == Buttons::PressType::SHORT) {
         if (manual) {
             if (button == Button::UP) {
                 orderedChanelIndex += 1;

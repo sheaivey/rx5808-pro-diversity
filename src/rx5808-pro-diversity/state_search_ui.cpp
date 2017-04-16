@@ -51,6 +51,9 @@
 #endif
 
 
+using Ui::display;
+
+
 void StateMachine::SearchStateHandler::onInitialDraw() {
     Ui::clear();
 
@@ -90,12 +93,13 @@ void StateMachine::SearchStateHandler::onUpdateDraw() {
     drawFrequencyText();
     drawScanBar();
     drawRssiGraph();
+    menu.draw();
 
     Ui::needDisplay();
 }
 
 void StateMachine::SearchStateHandler::drawBorders() {
-    Ui::display.drawRoundRect(
+    display.drawRoundRect(
         SCANBAR_BORDER_X,
         SCANBAR_BORDER_Y,
         SCANBAR_BORDER_W,
@@ -113,25 +117,25 @@ void StateMachine::SearchStateHandler::drawBorders() {
 }
 
 void StateMachine::SearchStateHandler::drawChannelText() {
-    Ui::display.setTextSize(CHANNEL_TEXT_SIZE);
-    Ui::display.setTextColor(WHITE);
-    Ui::display.setCursor(CHANNEL_TEXT_X, CHANENL_TEXT_Y);
+    display.setTextSize(CHANNEL_TEXT_SIZE);
+    display.setTextColor(WHITE);
+    display.setCursor(CHANNEL_TEXT_X, CHANENL_TEXT_Y);
 
-    Ui::display.print(Channels::getName(Receiver::activeChannel));
+    display.print(Channels::getName(Receiver::activeChannel));
 }
 
 void StateMachine::SearchStateHandler::drawFrequencyText() {
-    Ui::display.setTextSize(FREQUENCY_TEXT_SIZE);
-    Ui::display.setTextColor(WHITE);
-    Ui::display.setCursor(FREQUENCY_TEXT_X, FREQUENCY_TEXT_Y);
+    display.setTextSize(FREQUENCY_TEXT_SIZE);
+    display.setTextColor(WHITE);
+    display.setCursor(FREQUENCY_TEXT_X, FREQUENCY_TEXT_Y);
 
-    Ui::display.print(Channels::getFrequency(Receiver::activeChannel));
+    display.print(Channels::getFrequency(Receiver::activeChannel));
 }
 
 void StateMachine::SearchStateHandler::drawScanBar() {
     uint8_t scanWidth = orderedChanelIndex * SCANBAR_W / CHANNELS_SIZE;
 
-    Ui::display.fillRect(
+    display.fillRect(
         SCANBAR_X,
         SCANBAR_Y,
         scanWidth,
@@ -169,14 +173,14 @@ void StateMachine::SearchStateHandler::drawRssiGraph() {
             GRAPH_SEPERATOR_STEP
         );
 
-        Ui::display.setTextSize(RX_TEXT_SIZE);
-        Ui::display.setTextColor(INVERSE);
+        display.setTextSize(RX_TEXT_SIZE);
+        display.setTextColor(INVERSE);
 
-        Ui::display.setCursor(RX_TEXT_X, RX_TEXT_A_Y);
-        Ui::display.print(PSTR2("A"));
+        display.setCursor(RX_TEXT_X, RX_TEXT_A_Y);
+        display.print(PSTR2("A"));
 
-        Ui::display.setCursor(RX_TEXT_X, RX_TEXT_B_Y);
-        Ui::display.print(PSTR2("B"));
+        display.setCursor(RX_TEXT_X, RX_TEXT_B_Y);
+        display.print(PSTR2("B"));
     #else
         Ui::drawGraph(
             Receiver::rssiALast,
@@ -188,4 +192,8 @@ void StateMachine::SearchStateHandler::drawRssiGraph() {
             GRAPH_H
         );
     #endif
+}
+
+void StateMachine::SearchStateHandler::drawMenu() {
+    this->menu.draw();
 }
