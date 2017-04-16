@@ -104,7 +104,7 @@ namespace Buttons {
 
                 if (duration < 500)
                     runChangeFuncs(button, PressType::SHORT);
-                else if (duration < 1000)
+                else if (duration < 2000)
                     runChangeFuncs(button, PressType::LONG);
             }
         }
