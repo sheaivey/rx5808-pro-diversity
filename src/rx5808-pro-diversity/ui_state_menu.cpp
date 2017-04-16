@@ -7,6 +7,16 @@ using Ui::display;
 using Ui::StateMenuHelper;
 
 
+#define MENU_ITEM_W 16
+#define MENU_ITEM_H 16
+
+#define MENU_MARGIN 2
+#define MENU_W (MENU_ITEM_W) + (MENU_MARGIN * 2)
+#define MENU_TARGET_X (SCREEN_WIDTH - MENU_W - 1)
+#define MENU_X (MENU_TARGET_X + this->slideX)
+#define MENU_H (SCREEN_HEIGHT)
+
+
 void StateMenuHelper::addItem(
     const MenuText text,
     const MenuHandler handler
@@ -25,6 +35,10 @@ bool StateMenuHelper::handleButtons(
         this->visible = !this->visible;
         if (!this->visible)
             Ui::needFullRedraw();
+
+        if (this->visible) {
+            this->slideX = MENU_W;
+        }
 
         return true;
     }
@@ -55,45 +69,36 @@ void StateMenuHelper::draw() {
     if (!this->isVisible())
         return;
 
-    #define MENU_ITEM_W 24
-
-    #define MENU_W (MENU_ITEM_W * this->activeItems)
-    #define MENU_X_L (SCREEN_WIDTH_MID - (MENU_W / 2))
-    #define MENU_X_R (SCREEN_WIDTH_MID + (MENU_W / 2))
-    #define MENU_H ((CHAR_HEIGHT * 2) + 8)
-    #define MENU_Y (SCREEN_HEIGHT - MENU_H)
-
-
-    #define MENU_ITEM_X_START (MENU_X_L)
-    #define MENU_ITEM_X_END (MENU_X_R)
-    #define MENU_ITEM_X_OFFSET ((MENU_ITEM_W / 2) - (CHAR_WIDTH * 2 / 2))
-    #define MENU_ITEM_Y (MENU_Y + 4)
+    if (MENU_X != MENU_TARGET_X) {
+        this->slideX -= 8;
+        if (this->slideX < 0)
+            this->slideX = 0;
+    }
 
     display.fillRect(
-        MENU_X_L,
-        MENU_Y,
+        MENU_X,
+        0,
         MENU_W,
-        MENU_H * 2,
+        MENU_H,
         BLACK
     );
 
-    display.drawRect(
-        MENU_X_L,
-        MENU_Y,
-        MENU_W,
-        MENU_H * 2,
+    display.drawFastVLine(
+        MENU_X - 1,
+        0,
+        MENU_H,
         WHITE
     );
 
-    display.setTextSize(2);
+    display.setTextSize(1);
 
     for (uint8_t i = 0; i < this->activeItems; i++) {
         if (this->selectedItem == i) {
             display.fillRect(
-                MENU_ITEM_X_START + 1 + (MENU_ITEM_W * i),
-                MENU_Y,
+                MENU_X,
+                MENU_ITEM_H * i,
                 MENU_ITEM_W,
-                MENU_H,
+                MENU_ITEM_H,
                 WHITE
             );
 
@@ -103,8 +108,8 @@ void StateMenuHelper::draw() {
         }
 
         display.setCursor(
-            MENU_ITEM_X_START + MENU_ITEM_X_OFFSET + (MENU_ITEM_W * i),
-            MENU_ITEM_Y
+            MENU_X + MENU_MARGIN,
+            MENU_ITEM_H * i
         );
 
         display.print(this->menuItems[i].text(this->state));

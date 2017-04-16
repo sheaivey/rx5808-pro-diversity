@@ -39,6 +39,8 @@ namespace Ui {
             int activeItems = 0;
             int selectedItem = 0;
             bool visible = false;
+
+            int8_t slideX = 0;
     };
 }
 
