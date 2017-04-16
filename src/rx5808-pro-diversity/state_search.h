@@ -40,9 +40,17 @@ namespace StateMachine {
             void drawRssiGraph();
             void drawMenu();
 
-        public:
-            bool manual = false;
+            void setChannel();
 
+        public:
+            enum class ScanOrder : uint8_t {
+                FREQUENCY,
+                CHANNEL
+            };
+
+
+            bool manual = false;
+            ScanOrder order = ScanOrder::FREQUENCY;
 
             void onEnter();
             void onUpdate();

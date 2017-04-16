@@ -12,12 +12,12 @@
 namespace Ui {
     class StateMenuHelper {
         public:
-            typedef char* (*MenuText)(void* state);
+            typedef const unsigned char* (*MenuIcon)(void* state);
             typedef void (*MenuHandler)(void* state);
 
 
             struct StateMenuItem {
-                MenuText text = nullptr;
+                MenuIcon icon = nullptr;
                 MenuHandler handler = nullptr;
             };
 
@@ -27,7 +27,7 @@ namespace Ui {
             bool handleButtons(Button button, Buttons::PressType pressType);
             bool isVisible() { return this->visible; };
             void addItem(
-                const MenuText text,
+                const MenuIcon icon,
                 const MenuHandler handler
             );
 

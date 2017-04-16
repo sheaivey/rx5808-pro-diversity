@@ -11,17 +11,17 @@ using Ui::StateMenuHelper;
 #define MENU_ITEM_H 16
 
 #define MENU_MARGIN 2
-#define MENU_W (MENU_ITEM_W) + (MENU_MARGIN * 2)
-#define MENU_TARGET_X (SCREEN_WIDTH - MENU_W - 1)
+#define MENU_W ((MENU_ITEM_W))
+#define MENU_TARGET_X (SCREEN_WIDTH - MENU_W)
 #define MENU_X (MENU_TARGET_X + this->slideX)
 #define MENU_H (SCREEN_HEIGHT)
 
 
 void StateMenuHelper::addItem(
-    const MenuText text,
+    const MenuIcon icon,
     const MenuHandler handler
 ) {
-    this->menuItems[this->activeItems].text = text;
+    this->menuItems[this->activeItems].icon = icon;
     this->menuItems[this->activeItems].handler = handler;
 
     this->activeItems++;
@@ -90,28 +90,27 @@ void StateMenuHelper::draw() {
         WHITE
     );
 
-    display.setTextSize(1);
+    const uint8_t yOffset =
+        SCREEN_HEIGHT_MID - ((this->activeItems * MENU_ITEM_H) / 2);
 
     for (uint8_t i = 0; i < this->activeItems; i++) {
         if (this->selectedItem == i) {
             display.fillRect(
                 MENU_X,
-                MENU_ITEM_H * i,
+                MENU_ITEM_H * i + yOffset,
                 MENU_ITEM_W,
                 MENU_ITEM_H,
                 WHITE
             );
-
-            display.setTextColor(BLACK);
-        } else {
-            display.setTextColor(WHITE);
         }
 
-        display.setCursor(
-            MENU_X + MENU_MARGIN,
-            MENU_ITEM_H * i
+        display.drawBitmap(
+            MENU_X,
+            MENU_ITEM_H * i + yOffset,
+            this->menuItems[i].icon(this->state),
+            MENU_ITEM_W,
+            MENU_ITEM_H,
+            this->selectedItem == i ? BLACK : WHITE
         );
-
-        display.print(this->menuItems[i].text(this->state));
     }
 }

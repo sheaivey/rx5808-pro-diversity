@@ -15,14 +15,43 @@
 using StateMachine::SearchStateHandler;
 
 
-static char* menuModeText(void* state) {
+const unsigned char autoIcon[] PROGMEM = {
+    0x00, 0x00, 0x1F, 0x00, 0x3F, 0x80, 0x71, 0xC0, 0x60, 0xC0, 0x60, 0xC0, 0x60, 0xC0, 0x60, 0xC0,
+    0x7F, 0xD2, 0x7F, 0xD2, 0x60, 0xD2, 0x60, 0xD2, 0x60, 0xD2, 0x60, 0xD2, 0x60, 0xCC, 0x00, 0x00
+};
+
+const unsigned char manualIcon[] PROGMEM = {
+    0x00, 0x00, 0x20, 0x80, 0x71, 0xC0, 0x7B, 0xC0, 0x7F, 0xC0, 0x6E, 0xC0, 0x6E, 0xC0, 0x64, 0xC0,
+    0x60, 0xCC, 0x60, 0xD2, 0x60, 0xD2, 0x60, 0xDE, 0x60, 0xD2, 0x60, 0xD2, 0x60, 0xD2, 0x00, 0x00
+};
+
+const unsigned char channelOrderIcon[] PROGMEM = {
+    0x00, 0x00, 0x26, 0x08, 0x55, 0x08, 0x56, 0x1C, 0x75, 0x1C, 0x55, 0x3E, 0x56, 0x3E, 0x00, 0x00,
+    0x00, 0x00, 0x77, 0x3E, 0x44, 0x3E, 0x77, 0x1C, 0x44, 0x1C, 0x44, 0x08, 0x74, 0x08, 0x00, 0x00
+};
+
+const unsigned char freqOrderIcon[] PROGMEM = {
+    0x00, 0x00, 0x48, 0x08, 0x48, 0x08, 0x48, 0x1C, 0x48, 0x1C, 0x48, 0x3E, 0x48, 0x3E, 0x48, 0x00,
+    0x7B, 0x80, 0x48, 0xBE, 0x49, 0x3E, 0x49, 0x1C, 0x4A, 0x1C, 0x4A, 0x08, 0x4B, 0x88, 0x00, 0x00
+};
+
+
+static const unsigned char* menuModeIcon(void* state) {
     SearchStateHandler* search = static_cast<SearchStateHandler*>(state);
-    return search->manual ? PSTR2("M") : PSTR2("A");
+    return search->manual ? manualIcon : autoIcon;
 }
 
-static char* menuOrderText(void* state) {
+static const unsigned char* menuOrderIcon(void* state) {
     SearchStateHandler* search = static_cast<SearchStateHandler*>(state);
-    return PSTR2("F");
+    switch (search->order) {
+        case SearchStateHandler::ScanOrder::FREQUENCY:
+            return freqOrderIcon;
+            break;
+
+        case SearchStateHandler::ScanOrder::CHANNEL:
+            return channelOrderIcon;
+            break;
+    }
 }
 
 static void menuModeHandler(void* state) {
@@ -32,20 +61,17 @@ static void menuModeHandler(void* state) {
 
 static void menuOrderHandler(void* state) {
     SearchStateHandler* search = static_cast<SearchStateHandler*>(state);
-    return;
+    if (search->order == SearchStateHandler::ScanOrder::FREQUENCY) {
+        search->order = SearchStateHandler::ScanOrder::CHANNEL;
+    } else {
+        search->order = SearchStateHandler::ScanOrder::FREQUENCY;
+    }
 }
 
 
 void SearchStateHandler::onEnter() {
-    menu.addItem(
-        menuModeText,
-        menuModeHandler
-    );
-
-    menu.addItem(
-        menuOrderText,
-        menuOrderHandler
-    );
+    menu.addItem(menuModeIcon, menuModeHandler);
+    menu.addItem(menuOrderIcon, menuOrderHandler);
 }
 
 void SearchStateHandler::onUpdate() {
@@ -135,7 +161,7 @@ void SearchStateHandler::onButtonChange(
             else if (orderedChanelIndex >= CHANNELS_SIZE)
                 orderedChanelIndex = 0;
 
-            Receiver::setChannel(Channels::getOrderedIndex(orderedChanelIndex));
+            this->setChannel();
         } else {
             if (button == Button::UP) {
                 scanning = true;
@@ -161,6 +187,17 @@ void SearchStateHandler::onButtonChange(
         else if (orderedChanelIndex >= CHANNELS_SIZE)
             orderedChanelIndex = 0;
 
-        Receiver::setChannel(Channels::getOrderedIndex(orderedChanelIndex));
+        this->setChannel();
     }
+}
+
+void SearchStateHandler::setChannel() {
+    uint8_t actualChannelIndex;
+    if (this->order == ScanOrder::FREQUENCY) {
+        actualChannelIndex = Channels::getOrderedIndex(orderedChanelIndex);
+    } else {
+        actualChannelIndex = orderedChanelIndex;
+    }
+
+    Receiver::setChannel(actualChannelIndex);
 }
