@@ -184,5 +184,4 @@ void SearchStateHandler::setChannel() {
     }
 
     Receiver::setChannel(actualChannelIndex);
-    Receiver::waitForStableRssi();
 }

@@ -70,7 +70,7 @@ void StateMenuHelper::draw() {
         return;
 
     if (MENU_X != MENU_TARGET_X) {
-        this->slideX -= 8;
+        this->slideX -= 4;
         if (this->slideX < 0)
             this->slideX = 0;
     }

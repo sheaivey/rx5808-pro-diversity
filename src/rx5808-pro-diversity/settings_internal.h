@@ -59,7 +59,7 @@ SOFTWARE.
   #define OLED_CLASS Adafruit_SSD1306
 #endif
 
-#define OLED_FRAMERATE 1000 / 20
+#define OLED_FRAMERATE 1000 / 25
 
 // === Misc ====================================================================
 
