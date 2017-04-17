@@ -31,7 +31,6 @@ namespace StateMachine {
             Ui::StateMenuHelper menu = Ui::StateMenuHelper(this);
 
             void onUpdateAuto();
-            void onUpdateManual();
 
             void drawBorders();
             void drawChannelText();

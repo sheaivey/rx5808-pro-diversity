@@ -79,8 +79,6 @@ void SearchStateHandler::onUpdate() {
 
     if (!manual) {
         onUpdateAuto();
-    } else {
-        onUpdateManual();
     }
 
     Ui::needUpdate();
@@ -137,9 +135,6 @@ void SearchStateHandler::onUpdateAuto() {
     }
 }
 
-void SearchStateHandler::onUpdateManual() {
-
-}
 
 void SearchStateHandler::onButtonChange(
     Button button,
@@ -148,37 +143,29 @@ void SearchStateHandler::onButtonChange(
     if (this->menu.handleButtons(button, pressType))
         return;
 
-    if (pressType == Buttons::PressType::SHORT) {
-        if (manual) {
-            if (button == Button::UP) {
-                orderedChanelIndex += 1;
-            } else if (button == Button::DOWN) {
-                orderedChanelIndex -= 1;
-            }
-
-            if (orderedChanelIndex == 255)
-                orderedChanelIndex = CHANNELS_SIZE - 1;
-            else if (orderedChanelIndex >= CHANNELS_SIZE)
-                orderedChanelIndex = 0;
-
-            this->setChannel();
-        } else {
-            if (button == Button::UP) {
-                scanning = true;
-                forceNext = true;
-                direction = ScanDirection::UP;
-            } else if (button == Button::DOWN) {
-                scanning = true;
-                forceNext = true;
-                direction = ScanDirection::DOWN;
-            }
+    if (!this->manual) {
+        if (
+            pressType != Buttons::PressType::SHORT ||
+            button == Button::MODE
+        ) {
+            return;
         }
-    } else if (pressType == Buttons::PressType::HOLDING) {
+
+        scanning = true;
+        forceNext = true;
+        direction = button == Button::UP ?
+            ScanDirection::UP : ScanDirection::DOWN;
+    } else {
+        if (
+            pressType != Buttons::PressType::SHORT &&
+            pressType != Buttons::PressType::HOLDING
+        ) {
+            return;
+        }
+
         if (button == Button::UP) {
             orderedChanelIndex += 1;
-        }
-
-        if (button == Button::DOWN) {
+        } else if (button == Button::DOWN) {
             orderedChanelIndex -= 1;
         }
 
