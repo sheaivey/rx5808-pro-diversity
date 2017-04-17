@@ -75,8 +75,6 @@ void SearchStateHandler::onEnter() {
 }
 
 void SearchStateHandler::onUpdate() {
-    Receiver::waitForStableRssi();
-
     if (!manual) {
         onUpdateAuto();
     }
@@ -135,7 +133,6 @@ void SearchStateHandler::onUpdateAuto() {
     }
 }
 
-
 void SearchStateHandler::onButtonChange(
     Button button,
     Buttons::PressType pressType
@@ -187,4 +184,5 @@ void SearchStateHandler::setChannel() {
     }
 
     Receiver::setChannel(actualChannelIndex);
+    Receiver::waitForStableRssi();
 }
