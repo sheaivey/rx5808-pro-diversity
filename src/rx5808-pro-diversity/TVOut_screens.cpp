@@ -283,7 +283,8 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
         if (rssi > RSSI_SEEK_TRESHOLD) {
             if(best_rssi < rssi) {
                 best_rssi = rssi;
-                TV.print(22, SCANNER_LIST_Y_POS, channelName, HEX);
+                // TV.print(22, SCANNER_LIST_Y_POS, channelName, HEX);
+                TV.print(22, SCANNER_LIST_Y_POS, channelName);
                 TV.print(32, SCANNER_LIST_Y_POS, channelFrequency);
             }
             else {
@@ -292,11 +293,13 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
                     writePos=SCANNER_LIST_X_POS;
                 }
                 TV.draw_rect(writePos, SCANNER_LIST_Y_POS, 8, 6,  BLACK, BLACK);
-                TV.print(writePos, SCANNER_LIST_Y_POS, channelName, HEX);
+                TV.print(writePos, SCANNER_LIST_Y_POS, channelName);
+                // TV.print(writePos, SCANNER_LIST_Y_POS, channelName, HEX);
                 writePos += 10;
             }
             TV.draw_rect((channel * 3) - 5, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled) - 5, 8, 7,  BLACK, BLACK);
-            TV.print((channel * 3) - 4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled) - 5, channelName, HEX);
+            TV.print((channel * 3) - 4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled) - 5, channelName);
+            // TV.print((channel * 3) - 4, (TV_ROWS - TV_SCANNER_OFFSET - rssi_scaled) - 5, channelName, HEX);
         }
     }
     else {

@@ -97,6 +97,7 @@ const uint16_t channelFreqTable[] PROGMEM = {
 };
 
 // do coding as simple hex value to save memory.
+/*
 const uint8_t channelNames[] PROGMEM = {
 	0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8, // Band A
 	0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, // Band B
@@ -113,6 +114,45 @@ const uint8_t channelNames[] PROGMEM = {
 	0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48  // BAND H
 #endif  
 };
+*/
+#define CHANNEL_NAME(l, n) (uint8_t) ((l - 65) << 3) | (n - 1)
+static const uint8_t channelNames[] PROGMEM = {
+	CHANNEL_NAME('A', 1),	CHANNEL_NAME('A', 2),	CHANNEL_NAME('A', 3),	CHANNEL_NAME('A', 4),
+	CHANNEL_NAME('A', 5),	CHANNEL_NAME('A', 6),	CHANNEL_NAME('A', 7),	CHANNEL_NAME('A', 8),
+	
+	CHANNEL_NAME('B', 1),	CHANNEL_NAME('B', 2),	CHANNEL_NAME('B', 3),	CHANNEL_NAME('B', 4),
+	CHANNEL_NAME('B', 5),	CHANNEL_NAME('B', 6),	CHANNEL_NAME('B', 7),	CHANNEL_NAME('B', 8),
+	
+	CHANNEL_NAME('E', 1),	CHANNEL_NAME('E', 2),	CHANNEL_NAME('E', 3),	CHANNEL_NAME('E', 4),
+	CHANNEL_NAME('E', 5),	CHANNEL_NAME('E', 6),	CHANNEL_NAME('E', 7),	CHANNEL_NAME('E', 8),
+	
+	// a.k.a Airwave
+	CHANNEL_NAME('F', 1),	CHANNEL_NAME('F', 2),	CHANNEL_NAME('F', 3),	CHANNEL_NAME('F', 4),
+	CHANNEL_NAME('F', 5),	CHANNEL_NAME('F', 6),	CHANNEL_NAME('F', 7),	CHANNEL_NAME('F', 8),
+	
+	// C / Immersion Raceband
+	CHANNEL_NAME('R', 1),	CHANNEL_NAME('R', 2),	CHANNEL_NAME('R', 3),	CHANNEL_NAME('R', 4),
+	CHANNEL_NAME('R', 5),	CHANNEL_NAME('R', 6),	CHANNEL_NAME('R', 7),	CHANNEL_NAME('R', 8),
+	
+	#ifdef USE_LBAND
+		CHANNEL_NAME('D', 1),	CHANNEL_NAME('D', 2),		CHANNEL_NAME('D', 3),	CHANNEL_NAME('D', 4),
+		CHANNEL_NAME('D', 5),	CHANNEL_NAME('D', 6),		CHANNEL_NAME('D', 7),	CHANNEL_NAME('D', 8),
+	#endif
+	
+	#ifdef USE_9BAND
+		CHANNEL_NAME('U', 1),	CHANNEL_NAME('U', 2),		CHANNEL_NAME('U', 3),	CHANNEL_NAME('U', 4),
+		CHANNEL_NAME('U', 5),	CHANNEL_NAME('U', 6),		CHANNEL_NAME('U', 7),	CHANNEL_NAME('U', 8),
+		CHANNEL_NAME('O', 1),	CHANNEL_NAME('O', 2),		CHANNEL_NAME('O', 3),	CHANNEL_NAME('O', 4),
+		CHANNEL_NAME('O', 5),	CHANNEL_NAME('O', 6),		CHANNEL_NAME('O', 7),	CHANNEL_NAME('O', 8),
+		CHANNEL_NAME('L', 1),	CHANNEL_NAME('L', 2),		CHANNEL_NAME('L', 3),	CHANNEL_NAME('L', 4),
+		CHANNEL_NAME('L', 5),	CHANNEL_NAME('L', 6),		CHANNEL_NAME('L', 7),	CHANNEL_NAME('L', 8),
+		CHANNEL_NAME('H', 1),	CHANNEL_NAME('H', 2),		CHANNEL_NAME('H', 3),	CHANNEL_NAME('H', 4),
+		CHANNEL_NAME('H', 5),	CHANNEL_NAME('H', 6),		CHANNEL_NAME('H', 7),	CHANNEL_NAME('H', 8),
+	#endif
+
+};
+#undef CHANNEL_NAME
+
 
 // All Channels of the above List ordered by Mhz
 const uint8_t channelList[] PROGMEM = {

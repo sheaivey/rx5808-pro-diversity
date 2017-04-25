@@ -394,7 +394,8 @@ void screens::updateBandScanMode(bool in_setup, uint8_t channel, uint8_t rssi, u
                 best_rssi = rssi;
                 display.setTextColor(WHITE,BLACK);
                 display.setCursor(36,12);
-                display.print(channelName, HEX);
+//                display.print(channelName, HEX);
+                display.print(channelName);
                 display.setCursor(52,12);
                 display.print(channelFrequency);
             }
@@ -434,7 +435,8 @@ void screens::screenSaver(uint8_t diversity_mode, uint8_t channelName, uint16_t 
     display.setTextSize(6);
     display.setTextColor(WHITE);
     display.setCursor(0,0);
-    display.print(channelName, HEX);
+    // display.print(channelName, HEX);
+    display.print(channelName);
     display.setTextSize(1);
     display.setCursor(70,0);
     display.print(call_sign);
