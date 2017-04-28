@@ -134,6 +134,10 @@ void screens::seekMode(uint8_t state) {
     TV.select_font(font4x6);
     TV.printPGM(5,TV_Y_OFFSET+4*TV_Y_GRID,  PSTR("RSSI:"));
     TV.draw_line(0,5*TV_Y_GRID-4,TV_X_MAX,5*TV_Y_GRID-4,WHITE);
+#ifdef USE_VOLTAGE_MONITORING
+    TV.draw_line(86,4*TV_Y_GRID,86,5*TV_Y_GRID-4,WHITE);
+    TV.printPGM(90, TV_Y_OFFSET+4*TV_Y_GRID, PSTR("VBAT: "));
+#endif
     // frame for tune graph
     TV.draw_rect(0,TV_ROWS - TV_SCANNER_OFFSET,TV_X_MAX,13,  WHITE); // lower frame
 #ifdef USE_LBAND
@@ -146,7 +150,7 @@ void screens::seekMode(uint8_t state) {
 
 }
 
-void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, uint8_t rssi_seek_threshold, bool locked) {
+void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, uint8_t rssi_seek_threshold, bool locked,uint16_t voltage) {
     // display refresh handler
     TV.select_font(font8x8);
     if(channelIndex != last_channel) // only updated on changes
@@ -201,9 +205,23 @@ void screens::updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channe
         // show frequence
         TV.print(50,TV_Y_OFFSET+3*TV_Y_GRID, channelFrequency);
     }
-    // show signal strength
+    
+#ifdef USE_VOLTAGE_MONITORING
+    //show voltage
+    TV.select_font(font4x6);
+    TV.print(110, TV_Y_OFFSET+4*TV_Y_GRID, (float)voltage/10, 1);
+    TV.select_font(font8x8);
+#endif
+
+   
+#ifdef USE_VOLTAGE_MONITORING
+    #define RSSI_BAR_SIZE 58
+#else
     #define RSSI_BAR_SIZE 100
-    uint8_t rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);
+#endif
+    
+    // show signal strength 
+    uint8_t rssi_scaled=map(rssi, 1, 100, 1, RSSI_BAR_SIZE);    
     // clear last bar
     TV.draw_rect(25, TV_Y_OFFSET+4*TV_Y_GRID, RSSI_BAR_SIZE,4 , BLACK, BLACK);
     //  draw new bar
