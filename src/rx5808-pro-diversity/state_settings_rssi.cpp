@@ -19,7 +19,8 @@ void StateMachine::SettingsRssiStateHandler::onEnter() {
 }
 
 void StateMachine::SettingsRssiStateHandler::onUpdate() {
-    Receiver::waitForStableRssi();
+    if (!Receiver::isRssiStable())
+        return;
 
     switch (internalState) {
         case InternalState::SCANNING_LOW:

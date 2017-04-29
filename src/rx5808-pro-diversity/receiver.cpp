@@ -29,7 +29,7 @@ namespace Receiver {
         Timer diversityHysteresisTimer = Timer(DIVERSITY_HYSTERESIS_PERIOD);
     #endif
 
-    uint32_t lastChannelSwitchTime = 0;
+    static Timer rssiStableTimer = Timer(MIN_TUNE_TIME);
     static Timer rssiLogTimer = Timer(RECEIVER_LAST_DELAY);
     #ifdef USE_SERIAL_OUT
         static Timer serialLogTimer = Timer(25);
@@ -40,7 +40,7 @@ namespace Receiver {
     {
         ReceiverSpi::setSynthRegisterB(Channels::getSynthRegisterB(channel));
 
-        lastChannelSwitchTime = millis();
+        rssiStableTimer.reset();
         activeChannel = channel;
     }
 
@@ -73,19 +73,11 @@ namespace Receiver {
         activeReceiver = receiver;
     }
 
-    //
-    // Blocks until MIN_TUNE_TIME has been reached since last channel switch.
-    //
-    void waitForStableRssi() {
-        uint16_t timeSinceChannelSwitch = millis() - lastChannelSwitchTime;
-        if (timeSinceChannelSwitch < MIN_TUNE_TIME) {
-            delay(MIN_TUNE_TIME - timeSinceChannelSwitch);
-        }
+    bool isRssiStable() {
+        return rssiStableTimer.hasTicked();
     }
 
     uint16_t updateRssi() {
-        waitForStableRssi();
-
         analogRead(PIN_RSSI_A); // Fake read to let ADC settle.
         rssiARaw = analogRead(PIN_RSSI_A);
         #ifdef USE_DIVERSITY
@@ -192,15 +184,17 @@ namespace Receiver {
     }
 
     void update() {
-        updateRssi();
+        if (rssiStableTimer.hasTicked()) {
+            updateRssi();
 
-        #ifdef USE_SERIAL_OUT
-            writeSerialData();
-        #endif
+            #ifdef USE_SERIAL_OUT
+                writeSerialData();
+            #endif
 
-        #ifdef USE_DIVERSITY
-            switchDiversity();
-        #endif
+            #ifdef USE_DIVERSITY
+                switchDiversity();
+            #endif
+        }
     }
 }
 

@@ -24,7 +24,8 @@ void StateMachine::BandScanStateHandler::onExit() {
 
 
 void StateMachine::BandScanStateHandler::onUpdate() {
-    Receiver::waitForStableRssi();
+    if (!Receiver::isRssiStable())
+        return;
 
     #ifdef USE_DIVERSITY
         rssiData[orderedChanelIndex] = (Receiver::rssiA + Receiver::rssiB) / 2;

@@ -41,13 +41,14 @@ namespace Receiver {
     #endif
 
     void setChannel(uint8_t channel);
-    void waitForStableRssi();
     uint16_t updateRssi();
     void setActiveReceiver(ReceiverId receiver = ReceiverId::A);
     #ifdef USE_DIVERSITY
         void setDiversityMode(uint8_t mode);
         void switchDiversity();
     #endif
+
+    bool isRssiStable();
 
 
     void setup();
