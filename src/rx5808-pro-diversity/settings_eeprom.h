@@ -11,41 +11,38 @@
 
 
 struct EepromSettings {
-    public:
-        uint32_t magic;
-        uint8_t channel;
-        uint8_t defaultState;
+    uint32_t magic;
+    uint8_t channel;
+    uint8_t defaultState;
 
-        uint8_t beepEnabled;
+    uint8_t beepEnabled;
 
-        uint8_t searchManual;
-        uint8_t searchOrderByChannel;
+    uint8_t searchManual;
+    uint8_t searchOrderByChannel;
 
-        uint16_t rssiAMin;
-        uint16_t rssiAMax;
+    uint16_t rssiAMin;
+    uint16_t rssiAMax;
 
-        #ifdef USE_DIVERSITY
-            Receiver::DiversityMode diversityMode;
-            uint16_t rssiBMin;
-            uint16_t rssiBMax;
-        #endif
+    #ifdef USE_DIVERSITY
+        Receiver::DiversityMode diversityMode;
+        uint16_t rssiBMin;
+        uint16_t rssiBMax;
+    #endif
 
-        #ifdef USE_VOLTAGE_MONITORING
-            uint8_t vbatScale;
-            uint8_t vbatWarning;
-            uint8_t vbatCritical;
-        #endif
-
-
-        void update();
-
-        void load();
-        void save();
-        void markDirty();
+    #ifdef USE_VOLTAGE_MONITORING
+        uint8_t vbatScale;
+        uint8_t vbatWarning;
+        uint8_t vbatCritical;
+    #endif
 
 
-    private:
-        void initDefaults();
+    void update();
+
+    void load();
+    void save();
+    void markDirty();
+
+    void initDefaults();
 };
 
 

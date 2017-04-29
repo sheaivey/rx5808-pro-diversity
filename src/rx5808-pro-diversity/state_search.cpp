@@ -57,21 +57,33 @@ static const unsigned char* menuOrderIcon(void* state) {
 static void menuModeHandler(void* state) {
     SearchStateHandler* search = static_cast<SearchStateHandler*>(state);
     search->manual = !search->manual;
+
+    EepromSettings.searchManual = search->manual;
+    EepromSettings.markDirty();
 }
 
 static void menuOrderHandler(void* state) {
     SearchStateHandler* search = static_cast<SearchStateHandler*>(state);
     if (search->order == SearchStateHandler::ScanOrder::FREQUENCY) {
         search->order = SearchStateHandler::ScanOrder::CHANNEL;
+        EepromSettings.searchOrderByChannel = true;
     } else {
         search->order = SearchStateHandler::ScanOrder::FREQUENCY;
+        EepromSettings.searchOrderByChannel = true;
     }
+
+    EepromSettings.markDirty();
 }
 
 
 void SearchStateHandler::onEnter() {
     menu.addItem(menuModeIcon, menuModeHandler);
     menu.addItem(menuOrderIcon, menuOrderHandler);
+
+    this->manual = EepromSettings.searchManual;
+    this->order = EepromSettings.searchOrderByChannel ?
+        ScanOrder::CHANNEL :
+        ScanOrder::FREQUENCY;
 }
 
 void SearchStateHandler::onUpdate() {
