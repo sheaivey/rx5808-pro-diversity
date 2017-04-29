@@ -13,7 +13,6 @@
 struct EepromSettings {
     uint32_t magic;
     uint8_t channel;
-    uint8_t defaultState;
 
     uint8_t beepEnabled;
 
@@ -49,7 +48,6 @@ struct EepromSettings {
 PROGMEM const struct {
     uint32_t magic = EEPROM_MAGIC;
     uint8_t channel = 0;
-    uint8_t defaultState = 0;
 
     uint8_t beepEnabled = true;
 
