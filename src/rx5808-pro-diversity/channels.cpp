@@ -217,6 +217,100 @@ static const uint8_t channelFreqOrderedIndex[] PROGMEM = {
     #endif
 };
 
+static const uint8_t channelIndexToOrderedIndex[] PROGMEM = {
+    #ifdef USE_LBAND
+        39,
+        36,
+        32,
+        28,
+        25,
+        21,
+        18,
+        14,
+        16,
+        19,
+        23,
+        26,
+        30,
+        33,
+        37,
+        40,
+        13,
+        11,
+        10,
+         8,
+        43,
+        44,
+        46,
+        47,
+        17,
+        20,
+        24,
+        27,
+        31,
+        34,
+        38,
+        41,
+         9,
+        12,
+        15,
+        22,
+        29,
+        35,
+        42,
+        45,
+         0,
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7
+    #else
+        31,
+        28,
+        24,
+        20,
+        17,
+        13,
+        10,
+         6,
+         8,
+        11,
+        15,
+        18,
+        22,
+        25,
+        29,
+        32,
+         5,
+         3,
+         2,
+         0,
+        35,
+        36,
+        38,
+        39,
+         9,
+        12,
+        16,
+        19,
+        23,
+        26,
+        30,
+        33,
+         1,
+         4,
+         7,
+        14,
+        21,
+        27,
+        34,
+        37
+    #endif
+};
+
 
 namespace Channels {
     const uint16_t getSynthRegisterB(uint8_t index) {
@@ -242,5 +336,9 @@ namespace Channels {
 
     const uint8_t getOrderedIndex(uint8_t index) {
         return pgm_read_byte_near(channelFreqOrderedIndex + index);
+    }
+
+    const uint8_t getOrderedIndexFromIndex(uint8_t index) {
+        return pgm_read_byte_near(channelIndexToOrderedIndex + index);
     }
 }

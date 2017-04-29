@@ -21,7 +21,6 @@ namespace StateMachine {
             bool scanning = false;
             ScanDirection direction = ScanDirection::UP;
             bool forceNext = false;
-            uint8_t orderedChanelIndex = 0;
 
             bool scanningPeak = false;
             uint8_t peakChannelIndex = 0;
@@ -50,6 +49,7 @@ namespace StateMachine {
 
             bool manual = false;
             ScanOrder order = ScanOrder::FREQUENCY;
+            uint8_t orderedChanelIndex = 0;
 
             void onEnter();
             void onUpdate();

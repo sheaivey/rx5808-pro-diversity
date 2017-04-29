@@ -114,7 +114,7 @@ void setupPins() {
 
 void setupSettings() {
     EepromSettings.load();
-    Receiver::setChannel(EepromSettings.channel);
+    Receiver::setChannel(EepromSettings.startChannel);
 }
 
 

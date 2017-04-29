@@ -66,10 +66,14 @@ static void menuOrderHandler(void* state) {
     SearchStateHandler* search = static_cast<SearchStateHandler*>(state);
     if (search->order == SearchStateHandler::ScanOrder::FREQUENCY) {
         search->order = SearchStateHandler::ScanOrder::CHANNEL;
+        search->orderedChanelIndex =
+            Channels::getOrderedIndex(search->orderedChanelIndex);
         EepromSettings.searchOrderByChannel = true;
     } else {
         search->order = SearchStateHandler::ScanOrder::FREQUENCY;
-        EepromSettings.searchOrderByChannel = true;
+        search->orderedChanelIndex =
+            Channels::getOrderedIndexFromIndex(search->orderedChanelIndex);
+        EepromSettings.searchOrderByChannel = false;
     }
 
     EepromSettings.markDirty();
@@ -84,6 +88,17 @@ void SearchStateHandler::onEnter() {
     this->order = EepromSettings.searchOrderByChannel ?
         ScanOrder::CHANNEL :
         ScanOrder::FREQUENCY;
+
+    switch (this->order) {
+        case ScanOrder::CHANNEL:
+            this->orderedChanelIndex = EepromSettings.startChannel;
+            break;
+
+        case ScanOrder::FREQUENCY:
+            this->orderedChanelIndex =
+                Channels::getOrderedIndexFromIndex(EepromSettings.startChannel);
+            break;
+    }
 }
 
 void SearchStateHandler::onUpdate() {
@@ -114,6 +129,10 @@ void SearchStateHandler::onUpdateAuto() {
             uint8_t peakChannel = orderedChanelIndex + largestPeakIndex;
             orderedChanelIndex = peakChannel;
             Receiver::setChannel(Channels::getOrderedIndex(peakChannel));
+
+            EepromSettings.startChannel =
+                Channels::getOrderedIndex(peakChannel);
+            EepromSettings.markDirty();
 
             scanningPeak = false;
         } else {
@@ -196,4 +215,6 @@ void SearchStateHandler::setChannel() {
     }
 
     Receiver::setChannel(actualChannelIndex);
+    EepromSettings.startChannel = actualChannelIndex;
+    EepromSettings.markDirty();
 }
