@@ -82,7 +82,7 @@ void setup()
     Buttons::registerChangeFunc(globalMenuButtonHandler);
 
     // Switch to initial state.
-    StateMachine::switchState(StateMachine::State::MENU);
+    StateMachine::switchState(StateMachine::State::SEARCH);
 }
 
 void setupPins() {
