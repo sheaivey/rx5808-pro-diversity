@@ -33,7 +33,7 @@ SOFTWARE.
 // === EEPROM ==================================================================
 
 // This should be incremented after every EEPROM change.
-#define EEPROM_MAGIC 0x00000005
+#define EEPROM_MAGIC 0x00000007
 
 // === Receiver Modules =========================================================
 
@@ -67,5 +67,7 @@ SOFTWARE.
     #define VBAT_SMOOTH 8
     #define VBAT_PRESCALER 16
 #endif
+
+#define EEPROM_SAVE_TIME 5000
 
 #endif // file_defined

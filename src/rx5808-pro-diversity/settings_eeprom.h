@@ -1,6 +1,7 @@
 #ifndef EEPROM_SETTINGS_H
 #define EEPROM_SETTINGS_H
 
+
 #include <stdint.h>
 #include <avr/pgmspace.h>
 
@@ -8,33 +9,45 @@
 #include "settings_internal.h"
 #include "receiver.h"
 
+
 struct EepromSettings {
-    uint32_t magic;
-    uint8_t channel;
-    uint8_t defaultState;
+    public:
+        uint32_t magic;
+        uint8_t channel;
+        uint8_t defaultState;
 
-    uint8_t beepEnabled;
-    uint8_t orderByChannel;
+        uint8_t beepEnabled;
 
-    uint16_t rssiAMin;
-    uint16_t rssiAMax;
+        uint8_t searchManual;
+        uint8_t searchOrderByChannel;
 
-    #ifdef USE_DIVERSITY
-        Receiver::DiversityMode diversityMode;
-        uint16_t rssiBMin;
-        uint16_t rssiBMax;
-    #endif
+        uint16_t rssiAMin;
+        uint16_t rssiAMax;
 
-    #ifdef USE_VOLTAGE_MONITORING
-        uint8_t vbatScale;
-        uint8_t vbatWarning;
-        uint8_t vbatCritical;
-    #endif
+        #ifdef USE_DIVERSITY
+            Receiver::DiversityMode diversityMode;
+            uint16_t rssiBMin;
+            uint16_t rssiBMax;
+        #endif
 
-    void load();
-    void save();
-    void initDefaults();
+        #ifdef USE_VOLTAGE_MONITORING
+            uint8_t vbatScale;
+            uint8_t vbatWarning;
+            uint8_t vbatCritical;
+        #endif
+
+
+        void update();
+
+        void load();
+        void save();
+        void markDirty();
+
+
+    private:
+        void initDefaults();
 };
+
 
 PROGMEM const struct {
     uint32_t magic = EEPROM_MAGIC;
@@ -42,7 +55,9 @@ PROGMEM const struct {
     uint8_t defaultState = 0;
 
     uint8_t beepEnabled = true;
-    uint8_t orderByChannel = true;
+
+    uint8_t searchManual = false;
+    uint8_t searchOrderByChannel = false;
 
     uint16_t rssiAMin = RSSI_MIN_VAL;
     uint16_t rssiAMax = RSSI_MAX_VAL;
@@ -60,6 +75,8 @@ PROGMEM const struct {
     #endif
 } EepromDefaults;
 
-extern struct EepromSettings EepromSettings;
+
+extern EepromSettings EepromSettings;
+
 
 #endif

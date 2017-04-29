@@ -123,6 +123,7 @@ void loop() {
     Buttons::update();
     StateMachine::update();
     Ui::update();
+    EepromSettings.update();
 
     if (
         StateMachine::currentState != StateMachine::State::SCREENSAVER
