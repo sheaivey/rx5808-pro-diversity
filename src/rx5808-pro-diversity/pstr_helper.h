@@ -8,7 +8,7 @@
 // There is only one buffer so this will cause problems if you need to pass two
 // strings to one function.
 #define PSTR2(x) PSTRtoBuffer_P(PSTR(x))
-#define PSTR2_BUFFER_SIZE 32 // May need adjusted depending on your needs.
+#define PSTR2_BUFFER_SIZE 48 // May need adjusted depending on your needs.
 
 char *PSTRtoBuffer_P(PGM_P str);
 
