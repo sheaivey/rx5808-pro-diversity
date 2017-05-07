@@ -40,8 +40,8 @@ SOFTWARE.
 // uncomment depending on the display you are using.
 // this is an issue with the arduino preprocessor
 #ifdef TVOUT_SCREENS
-//    #include <TVout.h>
-//    #include <fontALL.h>
+//   #include <TVout.h>
+//   #include <fontALL.h>
 #endif
 #ifdef OLED_128x64_ADAFRUIT_SCREENS
 
@@ -856,7 +856,7 @@ void loop()
             state = STATE_SCREEN_SAVER;
         }
 #endif
-        drawScreen.updateSeekMode(state, channelIndex, channel, rssi, pgm_read_word_near(channelFreqTable + channelIndex), rssi_seek_threshold, seek_found);
+        drawScreen.updateSeekMode(state, channelIndex, channel, rssi, pgm_read_word_near(channelFreqTable + channelIndex), rssi_seek_threshold, seek_found, voltage);
     }
     /****************************/
     /*   Processing SCAN MODE   */

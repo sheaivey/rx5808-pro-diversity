@@ -57,7 +57,7 @@ class screens
 
         // SEEK & MANUAL MODE
         void seekMode(uint8_t state); // seek and manual mode
-        void updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, uint8_t rssi_seek_threshold, bool locked); // seek and manual mode
+        void updateSeekMode(uint8_t state, uint8_t channelIndex, uint8_t channel, uint8_t rssi, uint16_t channelFrequency, uint8_t rssi_seek_threshold, bool locked,uint16_t votlage); // seek and manual mode
 
         // BAND SCAN
         void bandScanMode(uint8_t state);
