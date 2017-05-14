@@ -1,4 +1,8 @@
+[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/rx5808-pro-diversity/)
+
 # ![Logo](media/logo.png)
+
+Manufactured version of this project can be found at [La Forge FPV](www.laforgefpv.com)
 
 This project is a fork of [rx5808-pro](https://code.google.com/p/rx5808-pro/) with support for diversity and much more. Please see the following video for a quick intro of the project.
 
