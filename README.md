@@ -19,7 +19,7 @@ The code is also backward compatible with the original rx5808-pro schematic minu
 
 
 # Releases
-The latest release can be found here. [Latest Releases](/releases)
+The latest release can be found here. [Latest Releases](https://github.com/sheaivey/rx5808-pro-diversity/releases)
 
 # Features
 - **User control** - 3 Button navigation, up, down, select.
@@ -84,7 +84,7 @@ For more information on specific hardware implementations:
 
 # Firmware
 The firmware is constantly being improved please refer to the release history for more detailed information on improvements.
-[Release History](/releases)
+[Release History](https://github.com/sheaivey/rx5808-pro-diversity/releases)
 
 # Contributing
 Any contributions are welcome!
