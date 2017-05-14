@@ -1,24 +1,18 @@
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/rx5808-pro-diversity/)
 
+# ![Logo](media/logo.png)
+
 Manufactured version of this project can be found at [La Forge FPV](www.laforgefpv.com)
 
-#Introduction
-The main goal of this project is to add diversity to an already amazing feature set. Please see the following video for a quick intro of the project.
+This project is a fork of [rx5808-pro](https://code.google.com/p/rx5808-pro/) with support for diversity and much more. Please see the following video for a quick intro of the project.
 
-[![Video](http://img.youtube.com/vi/NwnQCUikqvI/0.jpg)](http://www.youtube.com/watch?v=NwnQCUikqvI)
+<p align="center">
+    <a href="https://www.youtube.com/watch?v=NwnQCUikqvI"><img src="https://img.youtube.com/vi/NwnQCUikqvI/0.jpg"></a>
+</p>
 
-The code is also now backward compatible with the original rx5808-pro schematic minus diversity and dip switch mode. For details on updating click [here](/docs/diy-arduino-nano.md).
+The code is also backward compatible with the original rx5808-pro schematic minus diversity and dip switch mode. For details on updating click [here](/docs/diy-arduino-nano.md).
 
-This project originated [here](https://code.google.com/p/rx5808-pro/) and has been modified to include diversity receiver menu.
-
-## Donations Welcome!
-**Help fund more research and development into these great open source projects.**
-
-[![Donations](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GE83PG4KBZ5NJ)
-
-Donations help show the developer your appreciation for all their hard work. A little goes a long way whether it is used for new hardware samples or better test equipment, you can be sure it will be put to good use.
-
-## Table of Contents
+# Table of Contents
 1. [Features](#features)
 2. [Usage](#usage)
 3. [Hardware](#hardware)
@@ -27,7 +21,7 @@ Donations help show the developer your appreciation for all their hard work. A l
 6. [License](#license)
 
 
-##Features
+# Features
 - **User control** - 3 Button navigation, up, down, select.
 - **Manual Mode** - Set channel manual
 - **Search Mode** - Search next channel based on RSSI
@@ -36,18 +30,17 @@ Donations help show the developer your appreciation for all their hard work. A l
 - **Save channel** - Startup with last saved channel
 - **Beeper** - Acustic feedback on important actions
 - **Save RSSI range** - RSSI voltage may vary per part
-- *(NEW)* **Quick Save** - From any home press and hold select for 1 second.
-- *(NEW)* **Diversity** - Receiver select and monitor.
-- *(NEW)* **Led Status** - Power, button pressed, active antenna.
-- *(NEW)* **Race Band** - Added band C/Immersion Race for a total of 40 supported channels.
-- *(NEW)* **Backward Compatibility** - Use this code with your existing setup.
-- *(NEW)* **OLED Version** - Use a 128x64 OLED Display instead of TV_OUT.
-- *(NEW)* **Setup Menu** - Creating menu for toggling settings.
-- *(NEW)* **Voltage Alarm** - you can now use the built in buzzer for monitoring voltage
-- *(REMOVED)* ~~**DIP mode** - Set channel by extern DIP switch~~
+- **Quick Save** - From any home press and hold select for 1 second.
+- **Diversity** - Receiver select and monitor.
+- **Led Status** - Power, button pressed, active antenna.
+- **Race Band** - Added band C/Immersion Race for a total of 40 supported channels.
+- **Backward Compatibility** - Use this code with your existing setup.
+- **OLED Version** - Use a 128x64 OLED Display instead of TV_OUT.
+- **Setup Menu** - Creating menu for toggling settings.
+- **Voltage Alarm** - you can now use the built in buzzer for monitoring voltage
 
-##Usage
-####Screens
+# Usage
+## Screens
 
 ![TVOut Screens](docs/img/screens-tvout.jpg "TVOut Screens")
 
@@ -64,7 +57,7 @@ Donations help show the developer your appreciation for all their hard work. A l
     5. **Voltage Alarm** - Change the warning/alarm voltage and calibration value.
     6. **Save & Exit**
 
-####Initial Setup
+## Initial Setup
 When powering on for the first time it is best to calibrate your RSSI modules. No two modules have the same RSSI min and max readings. To calibrate follow these steps below. You can repeat this process as many times as needed.
 
 1. Power on your receiver and transmitter and place them about 5 to 20 feet apart from one another. (For best results remove antennas to calibrate each module on a level playing field.)
@@ -73,12 +66,10 @@ When powering on for the first time it is best to calibrate your RSSI modules. N
 4. Now that you are in the RSSI calibration screen, the receiver will scan all channels 3 times getting the min and max RSSI strength.
 5. Once all 3 scans are complete you will be returned to the last home screen. You should now be able to have accurate RSSI readings and also auto scan to active channels.
 
-##Hardware
-This project is centered around the rx5808 5.8ghz receiver module which can be found at a number of online stores.
+# Hardware
+**An awesome manufactured version of this project with additional features can be found at [La Forge FPV](http://www.laforgefpv.com).**
 
-I have modified the original schematics to incorporate the diversity setup.
-
-I have also added LEDs to represent which antenna is currently being selected.
+This project is centered around the RX5808 5.8GHz receiver module which can be found at a number of online stores. The original rx5808-pro schematic has been modified to incorporate the diversity setup. Additional LEDs have also been added to show the active receiver.
 
 ![diversity simple schematic](docs/img/rx5808-pro-diversity-schematic-simple.jpg)
 
@@ -91,7 +82,7 @@ For more information on specific hardware implementations:
 3. [rx5808 SPI modification](/docs/rx5808-spi-mod.md)
 6. [Voltage Monitoring](/docs/voltage-monitoring.md)
 
-##Software
+# Software
 The major software changes are centered around the diversity menu. This required removing the dip switch mode from the origional project. Within the diversity menu you will find RSSI signal strength for each receiver and the ability to select which mode the receivers are operating in (Auto, Receiver A, Receiver B).
 
 The following values control how often we switch receiver in diversity auto mode.
@@ -125,13 +116,19 @@ If check_counter is DIVERSITY_MAX_CHECKS
 The two percent helps prevent rapid video switching when both RSSI are close in value.
 ![diversity example](docs/img/diversity-example.jpg)
 
-##Contributing
+# Contributing
 Any contributions are welcome!
 
 Please follow [CONTRIBUTING.md](CONTRIBUTING.md) for standard practices regarding this repo.
 
-##License & Recognition
-####Recognition
+## Donations
+**Help fund more research and development into these great open source projects.**
+
+[![Donations](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GE83PG4KBZ5NJ)
+
+Donations help show the developer your appreciation for all their hard work. A little goes a long way whether it is used for new hardware samples or better test equipment, you can be sure it will be put to good use.
+
+## Recognition
 - SPI driver based on fs_skyrf_58g-main.c Written by Simon Chambers
 - TVOUT by Myles Metzel
 - Scanner by Johann Hermen (der-Frickler.net)
@@ -145,23 +142,9 @@ Please follow [CONTRIBUTING.md](CONTRIBUTING.md) for standard practices regardin
 - DIY Throughole board and documentation. by RCDaddy
 - Voltage monitoring by kabturek
 
-####License
-The MIT License (MIT)
+# License
+## Code
+The code is distrubuted under the [MIT license](LICENSE.md).
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+## Logo
+The logo is distributed under the [Creative Commons Attribution 4.0 International](http://creativecommons.org/licenses/by/4.0/) license.
