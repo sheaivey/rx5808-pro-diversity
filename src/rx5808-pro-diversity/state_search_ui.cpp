@@ -147,7 +147,7 @@ void StateMachine::SearchStateHandler::drawScanBar() {
 void StateMachine::SearchStateHandler::drawRssiGraph() {
     #ifdef USE_DIVERSITY
         Ui::drawGraph(
-            Receiver::rssiALast,
+            Receiver::rssiBLast,
             RECEIVER_LAST_DATA_SIZE,
             100,
             GRAPH_X,
@@ -157,7 +157,7 @@ void StateMachine::SearchStateHandler::drawRssiGraph() {
         );
 
         Ui::drawGraph(
-            Receiver::rssiBLast,
+            Receiver::rssiALast,
             RECEIVER_LAST_DATA_SIZE,
             100,
             GRAPH_X,
@@ -177,10 +177,10 @@ void StateMachine::SearchStateHandler::drawRssiGraph() {
         display.setTextColor(INVERSE);
 
         display.setCursor(RX_TEXT_X, RX_TEXT_A_Y);
-        display.print(PSTR2("A"));
+        display.print(PSTR2("B"));
 
         display.setCursor(RX_TEXT_X, RX_TEXT_B_Y);
-        display.print(PSTR2("B"));
+        display.print(PSTR2("A"));
     #else
         Ui::drawGraph(
             Receiver::rssiALast,
