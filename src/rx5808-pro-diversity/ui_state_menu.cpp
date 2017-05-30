@@ -31,16 +31,16 @@ bool StateMenuHelper::handleButtons(
     Button button,
     Buttons::PressType pressType
 ) {
-    if (button == Button::MODE && pressType == Buttons::PressType::LONG) {
-        this->visible = !this->visible;
-        if (!this->visible)
+    if (button == Button::MODE) {
+        if (this->visible && pressType == Buttons::PressType::LONG) {
+            this->visible = false;
             Ui::needFullRedraw();
-
-        if (this->visible) {
+            return true;
+        } else if (!this->visible && pressType == Buttons::PressType::SHORT) {
+            this->visible = true;
             this->slideX = MENU_W;
+            return true;
         }
-
-        return true;
     }
 
     if (!this->isVisible())
