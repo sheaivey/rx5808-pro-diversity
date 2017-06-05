@@ -4,7 +4,7 @@
 
 This project is a fork of [rx5808-pro](https://code.google.com/p/rx5808-pro/) with support for diversity and much more.
 
-Manufactured version of this project can be found at [La Forge FPV](www.laforgefpv.com)
+Manufactured version of this project can be found at [La Forge FPV](http://www.laforgefpv.com)
 
 The code is also backward compatible with the original rx5808-pro schematic minus diversity, dip switch mode and TV_Out. For details on updating click [here](/docs/diy-arduino-nano.md).
 
