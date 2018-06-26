@@ -156,7 +156,7 @@ void StateMachine::SettingsRssiStateHandler::onUpdateDraw() {
             Ui::display.print(EepromSettings.rssiAMin);
             #ifdef USE_DIVERSITY
                 Ui::display.setCursor((CHAR_WIDTH + 1) * 12, CHAR_HEIGHT * 2);
-                Ui::display.print(EepromSettings.rssiAMin);
+                Ui::display.print(EepromSettings.rssiBMin);
             #endif
 
             Ui::display.setCursor(0, CHAR_HEIGHT * 3 + 1);
