@@ -3,6 +3,7 @@
 
 
 #include <Adafruit_SSD1306.h>
+#include <Adafruit_SH1106.h>
 #include <stdint.h>
 
 #include "settings.h"
