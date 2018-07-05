@@ -13,13 +13,13 @@ namespace StateMachine {
     class SearchStateHandler : public StateMachine::StateHandler {
         private:
             enum class ScanDirection : int8_t {
-                UP = 1,
-                DOWN = -1
+                SCANUP = 1,
+                SCANDOWN = -1
             };
 
 
             bool scanning = false;
-            ScanDirection direction = ScanDirection::UP;
+            ScanDirection direction = ScanDirection::SCANUP;
             bool forceNext = false;
 
             bool scanningPeak = false;

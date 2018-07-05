@@ -25,7 +25,7 @@ void StateMachine::SettingsStateHandler::onButtonChange(
     Button button,
     Buttons::PressType pressType
 ) {
-    if (button == Button::MODE) {
+    if (button == Button::MODE_PRESSED) {
         StateMachine::switchState(StateMachine::State::SETTINGS_RSSI);
     }
 }
@@ -33,11 +33,9 @@ void StateMachine::SettingsStateHandler::onButtonChange(
 
 void StateMachine::SettingsStateHandler::onInitialDraw() {
     Ui::clear();
-
-    Ui::display.setTextSize(1);
-    Ui::display.setCursor(0, 0);
+    Ui::setTextSize(1);
+    Ui::setCursor(0, 0);
     Ui::display.print(PSTR2("Press mode for\nRSSI calibration"));
-
     Ui::needDisplay();
 }
 

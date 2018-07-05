@@ -50,10 +50,6 @@
     #define GRAPH_B_Y 0
 #endif
 
-
-using Ui::display;
-
-
 void StateMachine::SearchStateHandler::onInitialDraw() {
     Ui::clear();
 
@@ -93,13 +89,14 @@ void StateMachine::SearchStateHandler::onUpdateDraw() {
     drawFrequencyText();
     drawScanBar();
     drawRssiGraph();
+    drawBorders(); // Called again due to drawDashedVLine not displaying correctly.
     menu.draw();
 
     Ui::needDisplay();
 }
 
 void StateMachine::SearchStateHandler::drawBorders() {
-    display.drawRoundRect(
+    Ui::drawRoundRect(
         SCANBAR_BORDER_X,
         SCANBAR_BORDER_Y,
         SCANBAR_BORDER_W,
@@ -117,25 +114,25 @@ void StateMachine::SearchStateHandler::drawBorders() {
 }
 
 void StateMachine::SearchStateHandler::drawChannelText() {
-    display.setTextSize(CHANNEL_TEXT_SIZE);
-    display.setTextColor(WHITE);
-    display.setCursor(CHANNEL_TEXT_X, CHANENL_TEXT_Y);
+    Ui::setTextSize(CHANNEL_TEXT_SIZE);
+    Ui::setTextColor(WHITE);
+    Ui::setCursor(CHANNEL_TEXT_X, CHANENL_TEXT_Y);
 
-    display.print(Channels::getName(Receiver::activeChannel));
+    Ui::display.print(Channels::getName(Receiver::activeChannel));
 }
 
 void StateMachine::SearchStateHandler::drawFrequencyText() {
-    display.setTextSize(FREQUENCY_TEXT_SIZE);
-    display.setTextColor(WHITE);
-    display.setCursor(FREQUENCY_TEXT_X, FREQUENCY_TEXT_Y);
+    Ui::setTextSize(FREQUENCY_TEXT_SIZE);
+    Ui::setTextColor(WHITE);
+    Ui::setCursor(FREQUENCY_TEXT_X, FREQUENCY_TEXT_Y);
 
-    display.print(Channels::getFrequency(Receiver::activeChannel));
+    Ui::display.print(Channels::getFrequency(Receiver::activeChannel));
 }
 
 void StateMachine::SearchStateHandler::drawScanBar() {
     uint8_t scanWidth = orderedChanelIndex * SCANBAR_W / CHANNELS_SIZE;
-
-    display.fillRect(
+  
+    Ui::fillRect(
         SCANBAR_X,
         SCANBAR_Y,
         scanWidth,
@@ -173,14 +170,14 @@ void StateMachine::SearchStateHandler::drawRssiGraph() {
             GRAPH_SEPERATOR_STEP
         );
 
-        display.setTextSize(RX_TEXT_SIZE);
-        display.setTextColor(INVERSE);
+          Ui::setTextSize(RX_TEXT_SIZE);
+          Ui::setTextColor(INVERSE);
 
-        display.setCursor(RX_TEXT_X, RX_TEXT_A_Y);
-        display.print(PSTR2("B"));
+          Ui::setCursor(RX_TEXT_X, RX_TEXT_A_Y);
+          Ui::display.print(PSTR2("B"));
 
-        display.setCursor(RX_TEXT_X, RX_TEXT_B_Y);
-        display.print(PSTR2("A"));
+          Ui::setCursor(RX_TEXT_X, RX_TEXT_B_Y);
+          Ui::display.print(PSTR2("A"));
     #else
         Ui::drawGraph(
             Receiver::rssiALast,

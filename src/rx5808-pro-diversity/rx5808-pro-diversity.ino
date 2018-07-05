@@ -32,7 +32,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 #include "settings.h"
 #include "settings_internal.h"
 #include "settings_eeprom.h"
@@ -42,7 +41,6 @@ SOFTWARE.
 #include "receiver_spi.h"
 #include "buttons.h"
 #include "state.h"
-
 #include "ui.h"
 
 
@@ -88,10 +86,10 @@ void setup()
 void setupPins() {
     pinMode(PIN_LED, OUTPUT);
     pinMode(PIN_BUZZER, OUTPUT);
-    pinMode(PIN_BUTTON_UP, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_MODE, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_DOWN, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_SAVE, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_UP_PRESSED, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_MODE_PRESSED, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_DOWN_PRESSED, INPUT_PULLUP);
+    pinMode(PIN_BUTTON_SAVE_PRESSED, INPUT_PULLUP);
 
     pinMode(PIN_LED_A,OUTPUT);
     #ifdef USE_DIVERSITY
@@ -105,7 +103,7 @@ void setupPins() {
 
     pinMode(PIN_SPI_SLAVE_SELECT, OUTPUT);
     pinMode(PIN_SPI_DATA, OUTPUT);
-	pinMode(PIN_SPI_CLOCK, OUTPUT);
+    pinMode(PIN_SPI_CLOCK, OUTPUT);
 
     digitalWrite(PIN_SPI_SLAVE_SELECT, HIGH);
     digitalWrite(PIN_SPI_CLOCK, LOW);
@@ -142,7 +140,7 @@ static void globalMenuButtonHandler(
 ) {
     if (
         StateMachine::currentState != StateMachine::State::MENU &&
-        button == Button::MODE &&
+        button == Button::MODE_PRESSED &&
         pressType == Buttons::PressType::HOLDING
     ) {
         StateMachine::switchState(StateMachine::State::MENU);

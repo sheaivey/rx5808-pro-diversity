@@ -174,15 +174,15 @@ void SearchStateHandler::onButtonChange(
     if (!this->manual) {
         if (
             pressType != Buttons::PressType::SHORT ||
-            button == Button::MODE
+            button == Button::MODE_PRESSED
         ) {
             return;
         }
 
         scanning = true;
         forceNext = true;
-        direction = button == Button::UP ?
-            ScanDirection::UP : ScanDirection::DOWN;
+        direction = button == Button::UP_PRESSED ?
+            ScanDirection::SCANUP : ScanDirection::SCANDOWN;
     } else {
         if (
             pressType != Buttons::PressType::SHORT &&
@@ -191,9 +191,9 @@ void SearchStateHandler::onButtonChange(
             return;
         }
 
-        if (button == Button::UP) {
+        if (button == Button::UP_PRESSED) {
             orderedChanelIndex += 1;
-        } else if (button == Button::DOWN) {
+        } else if (button == Button::DOWN_PRESSED) {
             orderedChanelIndex -= 1;
         }
 

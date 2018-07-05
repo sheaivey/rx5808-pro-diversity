@@ -29,10 +29,10 @@ namespace Buttons {
                 PIN_BUTTON_ ## button \
             );
 
-        UPDATE_BUTTON(UP);
-        UPDATE_BUTTON(DOWN);
-        UPDATE_BUTTON(MODE);
-        UPDATE_BUTTON(SAVE);
+        UPDATE_BUTTON(UP_PRESSED);
+        UPDATE_BUTTON(DOWN_PRESSED);
+        UPDATE_BUTTON(MODE_PRESSED);
+        UPDATE_BUTTON(SAVE_PRESSED);
 
         #undef UPDATE_BUTTON
     }

@@ -2,10 +2,7 @@
 #include "ui_state_menu.h"
 #include "pstr_helper.h"
 
-
-using Ui::display;
 using Ui::StateMenuHelper;
-
 
 #define MENU_ITEM_W 16
 #define MENU_ITEM_H 16
@@ -31,7 +28,7 @@ bool StateMenuHelper::handleButtons(
     Button button,
     Buttons::PressType pressType
 ) {
-    if (button == Button::MODE && pressType == Buttons::PressType::LONG) {
+    if (button == Button::MODE_PRESSED && pressType == Buttons::PressType::LONG) {
         this->visible = !this->visible;
         if (!this->visible)
             Ui::needFullRedraw();
@@ -47,17 +44,17 @@ bool StateMenuHelper::handleButtons(
         return false;
 
     switch (button) {
-        case Button::UP:
+        case Button::UP_PRESSED:
             if (--this->selectedItem < 0)
                 this->selectedItem = this->activeItems - 1;
             break;
 
-        case Button::DOWN:
+        case Button::DOWN_PRESSED:
             if (++this->selectedItem >= this->activeItems)
                 this->selectedItem = 0;
             break;
 
-        case Button::MODE:
+        case Button::MODE_PRESSED:
             this->menuItems[this->selectedItem].handler(this->state);
             break;
     }
@@ -75,7 +72,7 @@ void StateMenuHelper::draw() {
             this->slideX = 0;
     }
 
-    display.fillRect(
+    Ui::fillRect(
         MENU_X,
         0,
         MENU_W,
@@ -83,7 +80,7 @@ void StateMenuHelper::draw() {
         BLACK
     );
 
-    display.drawFastVLine(
+    Ui::drawFastVLine(
         MENU_X - 1,
         0,
         MENU_H,
@@ -95,22 +92,22 @@ void StateMenuHelper::draw() {
 
     for (uint8_t i = 0; i < this->activeItems; i++) {
         if (this->selectedItem == i) {
-            display.fillRect(
-                MENU_X,
-                MENU_ITEM_H * i + yOffset,
-                MENU_ITEM_W,
-                MENU_ITEM_H,
-                WHITE
-            );
-        }
-
-        display.drawBitmap(
+          Ui::fillRect(
             MENU_X,
             MENU_ITEM_H * i + yOffset,
-            this->menuItems[i].icon(this->state),
             MENU_ITEM_W,
             MENU_ITEM_H,
-            this->selectedItem == i ? BLACK : WHITE
+            WHITE
+          );
+        }
+
+        Ui::drawBitmap(
+          MENU_X,
+          MENU_ITEM_H * i + yOffset,
+          this->menuItems[i].icon(this->state),
+          MENU_ITEM_W,
+          MENU_ITEM_H,
+          this->selectedItem == i ? BLACK : WHITE
         );
     }
 }

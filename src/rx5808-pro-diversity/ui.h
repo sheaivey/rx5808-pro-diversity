@@ -1,13 +1,14 @@
 #ifndef UI_H
 #define UI_H
 
-
 #include <Adafruit_SSD1306.h>
 #include <stdint.h>
 
+#include <TVout.h>
+#include <fontALL.h>
+
 #include "settings.h"
 #include "settings_internal.h"
-
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -18,9 +19,14 @@
 #define CHAR_WIDTH 5
 #define CHAR_HEIGHT 7
 
-
 namespace Ui {
-    extern OLED_CLASS display;
+    #ifdef OLED_128x64_ADAFRUIT_SCREENS
+      extern OLED_CLASS display;
+    #endif
+    #ifdef TVOUT_SCREENS
+      extern TVout display;
+    #endif
+    
     extern bool shouldDrawUpdate;
     extern bool shouldDisplay;
     extern bool shouldFullRedraw;
@@ -40,7 +46,18 @@ namespace Ui {
 
     void drawDashedHLine(const int x, const int y, const int w, const int step);
     void drawDashedVLine(const int x, const int y, const int w, const int step);
+    void drawFastHLine(const int x, const int y, const int w, const int color);
+    void drawFastVLine(const int x, const int y, const int h, const int color);
+    void drawRoundRect(const int x, const int y,const int w, const int h, const int r, const int color);
+    void fillRect(const int x, const int y,const int w, const int h, const int color);
+    void fillTriangle(const int x0, const int y0, const int x1, const int y1, const int x2, const int y2, const int color);
+    void drawBitmap(const int x, const int y, const unsigned char *image, const int w, const int h, const int color);
 
+    void setTextColor(const int color);
+    void setTextSize(const int size);
+    void setCursor(const int x, const int y);
+    void print(const char text);
+      
     void clear();
     void clearRect(const int x, const int y, const int w, const int h);
 
