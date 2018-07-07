@@ -8,7 +8,6 @@
 #include "state.h"
 #include "ui.h"
 
-
 static const unsigned char PROGMEM logo[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -102,30 +101,30 @@ void StateMachine::ScreensaverStateHandler::onButtonChange(
 void StateMachine::ScreensaverStateHandler::onInitialDraw() {
     Ui::clear();
 
-    if (showLogo) {
-        Ui::display.drawBitmap(
-            0,
-            0,
-            logo,
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-            WHITE
-        );
+    if (showLogo) {  
+      Ui::drawBitmap(
+          0,
+          0,
+          logo,
+          SCREEN_WIDTH,
+          SCREEN_HEIGHT,
+          WHITE
+      );
     } else {
-        Ui::display.setTextColor(WHITE);
+      Ui::setTextColor(WHITE);
 
-        Ui::display.setTextSize(6);
-        Ui::display.setCursor(
-            SCREEN_WIDTH_MID - ((CHAR_WIDTH) * 6) / 2 * 2 - 3,
-            2);
+      Ui::setTextSize(6);
+      Ui::setCursor(
+          SCREEN_WIDTH_MID - ((CHAR_WIDTH) * 6) / 2 * 2 - 3,
+          2);
 
-        Ui::display.print(Channels::getName(Receiver::activeChannel));
+      Ui::display.print(Channels::getName(Receiver::activeChannel));
 
-        Ui::display.setTextSize(2);
-        Ui::display.setCursor(
-            SCREEN_WIDTH_MID - ((CHAR_WIDTH + 1) * 2) / 2 * 4 - 1,
-            SCREEN_HEIGHT - CHAR_HEIGHT * 2 - 2);
-        Ui::display.print(Channels::getFrequency(Receiver::activeChannel));
+      Ui::setTextSize(2);
+      Ui::setCursor(
+          SCREEN_WIDTH_MID - ((CHAR_WIDTH + 1) * 2) / 2 * 4 - 1,
+          SCREEN_HEIGHT - CHAR_HEIGHT * 2 - 2);
+      Ui::display.print(Channels::getFrequency(Receiver::activeChannel));
     }
 
     Ui::needDisplay();

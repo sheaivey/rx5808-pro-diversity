@@ -60,17 +60,17 @@ void StateMachine::MenuStateHandler::onButtonChange(
         return;
 
     switch (button) {
-        case Button::UP:
+        case Button::UP_PRESSED:
             this->menu.selectPreviousItem();
             Ui::needUpdate();
             break;
 
-        case Button::DOWN:
+        case Button::DOWN_PRESSED:
             this->menu.selectNextItem();
             Ui::needUpdate();
             break;
 
-        case Button::MODE:
+        case Button::MODE_PRESSED:
             this->menu.activateItem();
             break;
     }

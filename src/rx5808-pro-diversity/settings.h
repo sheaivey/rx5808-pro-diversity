@@ -44,9 +44,7 @@ SOFTWARE.
 // Enable this if your screen is upside down.
 //#define USE_FLIP_SCREEN
 
-#ifdef OLED_128x64_ADAFRUIT_SCREENS
-    #define OLED_ADDRESS 0x3C // I2C address for display (0x3C or 0x3D, usually)
-#endif
+#define OLED_ADDRESS 0x3C // I2C address for display (0x3C or 0x3D, usually)
 
 // === Receiver Module =========================================================
 //
@@ -107,12 +105,12 @@ SOFTWARE.
 // === Pins ====================================================================
 
 // Buttons (required)
-#define PIN_BUTTON_UP 2
-#define PIN_BUTTON_MODE 3
+#define PIN_BUTTON_UP_PRESSED 2
+#define PIN_BUTTON_MODE_PRESSED 3
 
 // Buttons (optional, for comfort)
-#define PIN_BUTTON_DOWN 4
-#define PIN_BUTTON_SAVE 5
+#define PIN_BUTTON_DOWN_PRESSED 4
+#define PIN_BUTTON_SAVE_PRESSED 5
 
 #define PIN_LED 13
 #define PIN_BUZZER 6 // Must be an active buzzer, not passive.

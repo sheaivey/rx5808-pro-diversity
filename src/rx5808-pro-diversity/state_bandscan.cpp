@@ -81,54 +81,54 @@ void StateMachine::BandScanStateHandler::onUpdate() {
 void StateMachine::BandScanStateHandler::onInitialDraw() {
     Ui::clear();
 
-    Ui::display.drawFastVLine(
+    Ui::drawFastVLine(
         BORDER_LEFT_X,
         BORDER_LEFT_Y,
         BORDER_LEFT_H,
         WHITE
     );
 
-    Ui::display.drawFastVLine(
+    Ui::drawFastVLine(
         BORDER_RIGHT_X,
         BORDER_RIGHT_Y,
         BORDER_RIGHT_H,
         WHITE
     );
 
-    Ui::display.drawFastHLine(
+    Ui::drawFastHLine(
         BORDER_BOTTOM_X,
         BORDER_BOTTOM_Y,
         BORDER_BOTTOM_W,
         WHITE
     );
 
-    Ui::display.drawFastHLine(
+    Ui::drawFastHLine(
         BORDER_PROGRESS_LEFT_X,
         SCREEN_HEIGHT - 1,
         BORDER_PROGRESS_RIGHT_X - BORDER_PROGRESS_LEFT_X,
         WHITE
     );
 
-    Ui::display.drawFastVLine(
+    Ui::drawFastVLine(
         BORDER_PROGRESS_LEFT_X,
         BORDER_PROGRESS_Y,
         BORDER_PROGRESS_H,
         WHITE
     );
 
-    Ui::display.drawFastVLine(
+    Ui::drawFastVLine(
         BORDER_PROGRESS_RIGHT_X,
         BORDER_PROGRESS_Y,
         BORDER_PROGRESS_H,
         WHITE
     );
 
-    Ui::display.setTextSize(1);
-    Ui::display.setTextColor(WHITE);
-    Ui::display.setCursor(CHANNEL_TEXT_LOW_X, CHANNEL_TEXT_LOW_Y);
+    Ui::setTextSize(1);
+    Ui::setTextColor(WHITE);
+    Ui::setCursor(CHANNEL_TEXT_LOW_X, CHANNEL_TEXT_LOW_Y);
     Ui::display.print(Channels::getFrequency(Channels::getOrderedIndex(0)));
 
-    Ui::display.setCursor(CHANNEL_TEXT_HIGH_X, CHANNEL_TEXT_HIGH_Y);
+    Ui::setCursor(CHANNEL_TEXT_HIGH_X, CHANNEL_TEXT_HIGH_Y);
     Ui::display.print(
         Channels::getFrequency(Channels::getOrderedIndex(CHANNELS_SIZE - 1)));
 
@@ -146,7 +146,7 @@ void StateMachine::BandScanStateHandler::onUpdateDraw() {
         GRAPH_H
     );
 
-    Ui::display.drawFastHLine(
+    Ui::drawFastHLine(
         BORDER_BOTTOM_X,
         BORDER_BOTTOM_Y,
         BORDER_BOTTOM_W,
@@ -161,7 +161,7 @@ void StateMachine::BandScanStateHandler::onUpdateDraw() {
     );
 
     uint8_t progressW = orderedChanelIndex * PROGRESS_W / CHANNELS_SIZE + 1;
-    Ui::display.fillRect(
+    Ui::fillRect(
         PROGRESS_X,
         PROGRESS_Y,
         progressW,
