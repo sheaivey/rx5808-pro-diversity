@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <avr/pgmspace.h>
 
@@ -8,7 +10,7 @@
 
 
 namespace Ui {
-    OLED_CLASS display;
+    OLED_CLASS display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
     bool shouldDrawUpdate = false;
     bool shouldDisplay = false;
     bool shouldFullRedraw = false;
@@ -23,7 +25,7 @@ namespace Ui {
 
         display.clearDisplay();
 
-        display.begin();
+
     }
 
     void update() {
